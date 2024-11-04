@@ -1,15 +1,16 @@
 import React, { useState } from 'react';
 import './Dashboard.css';
-import HomeIcon from '@mui/icons-material/Home';
+import HomeRoundedIcon from '@mui/icons-material/HomeRounded';
 import DiamondIcon from '@mui/icons-material/Diamond';
 import OrderIcon from '@mui/icons-material/ReceiptLong';
-import WarehouseIcon from '@mui/icons-material/Warehouse';
+import WarehouseRoundedIcon from '@mui/icons-material/WarehouseRounded';
 import ImportWarehouseIcon from '@mui/icons-material/Input';
 import ShoppingBagIcon from '@mui/icons-material/ShoppingBag';
 import HistoryIcon from '@mui/icons-material/History';
-import BarChartIcon from '@mui/icons-material/BarChart';
+import LeaderboardRoundedIcon from '@mui/icons-material/LeaderboardRounded';
+import PaidRoundedIcon from '@mui/icons-material/PaidRounded';
 import GroupsIcon from '@mui/icons-material/Groups';
-import PersonIcon from '@mui/icons-material/Person';
+import GroupRoundedIcon from '@mui/icons-material/GroupRounded';
 import ServiceIcon from '@mui/icons-material/SupportAgent';
 import TimeKeepingIcon from '@mui/icons-material/EventAvailable';
 import SettingsIcon from '@mui/icons-material/Settings';
@@ -22,16 +23,17 @@ const MaterialIcon: React.FC<{ icon: React.ReactNode; active?: boolean }> = ({ i
 );
 
 const menuItems = [
-  { id: 'HomeIcon', icon: <HomeIcon />, label: 'Trang chủ' },
+  { id: 'HomeRoundedIcon', icon: <HomeRoundedIcon />, label: 'Trang chủ' },
   { id: 'products', icon: <DiamondIcon />, label: 'Sản phẩm và dịch vụ' },
   { id: 'orders', icon: <OrderIcon />, label: 'Đơn hàng' },
-  { id: 'warehouse', icon: <WarehouseIcon />, label: 'Kho hàng' },
+  { id: 'warehouse', icon: <WarehouseRoundedIcon />, label: 'Kho hàng' },
   { id: 'import', icon: <ImportWarehouseIcon />, label: 'Nhập kho' },
   { id: 'returns', icon: <ShoppingBagIcon />, label: 'Hàng mua lại' },
   { id: 'history', icon: <HistoryIcon />, label: 'Lịch sử giao dịch' },
-  { id: 'statistics', icon: <BarChartIcon />, label: 'Thống kê' },
-  { id: 'staff', icon: <GroupsIcon />, label: 'Quản lý nhân viên' },
-  { id: 'customers', icon: <PersonIcon />, label: 'Quản lý khách hàng' },
+  { id: 'statistics', icon: <LeaderboardRoundedIcon />, label: 'Thống kê' },
+  { id: 'salary', icon: <PaidRoundedIcon />, label: 'Quản lý lương' },
+  { id: 'staff', icon: < GroupRoundedIcon/>, label: 'Quản lý nhân viên' },
+  { id: 'customers', icon: <GroupsIcon />, label: 'Quản lý khách hàng' },
   { id: 'services', icon: <ServiceIcon />, label: 'Quản lý dịch vụ' },
   { id: 'feedback', icon: <TimeKeepingIcon />, label: 'Chấm công' },
   { id: 'settings', icon: <SettingsIcon />, label: 'Cài đặt' }
