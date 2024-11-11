@@ -57,8 +57,7 @@
   font-weight: bold;
   color: #bf8e54;
 }
-
-/* Navigation styles */
+ 
 .nav {
   flex-grow: 1;
   /* overflow-y: auto; */
