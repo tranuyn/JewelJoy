@@ -1,68 +1,164 @@
-import React, { useState } from 'react';
-import './Dashboard.css';
-import HomeRoundedIcon from '@mui/icons-material/HomeRounded';
-import DiamondIcon from '@mui/icons-material/Diamond';
-import OrderIcon from '@mui/icons-material/ReceiptLong';
-import WarehouseRoundedIcon from '@mui/icons-material/WarehouseRounded';
-import ImportWarehouseIcon from '@mui/icons-material/Input';
-import ShoppingBagIcon from '@mui/icons-material/ShoppingBag';
-import HistoryIcon from '@mui/icons-material/History';
-import LeaderboardRoundedIcon from '@mui/icons-material/LeaderboardRounded';
-import PaidRoundedIcon from '@mui/icons-material/PaidRounded';
-import GroupsIcon from '@mui/icons-material/Groups';
-import GroupRoundedIcon from '@mui/icons-material/GroupRounded';
-import ServiceIcon from '@mui/icons-material/SupportAgent';
-import TimeKeepingIcon from '@mui/icons-material/EventAvailable';
-import SettingsIcon from '@mui/icons-material/Settings';
-import LogoImage from './logo.png';
-
-const MaterialIcon: React.FC<{ icon: React.ReactNode; active?: boolean }> = ({ icon, active }) => (
-  <span className={`icon ${active ? 'active' : ''}`}>
-    {icon}
-  </span>
-);
+import React, { useState } from "react";
+import "./Dashboard.css";
+import MenuIcon from "@mui/icons-material/Menu";
+import HomeIcon from "@mui/icons-material/Home";
+import DiamondIcon from "@mui/icons-material/Diamond";
+import OrderIcon from "@mui/icons-material/ReceiptLong";
+import WarehouseIcon from "@mui/icons-material/Warehouse";
+import ImportWarehouseIcon from "@mui/icons-material/Input";
+import ShoppingBagIcon from "@mui/icons-material/ShoppingBag";
+import HistoryIcon from "@mui/icons-material/History";
+import BarChartIcon from "@mui/icons-material/BarChart";
+import GroupsIcon from "@mui/icons-material/Groups";
+import PersonIcon from "@mui/icons-material/Person";
+import ServiceIcon from "@mui/icons-material/SupportAgent";
+import TimeKeepingIcon from "@mui/icons-material/EventAvailable";
+import SettingsIcon from "@mui/icons-material/Settings";
+import LogoImage from "./logo.png";
+import LocalAtmOutlinedIcon from "@mui/icons-material/LocalAtmOutlined";
+import { useNavigate } from "react-router-dom";
+interface DashboardProps {
+  onToggle: (collapsed: boolean) => void;
+}
+const MaterialIcon: React.FC<{ icon: React.ReactNode; active?: boolean }> = ({
+  icon,
+  active,
+}) => <span className={`icon ${active ? "active" : ""}`}>{icon}</span>;
 
 const menuItems = [
-  { id: 'HomeRoundedIcon', icon: <HomeRoundedIcon />, label: 'Trang chủ' },
-  { id: 'products', icon: <DiamondIcon />, label: 'Sản phẩm và dịch vụ' },
-  { id: 'orders', icon: <OrderIcon />, label: 'Đơn hàng' },
-  { id: 'warehouse', icon: <WarehouseRoundedIcon />, label: 'Kho hàng' },
-  { id: 'import', icon: <ImportWarehouseIcon />, label: 'Nhập kho' },
-  { id: 'returns', icon: <ShoppingBagIcon />, label: 'Hàng mua lại' },
-  { id: 'history', icon: <HistoryIcon />, label: 'Lịch sử giao dịch' },
-  { id: 'statistics', icon: <LeaderboardRoundedIcon />, label: 'Thống kê' },
-  { id: 'salary', icon: <PaidRoundedIcon />, label: 'Quản lý lương' },
-  { id: 'staff', icon: < GroupRoundedIcon/>, label: 'Quản lý nhân viên' },
-  { id: 'customers', icon: <GroupsIcon />, label: 'Quản lý khách hàng' },
-  { id: 'services', icon: <ServiceIcon />, label: 'Quản lý dịch vụ' },
-  { id: 'feedback', icon: <TimeKeepingIcon />, label: 'Chấm công' },
-  { id: 'settings', icon: <SettingsIcon />, label: 'Cài đặt' }
+  { id: "HomeIcon", icon: <HomeIcon />, label: "Trang chủ", path: "/home" },
+  {
+    id: "products",
+    icon: <DiamondIcon />,
+    label: "Sản phẩm và dịch vụ",
+    path: "/products",
+  },
+  { id: "orders", icon: <OrderIcon />, label: "Đơn hàng", path: "/orders" },
+  {
+    id: "warehouse",
+    icon: <WarehouseIcon />,
+    label: "Kho hàng",
+    path: "/inventory",
+  },
+  {
+    id: "import",
+    icon: <ImportWarehouseIcon />,
+    label: "Nhập kho",
+    path: "/hehe",
+  },
+  {
+    id: "returns",
+    icon: <ShoppingBagIcon />,
+    label: "Hàng mua lại",
+    path: "/repurchase",
+  },
+  {
+    id: "history",
+    icon: <HistoryIcon />,
+    label: "Lịch sử giao dịch",
+    path: "/history",
+  },
+  {
+    id: "statistics",
+    icon: <BarChartIcon />,
+    label: "Thống kê",
+    path: "/statistics",
+  },
+  {
+    id: "salary",
+    icon: <LocalAtmOutlinedIcon />,
+    label: "Quản lý lương",
+    path: "/salary",
+  },
+  {
+    id: "staff",
+    icon: <GroupsIcon />,
+    label: "Quản lý nhân viên",
+    path: "/staff",
+  },
+  {
+    id: "customers",
+    icon: <PersonIcon />,
+    label: "Quản lý khách hàng",
+    path: "/customers",
+  },
+  {
+    id: "services",
+    icon: <ServiceIcon />,
+    label: "Quản lý dịch vụ",
+    path: "/services",
+  },
+  {
+    id: "feedback",
+    icon: <TimeKeepingIcon />,
+    label: "Chấm công",
+    path: "/attendance",
+  },
+  {
+    id: "settings",
+    icon: <SettingsIcon />,
+    label: "Cài đặt",
+    path: "/settings",
+  },
 ];
 
-const Dashboard: React.FC = () => {
-  const [activeItem, setActiveItem] = useState('dashboard');
+const Dashboard: React.FC<DashboardProps> = ({ onToggle }) => {
+  const [activeItem, setActiveItem] = useState("dashboard");
+  const navigate = useNavigate();
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
+  const toggleSidebar = () => {
+    const newCollapsedState = !isCollapsed;
+    setIsCollapsed(newCollapsedState);
+    onToggle(newCollapsedState);
+  };
   return (
-    <div className="sidebar">
+    <div className={`sidebar ${isCollapsed ? "collapsed" : ""}`}>
+      {" "}
       <div className="logo">
-        <img src={LogoImage} alt="Shop Logo" />
-        <span className="logo-text">M O R R I</span>
+        {!isCollapsed && (
+          <>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                width: "200px",
+                justifyContent: "center",
+                alignItems: "center",
+                height: "100px",
+                // backgroundColor: "blue",
+                // backgroundColor: "green",
+              }}
+            >
+              <img src={LogoImage} alt="Shop Logo" />
+              <span className="logo-text">M O R R I</span>
+            </div>
+          </>
+        )}
+        <button className="hamburger-button" onClick={toggleSidebar}>
+          <MenuIcon />
+        </button>
       </div>
-
       <nav className="nav">
         <ul className="ul">
           {menuItems.map((item) => (
             <li key={item.id}>
               <button
-                onClick={() => setActiveItem(item.id)}
-                className={`menu-item ${activeItem === item.id ? 'active' : ''}`}
+                onClick={() => {
+                  setActiveItem(item.id);
+                  navigate(item.path);
+                }}
+                className={`menu-item ${
+                  activeItem === item.id ? "active" : ""
+                }`}
+                title={isCollapsed ? item.label : ""}
               >
                 <MaterialIcon
                   key={item.id}
                   icon={item.icon}
                   active={activeItem === item.id}
                 />
-                <span>{item.label}</span>
+                {!isCollapsed && <span>{item.label}</span>}
               </button>
             </li>
           ))}

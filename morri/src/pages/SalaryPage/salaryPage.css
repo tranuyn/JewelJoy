@@ -1,0 +1,43 @@
+/* SalaryPage.css */
+.salary-page {
+  padding: 20px;
+}
+
+.salary-page h1 {
+  margin-bottom: 24px;
+  color: #333;
+}
+
+.salary-content {
+  display: grid;
+  gap: 20px;
+}
+
+.salary-card {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.salary-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin-top: 16px;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.stat-item span {
+  color: #666;
+}
+
+.stat-item strong {
+  font-size: 24px;
+  color: #333;
+}
