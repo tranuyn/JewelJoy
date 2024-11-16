@@ -1,5 +1,5 @@
 .sidebar {
-  height: 100vh;
+  height: 1000vh;
   width: 240px;
   max-width: 100%;
   background-color: #fff;
@@ -57,7 +57,7 @@
   font-weight: bold;
   color: #bf8e54;
 }
- 
+
 .nav {
   flex-grow: 1;
   /* overflow-y: auto; */
@@ -124,7 +124,6 @@
   }
 
   @media (max-width: 768px) {
-    /* Hide sidebar by default on smaller screens */
     .sidebar {
       width: 200px;
       transform: translateX(-100%);
@@ -144,7 +143,6 @@
       margin-right: 10px;
     }
 
-    /* Button to toggle sidebar */
     .toggle-button {
       display: block;
       position: fixed;
@@ -192,7 +190,7 @@
   font-size: 20px;
   color: #ced6d8;
   transition: color 0.3s;
-  margin-right: 10px;
+  /* margin-right: 10px; */
 }
 
 /* Center align text and icon */
@@ -200,6 +198,7 @@
   display: inline-block;
   text-align: center;
   vertical-align: middle;
+  margin-left: 10px;
 }
 
 .icon,
