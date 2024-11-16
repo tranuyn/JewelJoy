@@ -28,7 +28,7 @@
 
 @media (max-width: 600px) {
   .sidebar-container {
-    width: 64px;
+    width: 64px !important;
   }
 
   .main-content {

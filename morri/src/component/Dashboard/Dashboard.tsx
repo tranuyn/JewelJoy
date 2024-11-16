@@ -19,6 +19,7 @@ import LocalAtmOutlinedIcon from "@mui/icons-material/LocalAtmOutlined";
 import { useNavigate } from "react-router-dom";
 interface DashboardProps {
   onToggle: (collapsed: boolean) => void;
+  isCollapsed: boolean;
 }
 const MaterialIcon: React.FC<{ icon: React.ReactNode; active?: boolean }> = ({
   icon,
@@ -102,15 +103,16 @@ const menuItems = [
   },
 ];
 
-const Dashboard: React.FC<DashboardProps> = ({ onToggle }) => {
+const Dashboard: React.FC<DashboardProps> = ({ onToggle, isCollapsed }) => {
   const [activeItem, setActiveItem] = useState("dashboard");
   const navigate = useNavigate();
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  // const [isCollapsed, setIsCollapsed] = useState(false);
 
   const toggleSidebar = () => {
-    const newCollapsedState = !isCollapsed;
-    setIsCollapsed(newCollapsedState);
-    onToggle(newCollapsedState);
+    // const newCollapsedState = !isCollapsed;
+    // setIsCollapsed(newCollapsedState);
+    // onToggle(newCollapsedState);
+    onToggle(!isCollapsed);
   };
   return (
     <div className={`sidebar ${isCollapsed ? "collapsed" : ""}`}>
