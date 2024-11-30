@@ -1,0 +1,35 @@
+
+.home-page {
+    display: flex;
+    flex-wrap: wrap;
+    box-sizing: border-box;
+    padding-left: 50px;
+    padding-right: 50px;
+    flex-direction: column
+}
+.title-text {
+    font-size: 40px;
+    font-weight: bold;
+    color: #264850;
+  }
+  
+@media (min-width: 768px) {
+    .home-page {
+      flex: 1 1 ; 
+    };
+}
+  
+.line {
+    margin-bottom:0;
+    width: 50%;
+    height: 1px;
+    background-color: #EFB26A;
+    border-width: 0.6px;
+    border-style: solid;
+    border-color: #EFB26A;
+    opacity: 0.6; /* Giá trị opacity để làm mờ màu */
+}
+
+h2 {
+    color: #D7A05F
+}
