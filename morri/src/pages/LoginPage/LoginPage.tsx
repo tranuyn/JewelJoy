@@ -1,15 +1,28 @@
-import { Button, Container, TextField, Typography } from '@mui/material';
+import { Alert, Button, Container, TextField, Typography } from '@mui/material';
 import React, { useState } from 'react';
 
 const LoginPage: React.FC = () => {
     const [username, setUsername] = useState<string>('');
     const [password, setPassword] = useState<string>('');
+    const [error, setError] = useState<string>('');
 
     const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        // Handle login logic here
+        setError(''); // Clear previous error
+
+        // Simple validation
+        if (!username || !password) {
+            setError('Please enter both username and password.');
+            return;
+        }
+
+        // Handle login logic here (e.g., API call)
         console.log('Username:', username);
         console.log('Password:', password);
+        
+        // Reset fields after submission (optional)
+        setUsername('');
+        setPassword('');
     };
 
     return (
@@ -17,6 +30,7 @@ const LoginPage: React.FC = () => {
             <Typography component="h1" variant="h5">
                 Login
             </Typography>
+            {error && <Alert severity="error">{error}</Alert>}
             <form onSubmit={handleSubmit}>
                 <TextField
                     margin="normal"
