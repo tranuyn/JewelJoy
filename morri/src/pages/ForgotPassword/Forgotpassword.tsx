@@ -4,4 +4,4 @@ const Forgotpassword: React.FC = () => {
   return <div>Forgotpassword</div>;
 };
 
-export default Forgotpassword;
+export default Forgotpassword; 
