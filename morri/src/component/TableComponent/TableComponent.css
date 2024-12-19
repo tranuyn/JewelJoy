@@ -33,14 +33,6 @@
   border-bottom: 1px solid #e0e0e0;
 }
 
-.action-cell {
-  white-space: nowrap;
-  width: 100px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
 .edit-button {
   color: #ced6d8 !important;
   margin-right: 8px !important;
