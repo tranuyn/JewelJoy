@@ -133,7 +133,15 @@ const TableComponent: React.FC<TableComponentProps> = ({
                     {row[column.field]}
                   </StyledTableCell>
                 ))}
-                <StyledTableCell align="center" className="action-cell">
+                <StyledTableCell
+                  align="center"
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    width: "100px",
+                  }}
+                >
                   <StyledIconButton
                     className="edit-button"
                     size="small"
