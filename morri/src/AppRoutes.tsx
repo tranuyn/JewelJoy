@@ -1,10 +1,11 @@
 import React from "react";
-import { Routes, Route } from "react-router-dom";
-import SalaryPage from "./pages/SalaryPage/salaryPage";
+import { Route, Routes } from "react-router-dom";
 import DashboardLayout from "./component/Layout/DashboardLayout";
 import HomePage from "./pages/HomePage/homePage";
-import ProductsAndService from "./pages/ProductsAndServices/productsAndServicePage";
+import LoginPage from "./pages/LoginPage/LoginPage";
 import OrdersPage from "./pages/OrdersPage/ordersPage";
+import ProductsAndService from "./pages/ProductsAndServices/productsAndServicePage";
+import SalaryPage from "./pages/SalaryPage/salaryPage";
 
 const AppRoutes = () => {
   return (
@@ -24,7 +25,10 @@ const AppRoutes = () => {
         <Route path="/statistics" element={<SalaryPage />} />
         <Route path="/attendance" element={<SalaryPage />} />
         <Route path="/orders" element={<OrdersPage />} />
+
       </Route>
+      <Route path="/login" element={<LoginPage />} />
+
     </Routes>
   );
 };
