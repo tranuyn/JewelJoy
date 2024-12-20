@@ -6,11 +6,11 @@ import AdminLayout from "../component/Layout/AdminLayout";
 import HomePage from "../pages/HomePage/homePage";
 import ProductsAndService from "../pages/ProductsAndServices/productsAndServicePage";
 
-export const StaffRoutes = () => {
+export const InventoryStaffRoutes = () => {
   return (
     <Route
       element={
-        <ProtectedRoute allowedRoles={[ROLES.STAFF]}>
+        <ProtectedRoute allowedRoles={[ROLES.INVENTORY_STAFF]}>
           <AdminLayout />
         </ProtectedRoute>
       }

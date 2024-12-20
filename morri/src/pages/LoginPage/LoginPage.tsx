@@ -9,7 +9,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import googleIcon from "../../assets/constant/google-icon.png";
 import loginImage from "../../assets/constant/login.jpg";
 import "./LoginPage.css";
@@ -26,7 +26,7 @@ interface LoginFormState {
 }
 
 const Login: React.FC = () => {
-  const { login, isAuthenticated, loading, error } = useAuth();
+  const { login, logout, isAuthenticated, loading, error } = useAuth();
   const navigate = useNavigate();
 
   const [formState, setFormState] = useState<LoginFormState>({
@@ -64,7 +64,10 @@ const Login: React.FC = () => {
   const handleClickShowPassword = () => {
     setFormState((prev) => ({ ...prev, showPassword: !prev.showPassword }));
   };
-
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
   const handleRememberMe = (event: React.ChangeEvent<HTMLInputElement>) => {
     setFormState((prev) => ({ ...prev, rememberMe: event.target.checked }));
   };
@@ -92,16 +95,20 @@ const Login: React.FC = () => {
         } else {
           localStorage.removeItem("rememberMe");
         }
-        if (isAuthenticated) {
-          navigate("/home");
-        } else {
-          console.log("Not authenticated");
-        }
+        if (error) return;
+        navigate("/home");
       } catch (err) {
         console.error("Login failed:", err);
       }
     }
   };
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/home");
+    } else {
+      handleLogout();
+    }
+  });
 
   return (
     <Box className="login-page">
@@ -198,7 +205,9 @@ const Login: React.FC = () => {
               >
                 {loading ? "Đang đăng nhập" : "Đăng nhập"}
               </Button>
-              {error && <p style={{ color: "red" }}>{error}</p>}
+              {error && (
+                <p style={{ color: "red" }}>Đăng nhập không thành công!</p>
+              )}
               {isAuthenticated && (
                 <p style={{ padding: "10px", color: "green" }}>
                   Đăng nhập thành công!

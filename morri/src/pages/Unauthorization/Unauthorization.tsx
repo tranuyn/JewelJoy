@@ -1,20 +1,20 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import "./NotFound.css";
+import "./Unauthorization.css";
 import BtnComponent from "../../component/BtnComponent/BtnComponent";
 
-const NotFound: React.FC = () => {
+const Unauthorization: React.FC = () => {
   const navigate = useNavigate();
 
   const handleGoHome = () => {
-    navigate("/login");
+    navigate("/home");
   };
 
   return (
     <div className="not-found-container">
-      <h1 className="not-found-title">404</h1>
+      <h1 className="not-found-title">401</h1>
       <p className="not-found-message">
-        Oops! Trang bạn đang tìm không tồn tại.
+        Oops! Bạn không có quyền truy cập vào đây.
       </p>
       <BtnComponent
         btnColorType="close"
@@ -25,4 +25,4 @@ const NotFound: React.FC = () => {
   );
 };
 
-export default NotFound;
+export default Unauthorization;
