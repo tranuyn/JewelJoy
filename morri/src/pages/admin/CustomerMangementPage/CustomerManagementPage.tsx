@@ -1,14 +1,14 @@
 import React, { useState } from "react";
 import "./customer.css";
-import Header from "../../component/Title_header/Header";
-import TabBar from "../../component/Tabbar/TabBar";
+import Header from "../../../component/Title_header/Header";
+import TabBar from "../../../component/Tabbar/TabBar";
 import { Box } from "@mui/material";
-import TableComponent from "../../component/TableComponent/TableComponent";
-import SearchComponent from "../../component/SearchComponent/SearchComponent";
+import TableComponent from "../../../component/TableComponent/TableComponent";
+import SearchComponent from "../../../component/SearchComponent/SearchComponent";
 import AddCustomer from "./addCustomer";
-import BtnComponent from "../../component/BtnComponent/BtnComponent";
+import BtnComponent from "../../../component/BtnComponent/BtnComponent";
 import UpdateCustomer from "./updateCustomer";
-import DeleteComponent from "../../component/DeleteComponent/DeleteComponent";
+import DeleteComponent from "../../../component/DeleteComponent/DeleteComponent";
 interface Column {
   field: string;
   headerName: string;
@@ -57,7 +57,6 @@ const data = [
 ];
 
 const CustomerManagementPage: React.FC = () => {
-  // const [activeTab, setActiveTab] = useState<"sell" | "buy">("sell");
   const [activeTab, setActiveTab] = useState<string>("Khách hàng bán");
   const [searchKeyword, setSearchKeyword] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);

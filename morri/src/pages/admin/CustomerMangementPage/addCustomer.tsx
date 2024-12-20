@@ -1,7 +1,7 @@
 import React from "react";
 import { Box, Modal, CircularProgress } from "@mui/material";
-import TextBox from "../../component/TextBox/TextBox";
-import BtnComponent from "../../component/BtnComponent/BtnComponent";
+import TextBox from "../../../component/TextBox/TextBox";
+import BtnComponent from "../../../component/BtnComponent/BtnComponent";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import PhoneIcon from "@mui/icons-material/Phone";
 import TransgenderIcon from "@mui/icons-material/Transgender";

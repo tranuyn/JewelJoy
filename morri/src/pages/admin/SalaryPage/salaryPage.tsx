@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import "./salaryPage.css";
 import { Box } from "@mui/material";
-import Header from "../../component/Title_header/Header";
-import TabBar from "../../component/Tabbar/TabBar";
-import TableComponent from "../../component/TableComponent/TableComponent";
+import Header from "../../../component/Title_header/Header";
+import TabBar from "../../../component/Tabbar/TabBar";
+import TableComponent from "../../../component/TableComponent/TableComponent";
 interface Column {
   field: string;
   headerName: string;

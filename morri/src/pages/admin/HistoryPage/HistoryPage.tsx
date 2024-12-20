@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-import Header from "../../component/Title_header/Header";
-import TableComponent from "../../component/TableComponent/TableComponent";
+import Header from "../../../component/Title_header/Header";
+import TableComponent from "../../../component/TableComponent/TableComponent";
 import { Box } from "@mui/material";
-import TabBar from "../../component/Tabbar/TabBar";
+import TabBar from "../../../component/Tabbar/TabBar";
 interface Column {
   field: string;
   headerName: string;

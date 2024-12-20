@@ -4,11 +4,10 @@ import DashboardLayout from "./component/Layout/DashboardLayout";
 import HomePage from "./pages/HomePage/homePage";
 import LoginPage from "./pages/LoginPage/LoginPage";
 import OrdersPage from "./pages/OrdersPage/ordersPage";
-import CustomerManagementPage from "./pages/CustomerMangementPage/CustomerManagementPage";
-import HistoryPage from "./pages/HistoryPage/HistoryPage";
+import CustomerManagementPage from "./pages/admin/CustomerMangementPage/CustomerManagementPage";
+import HistoryPage from "./pages/admin/HistoryPage/HistoryPage";
 import ProductsAndService from "./pages/ProductsAndServices/productsAndServicePage";
-import SalaryPage from "./pages/SalaryPage/salaryPage";
- 
+import SalaryPage from "./pages/admin/SalaryPage/salaryPage";
 
 const AppRoutes = () => {
   return (
@@ -27,10 +26,8 @@ const AppRoutes = () => {
         <Route path="/statistics" element={<SalaryPage />} />
         <Route path="/attendance" element={<SalaryPage />} />
         <Route path="/orders" element={<OrdersPage />} />
-
       </Route>
       <Route path="/login" element={<LoginPage />} />
-
     </Routes>
   );
 };
