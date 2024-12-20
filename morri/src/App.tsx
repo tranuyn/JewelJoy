@@ -1,13 +1,31 @@
 import React from "react";
-import { BrowserRouter as Router } from "react-router-dom";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 import "./App.css";
-import AppRoutes from "./AppRoutes";
+import { AdminRoutes } from "./routes/AdminRoutes";
+import { StaffRoutes } from "./routes/StaffRoutes";
+import { CustomerRoutes } from "./routes/CustomerRoutes";
+import { PublicRoutes } from "./routes/PublicRoutes";
+import { useAuth } from "./services/useAuth";
+import NotFound from "./pages/NotFound/NotFound";
 
 function App() {
+  const { isAuthenticated } = useAuth();
+
   return (
-    <Router>
-      <AppRoutes />
-    </Router>
+    <BrowserRouter>
+      <Routes>
+        {isAuthenticated ? (
+          <>
+            {AdminRoutes()}
+            {StaffRoutes()}
+            {CustomerRoutes()}
+          </>
+        ) : (
+          <>{PublicRoutes()}</>
+        )}
+        <Route path="/unauthorized" element={<NotFound />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 

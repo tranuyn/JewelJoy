@@ -1,0 +1,17 @@
+.customer-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.customer-nav {
+  background-color: #ffffff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 1rem;
+}
+
+.customer-content {
+  flex: 1;
+  padding: 2rem;
+  background-color: #f5f5f5;
+}
