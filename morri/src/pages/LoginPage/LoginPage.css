@@ -155,6 +155,12 @@ html, body {
   color: #4285f4 !important;
 }
 
+.login-switch {
+  color: #0E343D;
+  font-weight: bold; 
+  text-decoration: underline; 
+}
+
 /* Responsive Styles */
 @media (max-width: 900px) {
   .login-container {

@@ -6,6 +6,7 @@ import {
   Checkbox,
   Divider,
   FormControlLabel,
+  FormHelperText,
   IconButton,
   Snackbar,
   TextField,
@@ -71,14 +72,14 @@ const Registration: React.FC = () => {
       setFormState((prev) => ({
         ...prev,
         [prop]: value,
-        ...(prop === "email" && {
-          emailError: value && !validateEmail(value as string) ? "Email không hợp lệ" : "",
+        ...(prop === "email" && value &&{
+          emailError: !validateEmail(value as string) ? "Email không hợp lệ" : " ",
         }),
-        ...(prop === "password" && {
+        ...(prop === "password" && value &&{
           passwordError:
-            value && (value as string).length < 6
+            (value as string).length < 6
               ? "Mật khẩu phải có ít nhất 6 ký tự"
-              : "",
+              : " ",
         }),
       }));
     };
@@ -108,15 +109,15 @@ const Registration: React.FC = () => {
       hasError = true;
     }
 
-    if (!formState.email || !validateEmail(formState.email)) {
-      newErrors.emailError = "Email không hợp lệ";
-      hasError = true;
-    }
+    // if (!formState.email || !validateEmail(formState.email)) {
+    //   newErrors.emailError = "Email không hợp lệ";
+    //   hasError = true;
+    // }
 
-    if (!formState.password || formState.password.length < 6) {
-      newErrors.passwordError = "Mật khẩu phải có ít nhất 6 ký tự";
-      hasError = true;
-    }
+    // if (!formState.password || formState.password.length < 6) {
+    //   newErrors.passwordError = "Mật khẩu phải có ít nhất 6 ký tự";
+    //   hasError = true;
+    // }
 
     if (!formState.agreeToTerms) {
       newErrors.termsError = "Vui lòng đồng ý với điều khoản và chính sách";
@@ -172,6 +173,7 @@ const Registration: React.FC = () => {
 
             <Box component="form" onSubmit={handleSubmit} className="login-form">
               <Box className="name-fields">
+                <Box className = "input-wrapper">
                 <TextField
                   required
                   fullWidth
@@ -184,6 +186,9 @@ const Registration: React.FC = () => {
                   helperText={formState.lastNameError}
                   margin="normal"
                 />
+                
+                </Box>
+                <Box className = "input-wrapper">
                 <TextField
                   required
                   fullWidth
@@ -196,8 +201,11 @@ const Registration: React.FC = () => {
                   helperText={formState.firstNameError}
                   margin="normal"
                 />
+                
+              </Box>
               </Box>
 
+              <Box className = "input-wrapper">
               <TextField
                 required
                 fullWidth
@@ -207,10 +215,17 @@ const Registration: React.FC = () => {
                 value={formState.email}
                 onChange={handleChange("email")}
                 error={!!formState.emailError}
-                helperText={formState.emailError}
-                margin="normal"
+               // helperText={formState.emailError}
+                margin="dense"
               />
+              {formState.emailError && (
+                  <FormHelperText error className="error-message">
+                    {formState.emailError}
+                  </FormHelperText>
+              )}
+              </Box>
 
+              <Box className = "input-wrapper">
               <TextField
                 required
                 fullWidth
@@ -221,8 +236,8 @@ const Registration: React.FC = () => {
                 value={formState.password}
                 onChange={handleChange("password")}
                 error={!!formState.passwordError}
-                helperText={formState.passwordError}
-                margin="normal"
+                //helperText={formState.passwordError}
+                margin="dense"
                 InputProps={{
                   endAdornment: (
                     <IconButton
@@ -235,7 +250,14 @@ const Registration: React.FC = () => {
                   ),
                 }}
               />
+              {formState.passwordError && (
+                  <FormHelperText error className="error-message">
+                    {formState.passwordError}
+                  </FormHelperText>
+                )}
+              </Box>
 
+              <Box className = "terms-wrapper">
               <FormControlLabel
                 control={
                   <Checkbox
@@ -247,10 +269,16 @@ const Registration: React.FC = () => {
                 label="Đồng ý với các điều khoản và chính sách bảo mật"
               />
               {formState.termsError && (
+                  <FormHelperText error className="error-message terms-error">
+                    {formState.termsError}
+                  </FormHelperText>
+                )}
+              </Box>
+              {/* {formState.termsError && (
                 <Typography color="error" variant="caption">
                   {formState.termsError}
                 </Typography>
-              )}
+              )} */}
 
               <Button type="submit" fullWidth variant="contained" className="login-button">
                 Đăng ký
@@ -284,6 +312,7 @@ const Registration: React.FC = () => {
           </Box>
         </Box>
       </Box>
+      
 
       <Snackbar
         open={snackbar.open}
