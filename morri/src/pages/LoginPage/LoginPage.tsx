@@ -244,6 +244,12 @@ const Login: React.FC = () => {
               >
                 Đăng nhập bằng Google
               </Button>
+              <Typography variant="body2" align="center" className="switch-auth" style = {{padding: "10px"}}>
+                Bạn chưa có tài khoản?{" "}
+                <span className="switch-link login-switch" onClick={() => navigate("/forgotpassword")}>
+                    Đăng ký
+                </span>
+              </Typography>
             </Box>
           </Box>
         </Box>
