@@ -4,7 +4,7 @@ import styled from "@emotion/styled";
 interface BtnComponentProps {
   btnColorType: "close" | "primary";
   btnText: string | ReactNode;
-  onClick?: () => void;
+  onClick?: () => Promise<void> | void;
   disabled?: boolean;
 }
 
@@ -33,7 +33,6 @@ const StyledButton = styled.button<{ colorType: "close" | "primary" }>`
     opacity: 0.8;
   }
 
-  /* Disabled styles */
   &:disabled {
     opacity: 0.6;
     cursor: not-allowed;
