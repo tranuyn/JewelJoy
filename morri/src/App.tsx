@@ -14,6 +14,7 @@ function App() {
   const { isAuthenticated, user, logout } = useAuth();
 
   if (!isAuthenticated) {
+    // console.log("isAuthenticated", isAuthenticated);
     logout();
     return (
       <BrowserRouter>
