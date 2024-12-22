@@ -10,11 +10,11 @@ import {
   Typography,
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import googleIcon from "../../assets/constant/google-icon.png";
 import loginImage from "../../assets/constant/login.jpg";
-import "./LoginPage.css";
 import { useAuth } from "../../services/useAuth";
-import { useNavigate } from "react-router-dom";
+import "./LoginPage.css";
 
 interface LoginFormState {
   email: string;
@@ -52,11 +52,11 @@ const Login: React.FC = () => {
         [prop]: value,
         ...(prop === "email" && {
           emailError:
-            value && !validateEmail(value) ? "Email không hợp lệ" : "",
+            value && !validateEmail(value) ? "Email không hợp lệ" : " ",
         }),
         ...(prop === "password" && {
           passwordError:
-            value && value.length < 6 ? "Mật khẩu phải có ít nhất 6 ký tự" : "",
+            value && value.length < 6 ? "Mật khẩu phải có ít nhất 6 ký tự" : " ",
         }),
       }));
     };
@@ -145,9 +145,15 @@ const Login: React.FC = () => {
                 margin="normal"
                 value={formState.email}
                 onChange={handleChange("email")}
-                error={!!formState.emailError}
-                helperText={formState.emailError}
+                error={!!formState.emailError.trim()}
+                helperText={formState.emailError|| " "}
                 className="form-field"
+                InputProps={{
+                  style: { minHeight: '40px' } // Đảm bảo chiều cao input cố định
+                }}
+                FormHelperTextProps={{
+                  style: { minHeight: '20px' } // Đảm bảo chiều cao error message cố định
+                }}
               />
 
               <TextField
@@ -161,10 +167,11 @@ const Login: React.FC = () => {
                 margin="normal"
                 value={formState.password}
                 onChange={handleChange("password")}
-                error={!!formState.passwordError}
-                helperText={formState.passwordError}
+                error={!!formState.passwordError.trim()}
+                helperText={formState.passwordError||" "}
                 className="form-field"
                 InputProps={{
+                  style : {minHeight:"40px"},
                   endAdornment: (
                     <IconButton
                       aria-label="toggle password visibility"
@@ -178,6 +185,9 @@ const Login: React.FC = () => {
                       )}
                     </IconButton>
                   ),
+                }}
+                FormHelperTextProps={{
+                  style: { minHeight: '20px' }
                 }}
               />
 
@@ -234,6 +244,12 @@ const Login: React.FC = () => {
               >
                 Đăng nhập bằng Google
               </Button>
+              <Typography variant="body2" align="center" className="switch-auth" style = {{padding: "10px"}}>
+                Bạn chưa có tài khoản?{" "}
+                <span className="switch-link login-switch" onClick={() => navigate("/forgotpassword")}>
+                    Đăng ký
+                </span>
+              </Typography>
             </Box>
           </Box>
         </Box>
