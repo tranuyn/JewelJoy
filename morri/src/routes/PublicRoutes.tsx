@@ -1,12 +1,12 @@
 import React from "react";
 import { Route } from "react-router-dom";
+import Forgotpassword from "../pages/ForgotPassword/Forgotpassword";
+import Login from "../pages/LoginPage/LoginPage";
 import NotFound from "../pages/NotFound/NotFound";
 import {
   default as Register,
   default as Registration,
 } from "../pages/SignUp/SignUpPage";
-import Forgotpassword from "../pages/ForgotPassword/Forgotpassword";
-import Login from "../pages/LoginPage/LoginPage";
 
 export const PublicRoutes = () => {
   return (
