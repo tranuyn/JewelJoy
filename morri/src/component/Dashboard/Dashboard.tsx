@@ -17,6 +17,7 @@ import SettingsIcon from "@mui/icons-material/Settings";
 import LogoImage from "./logo.png";
 import LocalAtmOutlinedIcon from "@mui/icons-material/LocalAtmOutlined";
 import { useNavigate } from "react-router-dom";
+
 interface DashboardProps {
   onToggle: (collapsed: boolean) => void;
   isCollapsed: boolean;
