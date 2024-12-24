@@ -1,0 +1,56 @@
+.pheader {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 5px solid #efb26a;
+}
+
+.pcontainer {
+  display: flex;
+  align-items: center;
+}
+.pCuaHang {
+  margin-left: 3px;
+}
+.pbtn {
+  border: none;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  background-color: transparent;
+  padding: 20px 20px;
+  transition: background-color 0.3s;
+  font-family: "Baloo 2", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",
+    "Helvetica Neue", sans-serif;
+}
+.pbtn:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  font-weight: 500;
+}
+.pbanner {
+  background-color: #f7f6f4;
+  background-image: url("../../assets/constant/anhnhan.jpg");
+  background-position: right center;
+  background-repeat: no-repeat;
+  background-size: 60%; /* Đảm bảo ảnh phủ kín phần tử */
+  width: 100%; /* Chiều rộng của phần tử */
+  height: 200px; /* Chiều cao của phần tử; điều chỉnh theo nhu cầu */
+  display: flex;
+  align-items: center;
+}
+.pmorri {
+  font-family: Georgia, "Times New Roman", Times, serif;
+  font-weight: 800;
+  color: #3e5c63;
+  font-size: larger;
+}
+.pTitle {
+  color: #3e5c63;
+  font-weight: 300;
+}
+.pbannerTextContainer {
+  width: 30%;
+  margin-left: 50px;
+}

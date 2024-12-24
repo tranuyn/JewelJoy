@@ -1,0 +1,205 @@
+@import url("https://fonts.googleapis.com/css2?family=Baloo+2:wght@400..800&display=swap");
+
+.profile-container {
+    display: flex;
+    width: 100%;
+    min-height: 100vh;
+    background: #fff;
+  }
+  
+  .left-section {
+    display: none;
+    position: relative;
+    width: 40%;
+    min-height: 100%;
+  }
+  
+  .jewelry-image {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    object-fit: cover;
+  }
+  
+
+.quote-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.5);
+  color: white;
+}
+
+.right-section {
+  width: 100%;
+  padding: 2rem;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.form-content {
+  width: 100%;
+  max-width: 600px;
+  padding: 20px;
+}
+
+.main-title {
+  font-weight: 700;
+  margin-bottom: 1rem;
+  text-align: center;
+  font-size: 2rem;
+  color: #000;
+}
+
+.subtitle {
+  margin-bottom: 2rem;
+  color: #666;
+  font-size: 1rem;
+}
+
+.form-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.avatar-upload-section {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.avatar-label {
+  margin-bottom: 1rem;
+  color: #000;
+  font-size: 1rem;
+}
+
+.upload-box {
+  width: 150px;
+  height: 150px;
+  margin: 0 auto;
+  border: 2px dashed #ccc;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: border-color 0.3s ease;
+}
+
+.upload-box:hover {
+  border-color: #999;
+}
+
+.upload-icon {
+  color: #666;
+  margin-bottom: 0.5rem;
+  width: 32px;
+  height: 32px;
+}
+
+.upload-text {
+  color: #1976d2;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.form-field {
+  margin-bottom: 1rem;
+}
+
+.form-field .MuiOutlinedInput-root {
+  border-radius: 8px;
+}
+
+.form-field .MuiInputLabel-root {
+  font-family: "Baloo 2", sans-serif;
+}
+
+.form-field .MuiFormHelperText-root {
+  margin-left: 0;
+  min-height: 20px;
+}
+
+.submit-button {
+  background-color: #EFB26A !important;
+  color: white !important;
+  padding: 12px !important;
+  font-weight: 600 !important;
+  text-transform: none !important;
+  border-radius: 8px !important;
+  margin-top: 1rem !important;
+  font-size: 1rem !important;
+  font-family: "Baloo 2", sans-serif !important;
+  letter-spacing: 0 !important;
+}
+
+.submit-button:hover {
+  background-color: #e5a55f !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+@media (min-width: 768px) {
+  .left-section {
+    display: block;
+  }
+
+  .right-section {
+    width: 60%;
+  }
+}
+
+@media (max-width: 768px) {
+  .profile-container {
+    flex-direction: column;
+  }
+
+  .right-section {
+    width: 100%;
+    padding: 1rem;
+  }
+
+  .form-content {
+    padding: 10px;
+  }
+
+  .main-title {
+    font-size: 1.75rem;
+  }
+
+  .upload-box {
+    width: 120px;
+    height: 120px;
+  }
+}
+
+/* Material-UI Overrides */
+.MuiTextField-root {
+  font-family: "Baloo 2", sans-serif !important;
+}
+
+.MuiButton-root {
+  font-family: "Baloo 2", sans-serif !important;
+}
+
+.MuiFormControlLabel-root {
+  font-family: "Baloo 2", sans-serif !important;
+}
+
+.MuiTypography-root {
+  font-family: "Baloo 2", sans-serif !important;
+}
+
+.MuiSelect-select {
+  font-family: "Baloo 2", sans-serif !important;
+}
+
+.MuiMenuItem-root {
+  font-family: "Baloo 2", sans-serif !important;
+}

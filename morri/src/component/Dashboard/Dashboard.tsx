@@ -15,8 +15,10 @@ import ServiceIcon from "@mui/icons-material/SupportAgent";
 import TimeKeepingIcon from "@mui/icons-material/EventAvailable";
 import SettingsIcon from "@mui/icons-material/Settings";
 import LogoImage from "./logo.png";
+import LogoutIcon from "@mui/icons-material/Logout";
 import LocalAtmOutlinedIcon from "@mui/icons-material/LocalAtmOutlined";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../services/useAuth";
 
 interface DashboardProps {
   onToggle: (collapsed: boolean) => void;
@@ -58,7 +60,7 @@ const menuItems = [
     id: "history",
     icon: <HistoryIcon />,
     label: "Lịch sử giao dịch",
-    path: "/history",
+    path: "/admin/history",
   },
   {
     id: "statistics",
@@ -70,7 +72,7 @@ const menuItems = [
     id: "salary",
     icon: <LocalAtmOutlinedIcon />,
     label: "Quản lý lương",
-    path: "/salary",
+    path: "/admin/salary",
   },
   {
     id: "staff",
@@ -82,7 +84,7 @@ const menuItems = [
     id: "customers",
     icon: <PersonIcon />,
     label: "Quản lý khách hàng",
-    path: "/customers",
+    path: "/admin/customer",
   },
   {
     id: "services",
@@ -102,18 +104,25 @@ const menuItems = [
     label: "Cài đặt",
     path: "/settings",
   },
+  {
+    id: "logout",
+    icon: <LogoutIcon />,
+    label: "Đăng xuất",
+    path: "/",
+  },
 ];
 
 const Dashboard: React.FC<DashboardProps> = ({ onToggle, isCollapsed }) => {
   const [activeItem, setActiveItem] = useState("dashboard");
   const navigate = useNavigate();
-  // const [isCollapsed, setIsCollapsed] = useState(false);
+  const { logout } = useAuth();
 
   const toggleSidebar = () => {
-    // const newCollapsedState = !isCollapsed;
-    // setIsCollapsed(newCollapsedState);
-    // onToggle(newCollapsedState);
     onToggle(!isCollapsed);
+  };
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
   };
   return (
     <div className={`sidebar ${isCollapsed ? "collapsed" : ""}`}>
@@ -129,8 +138,6 @@ const Dashboard: React.FC<DashboardProps> = ({ onToggle, isCollapsed }) => {
                 justifyContent: "center",
                 alignItems: "center",
                 height: "100px",
-                // backgroundColor: "blue",
-                // backgroundColor: "green",
               }}
             >
               <img src={LogoImage} alt="Shop Logo" />
@@ -149,7 +156,11 @@ const Dashboard: React.FC<DashboardProps> = ({ onToggle, isCollapsed }) => {
               <button
                 onClick={() => {
                   setActiveItem(item.id);
-                  navigate(item.path);
+                  if (item.id === "logout") {
+                    handleLogout();
+                  } else {
+                    navigate(item.path);
+                  }
                 }}
                 className={`menu-item ${
                   activeItem === item.id ? "active" : ""
