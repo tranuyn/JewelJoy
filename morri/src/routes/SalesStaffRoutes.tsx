@@ -1,10 +1,11 @@
 import React from "react";
-import { Route } from "react-router-dom";
+import { Navigate, Route } from "react-router-dom";
 import { ROLES } from "../constants/roles";
 import { ProtectedRoute } from "./ProtectedRoute";
 import AdminLayout from "../component/Layout/AdminLayout";
 import HomePage from "../pages/HomePage/homePage";
 import ProductsAndService from "../pages/ProductsAndServices/productsAndServicePage";
+import Unauthorization from "../pages/Unauthorization/Unauthorization";
 
 export const SalesStaffRoutes = () => {
   return (
@@ -18,6 +19,8 @@ export const SalesStaffRoutes = () => {
       <Route path="/home" element={<HomePage />} />
 
       <Route path="/products" element={<ProductsAndService />} />
+      <Route path="/unauthorized" element={<Unauthorization />} />
+      <Route path="*" element={<Navigate to="/unauthorized" />} />
     </Route>
   );
 };
