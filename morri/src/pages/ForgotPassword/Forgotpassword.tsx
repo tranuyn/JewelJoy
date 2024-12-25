@@ -1,10 +1,5 @@
-import {
-  Box,
-  Button,
-  TextField,
-  Typography
-} from "@mui/material";
-import React, { useState } from "react";
+import { Box, Button, TextField, Typography } from "@mui/material";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import loginImage from "../../assets/constant/login.jpg";
 import { useAuth } from "../../services/useAuth";
@@ -20,7 +15,7 @@ interface LoginFormState {
 }
 
 const ForgotPassword: React.FC = () => {
-  const { login, logout, isAuthenticated, loading, error } = useAuth();
+  const { login, isAuthenticated, loading, error } = useAuth();
   const navigate = useNavigate();
 
   const [formState, setFormState] = useState<LoginFormState>({
@@ -31,10 +26,41 @@ const ForgotPassword: React.FC = () => {
     emailError: "",
     passwordError: "",
   });
+  useEffect(() => {
+    const remembered = localStorage.getItem("rememberMe") === "true";
+    if (remembered) {
+      setFormState((prev) => ({ ...prev, rememberMe: true }));
+    }
+  }, []);
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/home");
+    }
+  }, [isAuthenticated, navigate]);
 
-  const validateEmail = (email: string) => {
-    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return regex.test(email);
+  const validateEmail = (email: string): boolean => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  };
+
+  const validatePassword = (password: string): boolean => {
+    return password.length >= 6;
+  };
+
+  const validateForm = (): boolean => {
+    const emailError = !validateEmail(formState.email)
+      ? "Email không hợp lệ"
+      : "";
+    const passwordError = !validatePassword(formState.password)
+      ? "Mật khẩu phải có ít nhất 6 ký tự"
+      : "";
+
+    setFormState((prev) => ({
+      ...prev,
+      emailError,
+      passwordError,
+    }));
+
+    return !emailError && !passwordError;
   };
 
   const handleChange =
@@ -46,63 +72,37 @@ const ForgotPassword: React.FC = () => {
         [prop]: value,
         ...(prop === "email" && {
           emailError:
-            value && !validateEmail(value) ? "Email không hợp lệ" : " ",
+            value && !validateEmail(value) ? "Email không hợp lệ" : "",
         }),
         ...(prop === "password" && {
           passwordError:
-            value && value.length < 6 ? "Mật khẩu phải có ít nhất 6 ký tự" : " ",
+            value && !validatePassword(value)
+              ? "Mật khẩu phải có ít nhất 6 ký tự"
+              : "",
         }),
       }));
     };
 
-  const handleClickShowPassword = () => {
-    setFormState((prev) => ({ ...prev, showPassword: !prev.showPassword }));
-  };
-  const handleLogout = () => {
-    logout();
-    navigate("/login");
-  };
-  const handleRememberMe = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setFormState((prev) => ({ ...prev, rememberMe: event.target.checked }));
-  };
-
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 
-    const emailError = !validateEmail(formState.email)
-      ? "Email không hợp lệ"
-      : "";
-    const passwordError =
-      formState.password.length < 6 ? "Mật khẩu phải có ít nhất 6 ký tự" : "";
+    if (!validateForm()) {
+      return;
+    }
 
-    setFormState((prev) => ({
-      ...prev,
-      emailError,
-      passwordError,
-    }));
-
-    if (!emailError && !passwordError) {
-      try {
-        await login(formState.email, formState.password);
-        if (formState.rememberMe) {
-          localStorage.setItem("rememberMe", "true");
-        } else {
-          localStorage.removeItem("rememberMe");
-        }
-        if (error) return;
-        navigate("/home");
-      } catch (err) {
-        console.error("Login failed:", err);
-      }
+    try {
+      await login({
+        email: formState.email,
+        password: formState.password,
+      });
+    } catch (err) {
+      console.error("Login failed:", err);
+      setFormState((prev) => ({
+        ...prev,
+        passwordError: "Invalid email or password",
+      }));
     }
   };
-  // useEffect(() => {
-  //   if (isAuthenticated) {
-  //     navigate("/home");
-  //   } else {
-  //     handleLogout();
-  //   }
-  // });
 
   return (
     <Box className="login-page">
@@ -123,7 +123,11 @@ const ForgotPassword: React.FC = () => {
               <strong>Quên mật khẩu</strong>
             </Typography>
 
-            <Box component="form" onSubmit={handleSubmit} className="login-form">
+            <Box
+              component="form"
+              onSubmit={handleSubmit}
+              className="login-form"
+            >
               <Box className="form-field-container">
                 <TextField
                   required
@@ -135,23 +139,23 @@ const ForgotPassword: React.FC = () => {
                   value={formState.email}
                   onChange={handleChange("email")}
                   error={!!formState.emailError.trim()}
-                  helperText={formState.emailError|| " "}
+                  helperText={formState.emailError || " "}
                   className="form-field"
                   InputProps={{
-                    style: { minHeight: '40px' }
+                    style: { minHeight: "40px" },
                   }}
                   FormHelperTextProps={{
-                    style: { minHeight: '20px' }
+                    style: { minHeight: "20px" },
                   }}
                 />
-                
-                <Typography 
-                  variant="body2" 
+
+                <Typography
+                  variant="body2"
                   className="helper-text"
-                  style={{ 
-                    marginTop: '0px',
-                    marginBottom: '16px',
-                    color: '#666'
+                  style={{
+                    marginTop: "0px",
+                    marginBottom: "16px",
+                    color: "#666",
                   }}
                 >
                   Vui lòng kiểm tra email sau khi nhấn gửi
@@ -166,20 +170,20 @@ const ForgotPassword: React.FC = () => {
               >
                 {loading ? "Đang gửi thông tin" : "Gửi"}
               </Button>
-              
+
               {error && (
                 <p style={{ color: "red" }}>Email bạn nhập chưa đúng!</p>
               )}
-              
-              <Typography 
-                variant="body2" 
-                align="center" 
-                className="switch-auth" 
+
+              <Typography
+                variant="body2"
+                align="center"
+                className="switch-auth"
                 style={{ padding: "10px" }}
               >
                 Bạn đã nhớ mật khẩu?{" "}
-                <span 
-                  className="switch-link login-switch" 
+                <span
+                  className="switch-link login-switch"
                   onClick={() => navigate("/login")}
                 >
                   Đăng nhập
