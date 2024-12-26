@@ -122,7 +122,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onToggle, isCollapsed }) => {
   };
   const handleLogout = () => {
     logout();
-    navigate("/login");
+    // navigate("/login");
   };
   return (
     <div className={`sidebar ${isCollapsed ? "collapsed" : ""}`}>
