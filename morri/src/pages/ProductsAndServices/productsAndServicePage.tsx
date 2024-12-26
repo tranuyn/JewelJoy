@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Header from "./header";
 import TabBar from "../../component/Tabbar/TabBar";
 import Charms from "./Charms";
@@ -9,8 +9,20 @@ import Charms from "./Charms";
 import Services from "./Services";
 import "./style.css";
 import SearchAndFilter from "./SearchAndFilter/searchAndFilter";
+import Product from "./ProductAndBill/Product";
+import Bill from "./ProductAndBill/Bill";
+
+interface ProductType {
+  id: string;
+  name: string;
+  material: string;
+  sellingPrice: number;
+  imageUrl: string[];
+  // Add other properties as needed
+}
 const ProductsAndService: React.FC = () => {
   const [activeTab, setActiveTab] = useState("Tất cả");
+  const [products, setProducts] = useState<ProductType[]>([]);
 
   const tabs = [
     "Tất cả",
@@ -21,6 +33,20 @@ const ProductsAndService: React.FC = () => {
     "Vòng tay",
     "Dịch vụ",
   ];
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await fetch("http://localhost:8081/jewelry/"); // Replace with your API URL
+        const data = await response.json();
+        setProducts(data); // Assume data is an array of products
+      } catch (error) {
+        console.error("Error fetching products:", error);
+      }
+    };
+
+    fetchProducts();
+  }, []);
 
   const renderContent = () => {
     switch (activeTab) {
@@ -64,6 +90,11 @@ const ProductsAndService: React.FC = () => {
         defaultTab="Tất cả"
       />
       <SearchAndFilter />
+
+      <div className="pbcontainer">
+        <Product products={products} />
+        <Bill />
+      </div>
 
       <div className="page-content">
         <div className="content-text">{renderContent()}</div>

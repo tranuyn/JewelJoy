@@ -54,3 +54,15 @@
   width: 30%;
   margin-left: 50px;
 }
+
+.container {
+  display: flex;
+  flex-direction: row;
+}
+.pbcontainer {
+  display: flex;
+  flex-direction: row;
+  margin-top: 20px;
+  padding-left: 10px;
+  padding-right: 10px;
+}

@@ -1,0 +1,61 @@
+.billContainer {
+  background-color: red;
+  width: 2000px;
+}
+.productContainer {
+  padding-right: 10px;
+}
+
+.productGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr); /* 4 columns by default */
+  gap: 10px; /* Space between items */
+}
+
+.productItem {
+  background: #fff; /* Background color for items */
+  border: 1px solid #ccc; /* Border */
+  border-radius: 8px; /* Rounded corners */
+  padding: 10px; /* Padding inside each item */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Optional shadow */
+}
+
+.productItem:hover {
+  background-color: #fefcef;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2); /* Hover shadow */
+}
+.pimgcontainer {
+  width: 100%; /* Make image responsive */
+  height: auto; /* Maintain aspect ratio */
+  border-radius: 8px; /* Rounded corners for images */
+}
+
+/* Media Queries for Responsiveness */
+@media (max-width: 1200px) {
+  .productGrid {
+    grid-template-columns: repeat(3, 1fr); /* 3 columns */
+  }
+}
+
+@media (max-width: 900px) {
+  .productGrid {
+    grid-template-columns: repeat(2, 1fr); /* 2 columns */
+  }
+}
+
+@media (max-width: 600px) {
+  .productGrid {
+    grid-template-columns: 1fr; /* 1 column */
+  }
+}
+
+.productName {
+  font-weight: 600;
+  height: 55px; /* Fixed height for two lines */
+  overflow: hidden; /* Hide overflow text */
+  display: -webkit-box; /* Use flexbox model */
+  -webkit-line-clamp: 2; /* Limit to 2 lines */
+  -webkit-box-orient: vertical; /* Vertical orientation */
+  text-overflow: ellipsis; /* Add ellipsis */
+}

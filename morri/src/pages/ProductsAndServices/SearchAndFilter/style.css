@@ -2,7 +2,7 @@
   transition: background-color 0.3s;
   display: flex;
   flex-direction: row;
-  justify-content: space-between;
+  /* justify-content: space-between; */
   margin-top: 30px;
   margin-left: 20px;
   margin-right: 20px;
@@ -15,6 +15,7 @@
   display: flex;
   align-items: center;
   background-color: #fff;
+  margin-right: 20px;
 }
 .psearchbar input {
   border: none;
@@ -41,6 +42,7 @@
   border-radius: 20px;
   cursor: pointer;
   width: 150px;
+  margin-right: 20px;
 }
 
 .dropbtn:hover,
@@ -63,4 +65,14 @@
 
 .show {
   display: block;
+}
+
+.SapXep {
+  padding: 10px;
+  border-radius: 20px;
+}
+
+.SapXep:hover,
+.SapXep:focus {
+  background-color: #fbefe1;
 }
