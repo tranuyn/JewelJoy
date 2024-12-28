@@ -18,11 +18,33 @@ interface ProductType {
   material: string;
   sellingPrice: number;
   imageUrl: string[];
+  quantityInBill: number;
   // Add other properties as needed
 }
 const ProductsAndService: React.FC = () => {
   const [activeTab, setActiveTab] = useState("Tất cả");
   const [products, setProducts] = useState<ProductType[]>([]);
+  const [selectedProducts, setSelectedProducts] = useState<ProductType[]>([]);
+
+  const handleSelectProduct = (product: ProductType) => {
+    const existingProduct = selectedProducts.find((p) => p.id === product.id);
+
+    if (existingProduct) {
+      // If the product already exists, increase its quantity
+      setSelectedProducts((prev) =>
+        prev.map((p) =>
+          p.id === product.id
+            ? { ...p, quantityInBill: p.quantityInBill + 1 }
+            : p
+        )
+      );
+    } else {
+      setSelectedProducts((prev) => [
+        ...prev,
+        { ...product, quantityInBill: 1 },
+      ]);
+    }
+  };
 
   const tabs = [
     "Tất cả",
@@ -68,7 +90,14 @@ const ProductsAndService: React.FC = () => {
   };
 
   return (
-    <div style={{ backgroundColor: "#F9FCFF", height: "100%" }}>
+    <div
+      style={{
+        backgroundColor: "#F9FCFF",
+        position: "relative",
+        overflow: "visible",
+        height: "100vh",
+      }}
+    >
       <Header />
       <div className="pbanner">
         <div className="pbannerTextContainer">
@@ -92,8 +121,13 @@ const ProductsAndService: React.FC = () => {
       <SearchAndFilter />
 
       <div className="pbcontainer">
-        <Product products={products} />
-        <Bill />
+        <div className="product-container">
+          <Product products={products} onSelectProduct={handleSelectProduct} />
+        </div>
+
+        <div className="bill-container">
+          <Bill selectedProducts={selectedProducts} />
+        </div>
       </div>
 
       <div className="page-content">

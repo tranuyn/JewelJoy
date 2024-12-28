@@ -1,4 +1,5 @@
 import React from "react";
+import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 
 // Define the type for a single product
 interface ProductType {
@@ -7,14 +8,16 @@ interface ProductType {
   material: string;
   sellingPrice: number;
   imageUrl: string[];
+  quantityInBill: number;
 }
 
 // Define the props interface for the Product component
 interface ProductProps {
   products: ProductType[]; // Array of products
+  onSelectProduct: (product: ProductType) => void; // Function to handle selection
 }
 
-const Product: React.FC<ProductProps> = ({ products }) => {
+const Product: React.FC<ProductProps> = ({ products, onSelectProduct }) => {
   return (
     <div className="productContainer">
       {products.length === 0 ? (
@@ -23,6 +26,12 @@ const Product: React.FC<ProductProps> = ({ products }) => {
         <div className="productGrid">
           {products.map((product) => (
             <div key={product.id} className="productItem">
+              <div className="iconAddInProduct">
+                <AddCircleOutlineIcon
+                  sx={{ marginBottom: 0, color: "white" }}
+                  onClick={() => onSelectProduct(product)}
+                />
+              </div>
               <img
                 className="pimgcontainer"
                 src={product.imageUrl[0]}
