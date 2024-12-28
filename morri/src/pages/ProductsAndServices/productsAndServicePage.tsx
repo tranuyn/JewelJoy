@@ -19,7 +19,7 @@ interface ProductType {
   sellingPrice: number;
   imageUrl: string[];
   quantityInBill: number;
-  // Add other properties as needed
+  loaiSanPham: string;
 }
 const ProductsAndService: React.FC = () => {
   const [activeTab, setActiveTab] = useState("Tất cả");
@@ -48,7 +48,7 @@ const ProductsAndService: React.FC = () => {
 
   const tabs = [
     "Tất cả",
-    "Charms",
+    "Đá quý",
     "Vòng cổ",
     "Nhẫn",
     "Hoa tai",
@@ -61,6 +61,7 @@ const ProductsAndService: React.FC = () => {
       try {
         const response = await fetch("http://localhost:8081/jewelry/"); // Replace with your API URL
         const data = await response.json();
+        console.log(JSON.stringify(data));
         setProducts(data); // Assume data is an array of products
       } catch (error) {
         console.error("Error fetching products:", error);
@@ -72,20 +73,113 @@ const ProductsAndService: React.FC = () => {
 
   const renderContent = () => {
     switch (activeTab) {
-      case "Charms":
-        return <Charms />;
-      //   case 'Vòng cổ':
-      //     return <VongCo />;
-      //   case 'Nhẫn':
-      //     return <Nhan />;
-      //   case 'Hoa tai':
-      //     return <HoaTai />;
-      //   case 'Vòng tay':
-      //     return <VongTay />;
+      case "Đá quý":
+        const charmsProducts = products.filter((product) =>
+          ["DAQUY", "KIMCUONG", "THACH", "NGOC"].includes(product.loaiSanPham)
+        );
+        return (
+          <div className="pbcontainer">
+            <div className="product-container">
+              <Product
+                products={charmsProducts}
+                onSelectProduct={handleSelectProduct}
+              />
+            </div>
+
+            <div className="bill-container">
+              <Bill selectedProducts={selectedProducts} />
+            </div>
+          </div>
+        );
+      case "Vòng cổ":
+        const VongCoProducts = products.filter(
+          (product) => product.loaiSanPham === "DAYCHUYEN" // So sánh trực tiếp giá trị chuỗi
+        );
+        return (
+          <div className="pbcontainer">
+            <div className="product-container">
+              <Product
+                products={VongCoProducts}
+                onSelectProduct={handleSelectProduct}
+              />
+            </div>
+
+            <div className="bill-container">
+              <Bill selectedProducts={selectedProducts} />
+            </div>
+          </div>
+        );
+      case "Nhẫn":
+        const nhanProducts = products.filter(
+          (product) => product.loaiSanPham === "NHAN" // So sánh trực tiếp giá trị chuỗi
+        );
+        return (
+          <div className="pbcontainer">
+            <div className="product-container">
+              <Product
+                products={nhanProducts}
+                onSelectProduct={handleSelectProduct}
+              />
+            </div>
+
+            <div className="bill-container">
+              <Bill selectedProducts={selectedProducts} />
+            </div>
+          </div>
+        );
+      case "Hoa tai":
+        const bongTaiProducts = products.filter(
+          (product) => product.loaiSanPham === "BONGTAI" // So sánh trực tiếp giá trị chuỗi
+        );
+        return (
+          <div className="pbcontainer">
+            <div className="product-container">
+              <Product
+                products={bongTaiProducts}
+                onSelectProduct={handleSelectProduct}
+              />
+            </div>
+
+            <div className="bill-container">
+              <Bill selectedProducts={selectedProducts} />
+            </div>
+          </div>
+        );
+      case "Vòng tay":
+        const vongTayProducts = products.filter(
+          (product) => product.loaiSanPham === "VONGTAY" // So sánh trực tiếp giá trị chuỗi
+        );
+        return (
+          <div className="pbcontainer">
+            <div className="product-container">
+              <Product
+                products={vongTayProducts}
+                onSelectProduct={handleSelectProduct}
+              />
+            </div>
+
+            <div className="bill-container">
+              <Bill selectedProducts={selectedProducts} />
+            </div>
+          </div>
+        );
       case "Dịch vụ":
         return <Services />;
       default:
-        return <div>Nội dung cho Tất cả</div>;
+        return (
+          <div className="pbcontainer">
+            <div className="product-container">
+              <Product
+                products={products}
+                onSelectProduct={handleSelectProduct}
+              />
+            </div>
+
+            <div className="bill-container">
+              <Bill selectedProducts={selectedProducts} />
+            </div>
+          </div>
+        );
     }
   };
 
@@ -120,7 +214,7 @@ const ProductsAndService: React.FC = () => {
       />
       <SearchAndFilter />
 
-      <div className="pbcontainer">
+      {/* <div className="pbcontainer">
         <div className="product-container">
           <Product products={products} onSelectProduct={handleSelectProduct} />
         </div>
@@ -128,7 +222,7 @@ const ProductsAndService: React.FC = () => {
         <div className="bill-container">
           <Bill selectedProducts={selectedProducts} />
         </div>
-      </div>
+      </div> */}
 
       <div className="page-content">
         <div className="content-text">{renderContent()}</div>

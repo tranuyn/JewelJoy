@@ -75,11 +75,12 @@
 
 .product-container {
   overflow-y: auto; /* Cho phép cuộn dọc */
+  flex: 1;
 }
 
 .bill-container {
   height: 70vh;
-  width: 2000px;
+  width: 250px;
   background-color: white;
   position: sticky;
   top: 150px;

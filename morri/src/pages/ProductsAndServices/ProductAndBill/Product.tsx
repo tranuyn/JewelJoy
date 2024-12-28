@@ -9,6 +9,7 @@ interface ProductType {
   sellingPrice: number;
   imageUrl: string[];
   quantityInBill: number;
+  loaiSanPham: string;
 }
 
 // Define the props interface for the Product component
@@ -18,6 +19,16 @@ interface ProductProps {
 }
 
 const Product: React.FC<ProductProps> = ({ products, onSelectProduct }) => {
+  function formatPrice(price: number): string {
+    if (isNaN(price)) {
+      return "0"; // Trả về "0" nếu giá trị không hợp lệ
+    }
+
+    // Chuyển giá trị thành chuỗi và chia thành các nhóm 3 chữ số
+    return price
+      .toString() // Chuyển thành chuỗi
+      .replace(/\B(?=(\d{3})+(?!\d))/g, "."); // Thêm dấu chấm sau mỗi 3 chữ số
+  }
   return (
     <div className="productContainer">
       {products.length === 0 ? (
@@ -47,7 +58,7 @@ const Product: React.FC<ProductProps> = ({ products, onSelectProduct }) => {
               >
                 <div style={{ color: "#717171" }}>{product.material}</div>
                 <div style={{ color: "#e54141", fontWeight: 500 }}>
-                  {product.sellingPrice} VND
+                  {formatPrice(product.sellingPrice)} VND
                 </div>
               </div>
             </div>

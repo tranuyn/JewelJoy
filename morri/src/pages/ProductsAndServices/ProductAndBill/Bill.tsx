@@ -9,6 +9,7 @@ interface ProductType {
   sellingPrice: number;
   imageUrl: string[];
   quantityInBill: number;
+  loaiSanPham: string;
 }
 
 interface BillProps {
@@ -61,9 +62,22 @@ const Bill: React.FC<BillProps> = ({ selectedProducts }) => {
     setDropdownOpen(null); // Close dropdown after deleting
   };
 
+  function formatPrice(price: number): string {
+    if (isNaN(price)) {
+      return "0"; // Trả về "0" nếu giá trị không hợp lệ
+    }
+
+    // Chuyển giá trị thành chuỗi và chia thành các nhóm 3 chữ số
+    return price
+      .toString() // Chuyển thành chuỗi
+      .replace(/\B(?=(\d{3})+(?!\d))/g, "."); // Thêm dấu chấm sau mỗi 3 chữ số
+  }
+
   return (
     <div className="bbillContainer">
-      <div style={{ fontWeight: 600 }}>Hóa đơn mua hàng</div>
+      <div style={{ fontWeight: 600, marginBottom: "10px" }}>
+        Hóa đơn mua hàng
+      </div>
       <div
         style={{
           flex: 1,
@@ -118,7 +132,9 @@ const Bill: React.FC<BillProps> = ({ selectedProducts }) => {
                     </div>
                   </div>
 
-                  {/* <div className="billItemPrice">đ {product.sellingPrice}</div> */}
+                  <div className="billItemPrice">
+                    đ {formatPrice(product.sellingPrice)}
+                  </div>
                   <div className="billItemQuantity">
                     <div
                       className="buttonSub"
@@ -148,11 +164,14 @@ const Bill: React.FC<BillProps> = ({ selectedProducts }) => {
         }}
       >
         <div style={{ fontWeight: 600 }}>Tổng</div>
-        {/* <div className="billItemPrice" style={{ fontSize: "16px" }}>
-          {selectedProducts.reduce((total, product) => {
-            return total + product.sellingPrice * quantities[product.id];
-          }, 0)}
-        </div> */}
+        <div className="billItemPrice" style={{ fontSize: "16px" }}>
+          {formatPrice(
+            selectedProducts.reduce((total, product) => {
+              return total + product.sellingPrice * quantities[product.id];
+            }, 0)
+          )}{" "}
+          VND
+        </div>
       </div>
 
       <button className="BuyNowButton">Mua ngay</button>
