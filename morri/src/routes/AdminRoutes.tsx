@@ -11,6 +11,7 @@ import ProductsAndService from "../pages/ProductsAndServices/productsAndServiceP
 import Unauthorization from "../pages/Unauthorization/Unauthorization";
 import AttendancePage from "../pages/AttendancePage/AttendancePage";
 import CheckOut from "../pages/CheckOut/CheckOut";
+import CheckOutSuccess from "../pages/CheckOut/CheckOutSuccess";
 
 export const AdminRoutes = () => {
   return (
@@ -24,6 +25,7 @@ export const AdminRoutes = () => {
       <Route path="/home" element={<HomePage />} />
       <Route path="/products" element={<ProductsAndService />} />
       <Route path="/products/checkout" element={<CheckOut />} />
+      <Route path="/products/checkout/:orderId" element={<CheckOutSuccess />} />
       <Route path="/admin/customer" element={<CustomerMangementPage />} />
       <Route path="/admin/salary" element={<SalaryPage />} />
       <Route path="/admin/history" element={<HistoryPage />} />
