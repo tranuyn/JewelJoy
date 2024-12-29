@@ -89,7 +89,7 @@ const menuItems = [
     id: "services",
     icon: <ServiceIcon />,
     label: "Quản lý dịch vụ",
-    path: "/services",
+    path: "/service",
   },
   {
     id: "feedback",
