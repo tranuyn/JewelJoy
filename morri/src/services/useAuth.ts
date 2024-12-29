@@ -1,10 +1,7 @@
-import { useEffect } from "react";
 import { RootState } from "../redux/store";
-import {
-  login as LoginAction,
-  logout as logoutAction,
-} from "../redux/slice/authSlice";
+import { login, logout, validateAuth } from "../redux/slice/authSlice";
 import { useAppDispatch, useAppSelector } from "../redux/hooks";
+import { useCallback } from "react";
 
 export const useAuth = () => {
   const dispatch = useAppDispatch();
@@ -12,26 +9,28 @@ export const useAuth = () => {
     (state: RootState) => state.auth
   );
 
-  const login = async (email: string, password: string) => {
-    await dispatch(LoginAction(email, password));
+  const loginUser = async (credentials: {
+    email: string;
+    password: string;
+  }) => {
+    return await dispatch(login(credentials)).unwrap();
   };
 
-  const logout = () => {
-    dispatch(logoutAction());
-  };
+  const logoutUser = useCallback(() => {
+    dispatch(logout());
+  }, [dispatch]);
 
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token && !isAuthenticated) {
-    }
-  }, [isAuthenticated]);
+  const validateAuthStatus = useCallback(() => {
+    dispatch(validateAuth());
+  }, [dispatch]);
 
   return {
     user,
     isAuthenticated,
     loading,
     error,
-    login,
-    logout,
+    login: loginUser,
+    logout: logoutUser,
+    validateAuthStatus,
   };
 };

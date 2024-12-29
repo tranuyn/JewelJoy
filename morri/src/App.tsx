@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import "./App.css";
 import { ROLES } from "./constants/roles";
@@ -9,13 +9,16 @@ import { InventoryStaffRoutes } from "./routes/InventoryStaffRoutes";
 import { PublicRoutes } from "./routes/PublicRoutes";
 import { SalesStaffRoutes } from "./routes/SalesStaffRoutes";
 import { useAuth } from "./services/useAuth";
+import { validateAuth } from "./redux/slice/authSlice";
 
 function App() {
-  const { isAuthenticated, user, logout } = useAuth();
+  const { isAuthenticated, user, validateAuthStatus } = useAuth();
+
+  useEffect(() => {
+    validateAuthStatus();
+  }, [validateAuthStatus]);
 
   if (!isAuthenticated) {
-    // console.log("isAuthenticated", isAuthenticated);
-    logout();
     return (
       <BrowserRouter>
         <Routes>
@@ -25,16 +28,17 @@ function App() {
       </BrowserRouter>
     );
   }
+  console.log("user", user);
 
   return (
     <BrowserRouter>
       <Routes>
-        {user?.role === ROLES.ADMIN && AdminRoutes()}
-        {user?.role === ROLES.SALE_STAFF && SalesStaffRoutes()}
-        {user?.role === ROLES.INVENTORY_STAFF && InventoryStaffRoutes()}
+        {user?.role === "ADMIN" && AdminRoutes()}
+        {user?.role === "SALE_STAFF" && SalesStaffRoutes()}
+        {user?.role === "INVENTORY_STAFF " && InventoryStaffRoutes()}
         {user?.role === ROLES.CUSTOMER && CustomerRoutes()}
         <Route path="/unauthorized" element={<Unauthorization />} />
-        <Route path="*" element={<Navigate to="/unauthorized" replace />} />
+        <Route path="*" element={<Navigate to="/unauthorized" />} />
       </Routes>
     </BrowserRouter>
   );

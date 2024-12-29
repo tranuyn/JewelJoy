@@ -1,13 +1,12 @@
 import React from "react";
-import { Route } from "react-router-dom";
+import { Navigate, Route } from "react-router-dom";
 import { ROLES } from "../constants/roles";
 import { ProtectedRoute } from "./ProtectedRoute";
 import AdminLayout from "../component/Layout/AdminLayout";
 import HomePage from "../pages/HomePage/homePage";
 import ProductsAndService from "../pages/ProductsAndServices/productsAndServicePage";
-import ServicePage from "../pages/ServicePage/ServicePage";
-import CustomerManagementPage from "../pages/admin/CustomerMangementPage/CustomerManagementPage";
-import SalaryPage from "../pages/admin/SalaryPage/salaryPage";
+import Unauthorization from "../pages/Unauthorization/Unauthorization";
+import AttendancePage from "../pages/AttendancePage/AttendancePage";
 
 export const SalesStaffRoutes = () => {
   return (
@@ -19,10 +18,11 @@ export const SalesStaffRoutes = () => {
       }
     >
       <Route path="/home" element={<HomePage />} />
-      <Route path="/service" element={<ServicePage />} /> 
-      <Route path="/admin/customer" element={<CustomerManagementPage />} />
-      <Route path="/products" element={<ProductsAndService />} /> 
+      <Route path="/attendance" element={<AttendancePage />} />
 
+      <Route path="/products" element={<ProductsAndService />} />
+      <Route path="/unauthorized" element={<Unauthorization />} />
+      <Route path="*" element={<Navigate to="/unauthorized" />} />
     </Route>
   );
 };

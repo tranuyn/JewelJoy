@@ -1,91 +1,97 @@
 .tab-bar-container.default-style {
-    width: 100%;
-    background-color: white;
-    box-shadow: 0px 0px 8px 2px rgba(0, 0, 0, 0.2);
+  width: 100%;
+  box-shadow: 0px 0px 8px 2px rgba(159, 157, 157, 0.2);
+  position: -webkit-sticky;
+  position: sticky !important; /* Đảm bảo sticky có hiệu lực */
+  top: 86px; /* Dính vào đầu trang */
+  z-index: 10; /* Đảm bảo header hiển thị trên các phần tử khác */
+  background-color: #fff; /* Thêm màu nền để header dễ nhìn */
 }
 
-.tab-bar-container.custom-style  {
-    width: fit-content;
-    background-color: #0E343D;
-    box-shadow: 0px 0px 8px 2px rgba(0, 0, 0, 0.2);
-    padding: 5px;
-    border-radius: 10px;
+.tab-bar-container.custom-style {
+  width: fit-content;
+  background-color: #0e343d;
+  box-shadow: 0px 0px 8px 2px rgba(0, 0, 0, 0.2);
+  padding: 5px;
+  border-radius: 10px;
+  position: -webkit-sticky;
+  position: sticky !important; /* Đảm bảo sticky có hiệu lực */
+  top: 86px; /* Dính vào đầu trang */
+  z-index: 10; /* Đảm bảo header hiển thị trên các phần tử khác */
+  background-color: #fff; /* Thêm màu nền để header dễ nhìn */
 }
 
 .tab-bar {
-    display: flex;
-    overflow-x: auto;
-    scrollbar-width: none;
-    -ms-overflow-style: none; 
+  display: flex;
+  scrollbar-width: none;
+  /* -ms-overflow-style: none; */
 }
 
 .tab-bar::-webkit-scrollbar {
-    display: none;
+  display: none;
 }
 
 .tab-item.default-style {
-    padding: 0.5rem 1rem;
-    min-width: fit-content;
-    white-space: nowrap;
-    font-weight: 500;
-    transition: all 0.2s ease-in-out;
-    cursor: pointer;
-    color: #86999E;
-    border: 2px solid #efb16a00;
-    outline: none;   
-    font-family: 'Baloo 2', sans-serif;
+  padding: 0.5rem 1rem;
+  min-width: fit-content;
+  white-space: nowrap;
+  font-weight: 500;
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+  color: #86999e;
+  border: 2px solid #efb16a00;
+  outline: none;
+  font-family: "Baloo 2", sans-serif;
 }
 
-.tab-item.custom-style  {
-    padding: 0.5rem 1rem;
-    border-radius: 5px;
-    min-width: fit-content;
-    white-space: nowrap;
-    font-weight: 500;
-    transition: all 0.2s ease-in-out;
-    cursor: pointer;
-    color: rgba(255, 255, 255, 0.577);
-    background-color: rgba(0, 0, 0, 0);
-    border: none;
-    outline: none;   
-    font-family: 'Baloo 2', sans-serif;
+.tab-item.custom-style {
+  padding: 0.5rem 1rem;
+  border-radius: 5px;
+  min-width: fit-content;
+  white-space: nowrap;
+  font-weight: 500;
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+  color: rgba(255, 255, 255, 0.577);
+  background-color: rgba(0, 0, 0, 0);
+  border: none;
+  outline: none;
+  font-family: "Baloo 2", sans-serif;
 }
 
 .tab-item.default-style:hover {
-    color: #374151;
+  color: #374151;
 }
 .tab-item.custom-style:hover {
-    color: white;
-    border: none;
+  color: white;
+  border: none;
 }
 
 .tab-item.default-style.active {
-    color: #0E343D;
-    border-bottom: 2px solid #EFB26A;
+  color: #0e343d;
+  border-bottom: 2px solid #efb26a;
 }
 .tab-item.custom-style.active {
-    color: #0E343D;
-    background-color: white;
-    border: none;
-    font-family: 'Baloo 2', sans-serif;
+  color: #0e343d;
+  background-color: white;
+  border: none;
+  font-family: "Baloo 2", sans-serif;
 }
 
-
-
 .page-header {
-    padding: 0.5rem 1rem;
-    border-bottom: 1px solid #e5e7eb;
+  padding: 0.5rem 1rem;
+  border-bottom: 1px solid #e5e7eb;
 }
 
 .page-title {
-    font-size: 1.125rem;
-    font-weight: 600;
+  font-size: 1.125rem;
+  font-weight: 600;
 }
 
 .page-content {
-    padding: 1rem;
+  padding: 1rem;
 }
 
 .content-text {
-    color: #4b5563;
+  color: #4b5563;
 }

@@ -4,6 +4,12 @@
   align-items: center;
   justify-content: space-between;
   border-bottom: 5px solid #efb26a;
+  position: sticky !important; /* Đảm bảo sticky có hiệu lực */
+  top: 0; /* Dính vào đầu trang */
+  z-index: 20; /* Đảm bảo header hiển thị trên các phần tử khác */
+  background-color: #fff; /* Thêm màu nền để header dễ nhìn */
+  padding: 10px 0; /* Cung cấp padding cho header */
+  width: 100%;
 }
 
 .pcontainer {
@@ -53,4 +59,34 @@
 .pbannerTextContainer {
   width: 30%;
   margin-left: 50px;
+}
+
+.container {
+  display: flex;
+  flex-direction: row;
+}
+.pbcontainer {
+  display: flex;
+  flex-direction: row;
+  padding: 20px 10px;
+
+  background-color: #f9fcff;
+}
+
+.product-container {
+  overflow-y: auto; /* Cho phép cuộn dọc */
+  flex: 1;
+}
+
+.bill-container {
+  height: 70vh;
+  width: 250px;
+  background-color: white;
+  position: sticky;
+  top: 150px;
+  padding: 10px;
+  border-radius: 10px;
+  border-color: #cbcbcb;
+  border-width: 1px; /* Added 'px' for units */
+  border-style: solid; /* Specify the border style */
 }
