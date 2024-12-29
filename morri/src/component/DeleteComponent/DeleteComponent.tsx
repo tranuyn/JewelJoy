@@ -6,7 +6,7 @@ interface DeleteComponentProps {
   isModalOpen: boolean;
   setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
   deleteName: string;
-  handleDelete: () => Promise<void>;
+  handleDelete: () => Promise<void> | void;
 }
 
 const DeleteComponent: React.FC<DeleteComponentProps> = ({
