@@ -1,0 +1,62 @@
+.cflexrow {
+  display: flex;
+  flex-direction: row;
+}
+.customerContainerBig {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  background-color: #e7ffed;
+  padding: 0px 30px;
+  align-items: center;
+  border: #ccc 1px solid;
+  border-radius: 20px;
+}
+.customerContainer {
+  display: flex;
+  flex-direction: row;
+  padding-top: 20px;
+}
+.BoldText {
+  font-weight: 600;
+  font-size: 16;
+}
+.viewButton {
+  background-color: white;
+  border: #efb26a 2px solid;
+  height: fit-content;
+  padding: 10px 30px;
+  color: #efb26a;
+  font-family: "Baloo 2", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",
+    "Helvetica Neue", sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: 20px;
+  cursor: pointer;
+}
+.inputCheckout {
+  font-family: "Baloo 2", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",
+    "Helvetica Neue", sans-serif;
+  padding: 5px 10px;
+  border-radius: 10px;
+  border: #cfcecd 2px solid;
+  margin: 0px 10px;
+  width: 200px;
+}
+.catchPhone {
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+}
+.CachedIconContainer:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2); /* Hover shadow */
+  cursor: pointer; /* Change cursor on hover */
+  border-radius: 20px;
+}
+.CachedIconContainer {
+  justify-content: center;
+  align-items: center;
+  display: flex;
+}

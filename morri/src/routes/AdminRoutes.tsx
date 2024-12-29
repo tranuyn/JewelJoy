@@ -9,6 +9,7 @@ import HistoryPage from "../pages/admin/HistoryPage/HistoryPage";
 import HomePage from "../pages/HomePage/homePage";
 import ProductsAndService from "../pages/ProductsAndServices/productsAndServicePage";
 import Unauthorization from "../pages/Unauthorization/Unauthorization";
+import CheckOut from "../pages/CheckOut/CheckOut";
 
 export const AdminRoutes = () => {
   return (
@@ -21,7 +22,7 @@ export const AdminRoutes = () => {
     >
       <Route path="/home" element={<HomePage />} />
       <Route path="/products" element={<ProductsAndService />} />
-
+      <Route path="/products/checkout" element={<CheckOut />} />
       <Route path="/admin/customer" element={<CustomerMangementPage />} />
       <Route path="/admin/salary" element={<SalaryPage />} />
       <Route path="/admin/history" element={<HistoryPage />} />
