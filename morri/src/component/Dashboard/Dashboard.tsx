@@ -66,7 +66,7 @@ const menuItems = [
     id: "statistics",
     icon: <BarChartIcon />,
     label: "Thống kê",
-    path: "/statistics",
+    path: "/admin/statistics",
   },
   {
     id: "salary",

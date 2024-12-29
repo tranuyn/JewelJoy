@@ -6,6 +6,7 @@ import AdminLayout from "../component/Layout/AdminLayout";
 import HomePage from "../pages/HomePage/homePage";
 import ProductsAndService from "../pages/ProductsAndServices/productsAndServicePage";
 import Unauthorization from "../pages/Unauthorization/Unauthorization";
+import OrdersPage from "../pages/OrdersPage/ordersPage";
 
 export const InventoryStaffRoutes = () => {
   return (
@@ -19,6 +20,7 @@ export const InventoryStaffRoutes = () => {
       <Route path="/home" element={<HomePage />} />
 
       <Route path="/products" element={<ProductsAndService />} />
+      <Route path="/orders" element={<OrdersPage />} />
       <Route path="/unauthorized" element={<Unauthorization />} />
       <Route path="*" element={<Navigate to="/unauthorized" />} />
     </Route>

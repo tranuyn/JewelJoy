@@ -9,6 +9,9 @@ import HistoryPage from "../pages/admin/HistoryPage/HistoryPage";
 import HomePage from "../pages/HomePage/homePage";
 import ProductsAndService from "../pages/ProductsAndServices/productsAndServicePage";
 import Unauthorization from "../pages/Unauthorization/Unauthorization";
+import OrdersPage from "../pages/OrdersPage/ordersPage";
+import Inventory from "../pages/InventoryPage/Inventory";
+import Statistics from "../pages/StatisticsPage/Statistics";
 
 export const AdminRoutes = () => {
   return (
@@ -25,6 +28,11 @@ export const AdminRoutes = () => {
       <Route path="/admin/customer" element={<CustomerMangementPage />} />
       <Route path="/admin/salary" element={<SalaryPage />} />
       <Route path="/admin/history" element={<HistoryPage />} />
+      <Route path="/admin/statistics" element={<Statistics />} />
+      <Route path="orders" element={<OrdersPage />} />
+      <Route path="inventory" element={<Inventory />} />
+
+
       <Route path="/unauthorized" element={<Unauthorization />} />
       <Route path="*" element={<Navigate to="/unauthorized" />} />
     </Route>

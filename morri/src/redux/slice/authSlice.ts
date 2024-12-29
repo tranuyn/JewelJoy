@@ -1,7 +1,7 @@
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import axios from "axios";
 
-const API_URL = "http://localhost:8080";
+const API_URL = "http://localhost:8081";
 
 interface User {
   id: string;
