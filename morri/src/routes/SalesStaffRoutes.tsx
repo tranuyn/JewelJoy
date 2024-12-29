@@ -6,6 +6,7 @@ import AdminLayout from "../component/Layout/AdminLayout";
 import HomePage from "../pages/HomePage/homePage";
 import ProductsAndService from "../pages/ProductsAndServices/productsAndServicePage";
 import Unauthorization from "../pages/Unauthorization/Unauthorization";
+import AttendancePage from "../pages/AttendancePage/AttendancePage";
 import CheckOut from "../pages/CheckOut/CheckOut";
 
 export const SalesStaffRoutes = () => {
@@ -18,6 +19,7 @@ export const SalesStaffRoutes = () => {
       }
     >
       <Route path="/home" element={<HomePage />} />
+      <Route path="/attendance" element={<AttendancePage />} />
 
       <Route path="/products" element={<ProductsAndService />} />
       <Route path="/products/checkout" element={<CheckOut />} />
