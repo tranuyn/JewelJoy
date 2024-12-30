@@ -68,7 +68,12 @@ const SearchAndFilter: React.FC = () => {
         )}
       </div>
 
-      <select id="age" value={selectedAge} onChange={handleChange}>
+      <select
+        className="SapXep"
+        id="age"
+        value={selectedAge}
+        onChange={handleChange}
+      >
         <option value="Increase">Giá tăng dần</option>
         <option value="Decrease">Giá giảm dần</option>
         <option value="Default">Mặc định</option>

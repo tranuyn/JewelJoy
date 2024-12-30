@@ -1,26 +1,22 @@
 import React, { useState } from "react";
 import { Box, Modal, CircularProgress } from "@mui/material";
 import BtnComponent from "../../component/BtnComponent/BtnComponent";
-
-interface DeleteComponentProps {
+import TextBox from "../../component/TextBox/TextBox";
+interface XinVang {
   isModalOpen: boolean;
   setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  deleteName: string;
-  handleDelete: () => Promise<void> | void;
+  handleXinVang: () => Promise<void>;
 }
-
-const DeleteComponent: React.FC<DeleteComponentProps> = ({
+const XinVangModal: React.FC<XinVang> = ({
   isModalOpen,
   setIsModalOpen,
-  deleteName,
-  handleDelete,
+  handleXinVang,
 }) => {
   const [loading, setLoading] = useState(false);
-
-  const handleConfirmDelete = async () => {
+  const handleXinVangModal = async () => {
     setLoading(true);
     try {
-      await handleDelete();
+      await handleXinVang();
       setIsModalOpen(false);
     } catch (error) {
       console.error("Error deleting:", error);
@@ -28,7 +24,6 @@ const DeleteComponent: React.FC<DeleteComponentProps> = ({
       setLoading(false);
     }
   };
-
   return (
     <Modal
       open={isModalOpen}
@@ -41,42 +36,57 @@ const DeleteComponent: React.FC<DeleteComponentProps> = ({
     >
       <Box
         sx={{
-          backgroundColor: "#fff",
+          backgroundColor: "white",
           padding: 4,
           borderRadius: 2,
-          boxShadow: 24,
-          maxWidth: 400,
-          width: "100%",
+          width: "90%",
+          maxWidth: "600px",
         }}
       >
         <div
-          style={{ fontWeight: "bold", fontSize: "16px", marginBottom: "16px" }}
+          style={{
+            fontWeight: "bold",
+            fontSize: "2rem",
+            color: "#264850",
+            textAlign: "center",
+          }}
         >
-          Bạn có chắc chắn muốn xoá{" "}
-          <span style={{ color: "#d32f2f" }}>{deleteName}</span> không?
+          Xin Vang
         </div>
+        <TextBox
+          datatype="string"
+          title="Mã NV"
+          placeholder=""
+          onChange={(value) => {}}
+          defaultValue=""
+        />
+        <TextBox
+          datatype="string"
+          title="Li do vang"
+          placeholder="Nhập li do vang"
+          onChange={(value) => {}}
+        />
         <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2 }}>
           <BtnComponent
             btnColorType="close"
-            btnText="Huỷ"
+            btnText={"Đóng"}
             onClick={() => setIsModalOpen(false)}
           />
           <BtnComponent
             btnColorType="primary"
             btnText={
-              loading ? (
-                <CircularProgress size={20} color="inherit" />
-              ) : (
-                "Xác nhận"
-              )
+              loading ? <CircularProgress size={20} color="inherit" /> : "Lưu"
             }
-            onClick={handleConfirmDelete}
+            onClick={handleXinVangModal}
             disabled={loading}
           />
         </Box>
+        {/* <Box sx={{ width: 400 }}>
+        <CircularProgress color="primary" />
+      </Box> */}
       </Box>
     </Modal>
   );
 };
 
-export default DeleteComponent;
+export default XinVangModal;

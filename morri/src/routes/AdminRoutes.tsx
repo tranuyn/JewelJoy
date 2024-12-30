@@ -12,6 +12,9 @@ import Unauthorization from "../pages/Unauthorization/Unauthorization";
 import OrdersPage from "../pages/OrdersPage/ordersPage";
 import Inventory from "../pages/InventoryPage/Inventory";
 import Statistics from "../pages/StatisticsPage/Statistics";
+import AttendancePage from "../pages/AttendancePage/AttendancePage";
+import CheckOut from "../pages/CheckOut/CheckOut";
+import CheckOutSuccess from "../pages/CheckOut/CheckOutSuccess";
 
 export const AdminRoutes = () => {
   return (
@@ -24,7 +27,8 @@ export const AdminRoutes = () => {
     >
       <Route path="/home" element={<HomePage />} />
       <Route path="/products" element={<ProductsAndService />} />
-
+      <Route path="/products/checkout" element={<CheckOut />} />
+      <Route path="/products/checkout/:orderId" element={<CheckOutSuccess />} />
       <Route path="/admin/customer" element={<CustomerMangementPage />} />
       <Route path="/admin/salary" element={<SalaryPage />} />
       <Route path="/admin/history" element={<HistoryPage />} />
@@ -32,6 +36,7 @@ export const AdminRoutes = () => {
       <Route path="orders" element={<OrdersPage />} />
       <Route path="inventory" element={<Inventory />} />
 
+      <Route path="/attendance" element={<AttendancePage />} />
 
       <Route path="/unauthorized" element={<Unauthorization />} />
       <Route path="*" element={<Navigate to="/unauthorized" />} />

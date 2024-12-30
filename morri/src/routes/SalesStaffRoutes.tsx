@@ -7,6 +7,9 @@ import HomePage from "../pages/HomePage/homePage";
 import ProductsAndService from "../pages/ProductsAndServices/productsAndServicePage";
 import Unauthorization from "../pages/Unauthorization/Unauthorization";
 import OrdersPage from "../pages/OrdersPage/ordersPage";
+import AttendancePage from "../pages/AttendancePage/AttendancePage";
+import CheckOut from "../pages/CheckOut/CheckOut";
+import CheckOutSuccess from "../pages/CheckOut/CheckOutSuccess";
 
 export const SalesStaffRoutes = () => {
   return (
@@ -18,9 +21,12 @@ export const SalesStaffRoutes = () => {
       }
     >
       <Route path="/home" element={<HomePage />} />
+      <Route path="/attendance" element={<AttendancePage />} />
 
       <Route path="/products" element={<ProductsAndService />} />
       <Route path="/orders" element={<OrdersPage />} />
+      <Route path="/products/checkout" element={<CheckOut />} />
+      <Route path="/products/checkout/:orderId" element={<CheckOutSuccess />} />
       <Route path="/unauthorized" element={<Unauthorization />} />
       <Route path="*" element={<Navigate to="/unauthorized" />} />
     </Route>

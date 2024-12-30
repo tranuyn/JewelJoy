@@ -7,6 +7,7 @@ import HomePage from "../pages/HomePage/homePage";
 import ProductsAndService from "../pages/ProductsAndServices/productsAndServicePage";
 import Unauthorization from "../pages/Unauthorization/Unauthorization";
 import OrdersPage from "../pages/OrdersPage/ordersPage";
+import AttendancePage from "../pages/AttendancePage/AttendancePage";
 
 export const InventoryStaffRoutes = () => {
   return (
@@ -18,6 +19,7 @@ export const InventoryStaffRoutes = () => {
       }
     >
       <Route path="/home" element={<HomePage />} />
+      <Route path="/attendance" element={<AttendancePage />} />
 
       <Route path="/products" element={<ProductsAndService />} />
       <Route path="/orders" element={<OrdersPage />} />
