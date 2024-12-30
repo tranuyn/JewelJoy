@@ -11,6 +11,8 @@ import ProductsAndService from "../pages/ProductsAndServices/productsAndServiceP
 import Unauthorization from "../pages/Unauthorization/Unauthorization";
 import AttendancePage from "../pages/AttendancePage/AttendancePage";
 import ServicePage from "../pages/ServicePage/ServicePage";
+import StaffPage from "../pages/StaffPage/StaffPage";
+import SettingPage from "../pages/SettingPage/SettingPage";
 
 export const AdminRoutes = () => {
   return (
@@ -23,13 +25,15 @@ export const AdminRoutes = () => {
     >
       <Route path="/home" element={<HomePage />} />
       <Route path="/products" element={<ProductsAndService />} />
+      <Route path="/staff" element={<StaffPage />} />
+      <Route path="/settings" element={<SettingPage />} />
 
       <Route path="/admin/customer" element={<CustomerMangementPage />} />
       <Route path="/admin/salary" element={<SalaryPage />} />
       <Route path="/admin/history" element={<HistoryPage />} />
       <Route path="/attendance" element={<AttendancePage />} />
       <Route path="/service" element={<ServicePage />} />
-      <Route path="/unauthorized" element={<Unauthorization />} />
+       <Route path="/unauthorized" element={<Unauthorization />} />
       <Route path="*" element={<Navigate to="/unauthorized" />} />
     </Route>
   );
