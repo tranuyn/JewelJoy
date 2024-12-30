@@ -14,7 +14,7 @@ export const Navbar = () => {
     <nav className="navbar">
       {/* Logo Section */}
       <div className="nav-section logo-section">
-        <img src={logoImage} alt="MORRI" className="logo" />
+        <img src={logoImage} alt="MORRI" className="logoNavbar" />
       </div>
 
       {/* Store Info Section */}
