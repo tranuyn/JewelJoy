@@ -10,6 +10,7 @@ import ProductsAndService from "./pages/ProductsAndServices/productsAndServicePa
 import SalaryPage from "./pages/admin/SalaryPage/salaryPage";
 import CheckOut from "./pages/CheckOut/CheckOut";
 import CheckOutSuccess from "./pages/CheckOut/CheckOutSuccess";
+import ProductDetail from "./pages/ProductDetail/ProductDetail";
 
 const AppRoutes = () => {
   return (
@@ -20,6 +21,7 @@ const AppRoutes = () => {
         <Route path="/repurchase" element={<SalaryPage />} />
         <Route path="/salary" element={<SalaryPage />} />
         <Route path="/products" element={<ProductsAndService />} />
+        <Route path="/products/detail/:id" element={<ProductDetail />} />
         <Route path="/products/checkout" element={<CheckOut />} />
         <Route
           path="/products/checkout/:orderId"
