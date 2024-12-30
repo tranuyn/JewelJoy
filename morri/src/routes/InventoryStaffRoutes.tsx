@@ -8,6 +8,8 @@ import ProductsAndService from "../pages/ProductsAndServices/productsAndServiceP
 import Unauthorization from "../pages/Unauthorization/Unauthorization";
 import OrdersPage from "../pages/OrdersPage/ordersPage";
 import AttendancePage from "../pages/AttendancePage/AttendancePage";
+import StaffPage from "../pages/StaffPage/StaffPage";
+import SettingPage from "../pages/SettingPage/SettingPage";
 
 export const InventoryStaffRoutes = () => {
   return (
@@ -20,6 +22,8 @@ export const InventoryStaffRoutes = () => {
     >
       <Route path="/home" element={<HomePage />} />
       <Route path="/attendance" element={<AttendancePage />} />
+      <Route path="/staff" element={<StaffPage />} />
+      <Route path="/settings" element={<SettingPage />} />
 
       <Route path="/products" element={<ProductsAndService />} />
       <Route path="/orders" element={<OrdersPage />} />
