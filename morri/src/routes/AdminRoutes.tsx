@@ -19,6 +19,7 @@ import SettingPage from "../pages/SettingPage/SettingPage";
 import CheckOut from "../pages/CheckOut/CheckOut";
 import CheckOutSuccess from "../pages/CheckOut/CheckOutSuccess";
 import ProductDetail from "../pages/ProductDetail/ProductDetail";
+import EnterInventory from "../pages/EnterInventory/EnterInventory";
 
 export const AdminRoutes = () => {
   return (
@@ -42,7 +43,7 @@ export const AdminRoutes = () => {
       <Route path="/admin/statistics" element={<Statistics />} />
       <Route path="orders" element={<OrdersPage />} />
       <Route path="inventory" element={<Inventory />} />
-
+      <Route path="/enter-inventory" element={<EnterInventory />} />
       <Route path="/attendance" element={<AttendancePage />} />
       <Route path="/service" element={<ServicePage />} />
       <Route path="/unauthorized" element={<Unauthorization />} />

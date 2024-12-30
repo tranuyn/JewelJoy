@@ -42,11 +42,7 @@ const Product: React.FC<ProductProps> = ({ products, onSelectProduct }) => {
       ) : (
         <div className="productGrid">
           {products.map((product) => (
-            <div
-              key={product.id}
-              className="productItem"
-              onClick={() => viewProductDetail(product.id)}
-            >
+            <div key={product.id} className="productItem">
               <div className="iconAddInProduct">
                 <AddCircleOutlineIcon
                   sx={{ marginBottom: 0, color: "white" }}
@@ -54,12 +50,19 @@ const Product: React.FC<ProductProps> = ({ products, onSelectProduct }) => {
                 />
               </div>
               <img
+                onClick={() => viewProductDetail(product.id)}
                 className="pimgcontainer"
                 src={product.imageUrl[0]}
                 alt={product.name}
               />
-              <div className="productName">{product.name}</div>
               <div
+                className="productName"
+                onClick={() => viewProductDetail(product.id)}
+              >
+                {product.name}
+              </div>
+              <div
+                onClick={() => viewProductDetail(product.id)}
                 style={{
                   display: "flex",
                   flexDirection: "row",
