@@ -1,17 +1,56 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import "./style.css";
 import InputCpn from "./inputComponent";
 import ProductForm from "./ProductForm";
 const CreateEI: React.FC = () => {
-  const addProductForm = () => {
-    setProductForms((prevForms) => [
-      ...prevForms,
-      <ProductForm key={productForms.length} addProductForm={addProductForm} />,
-    ]);
+  const [formCount, setFormCount] = useState<number>(1);
+  const [productForms, setProductForms] = useState<JSX.Element[]>([]);
+  const hasMounted = useRef(false);
+  const removeForm = (index: number) => {
+    console.log("Removing form at index:", index);
+    console.log(
+      "Current length of productForms before removal:",
+      productForms.length
+    );
+
+    if (productForms.length === 0) return;
+
+    setProductForms((prevForms) => {
+      const updatedForms = prevForms.filter(
+        (form) => form.props.index !== index
+      );
+      console.log(
+        "Length of productForms after filtering:",
+        updatedForms.length
+      );
+      return updatedForms;
+    });
   };
-  const [productForms, setProductForms] = useState<JSX.Element[]>([
-    <ProductForm key={0} addProductForm={addProductForm} />, // Form mặc định ban đầu
-  ]);
+
+  const addProductForm = () => {
+    setFormCount((prev) => prev + 1);
+  };
+
+  useEffect(() => {
+    if (!hasMounted.current) {
+      hasMounted.current = true; // Set to true after first render
+    } else {
+      console.log("khoi tao"); // Log only after the first render
+      const newForm = (
+        <ProductForm
+          index={formCount}
+          key={formCount}
+          addProductForm={addProductForm}
+          removeForm={removeForm}
+        />
+      );
+      setProductForms((prevForms) => [...prevForms, newForm]);
+    }
+    console.log(productForms);
+  }, [formCount]);
+  useEffect(() => {
+    console.log("Updated productForms:", productForms);
+  }, [productForms]);
 
   return (
     <div className="enter-inventory-page">
