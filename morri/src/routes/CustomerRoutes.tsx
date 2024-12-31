@@ -2,7 +2,9 @@ import React from "react";
 import { Route } from "react-router-dom";
 import CustomerLayout from "../component/Layout/CustomerLayout";
 import { ROLES } from "../constants/roles";
-import { ProtectedRoute } from "./ProtectedRoute";
+import { ProtectedRoute } from "./ProtectedRoute";  
+import { Navbar } from "../component/Navbar/Navbar"; 
+
 
 export const CustomerRoutes = () => {
   return (
@@ -12,10 +14,9 @@ export const CustomerRoutes = () => {
           <CustomerLayout />
         </ProtectedRoute>
       }
-    >
-      {/* <Route path="/profile" element={<Profile />} />
-      <Route path="/orders" element={<Orders />} /> */}
-      
+    > 
+      <Route path="/navbar" element={<Navbar />} /> 
+
     </Route>
   );
 };

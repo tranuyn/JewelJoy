@@ -19,6 +19,7 @@ import LogoutIcon from "@mui/icons-material/Logout";
 import LocalAtmOutlinedIcon from "@mui/icons-material/LocalAtmOutlined";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../services/useAuth";
+
 interface DashboardProps {
   onToggle: (collapsed: boolean) => void;
   isCollapsed: boolean;
@@ -65,7 +66,7 @@ const menuItems = [
     id: "statistics",
     icon: <BarChartIcon />,
     label: "Thống kê",
-    path: "/statistics",
+    path: "/admin/statistics",
   },
   {
     id: "salary",
@@ -89,7 +90,7 @@ const menuItems = [
     id: "services",
     icon: <ServiceIcon />,
     label: "Quản lý dịch vụ",
-    path: "/services",
+    path: "/service",
   },
   {
     id: "feedback",

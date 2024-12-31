@@ -61,7 +61,6 @@ const ProductsAndService: React.FC = () => {
       try {
         const response = await fetch("http://localhost:8081/jewelry/"); // Replace with your API URL
         const data = await response.json();
-        console.log(JSON.stringify(data));
         setProducts(data); // Assume data is an array of products
       } catch (error) {
         console.error("Error fetching products:", error);

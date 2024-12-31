@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./style.css";
 import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
+import { useNavigate } from "react-router-dom";
 
 interface ProductType {
   id: string;
@@ -22,6 +23,7 @@ const Bill: React.FC<BillProps> = ({ selectedProducts }) => {
   const [selectedProductInBill, setSelectedProducts] =
     useState<ProductType[]>(selectedProducts);
 
+  const navigate = useNavigate();
   useEffect(() => {
     if (selectedProducts.length > 0) {
       const initialQuantities = selectedProducts.reduce((acc, product) => {
@@ -72,6 +74,15 @@ const Bill: React.FC<BillProps> = ({ selectedProducts }) => {
       .toString() // Chuyển thành chuỗi
       .replace(/\B(?=(\d{3})+(?!\d))/g, "."); // Thêm dấu chấm sau mỗi 3 chữ số
   }
+
+  const handleBuyNow = () => {
+    navigate("/products/checkout", {
+      state: {
+        selectedProducts,
+        quantities,
+      },
+    });
+  };
 
   return (
     <div className="bbillContainer">
@@ -174,7 +185,9 @@ const Bill: React.FC<BillProps> = ({ selectedProducts }) => {
         </div>
       </div>
 
-      <button className="BuyNowButton">Mua ngay</button>
+      <button className="BuyNowButton" onClick={() => handleBuyNow()}>
+        Mua ngay
+      </button>
     </div>
   );
 };

@@ -1,0 +1,160 @@
+.productDetailContainer {
+  background-color: #f9fcff;
+}
+.detailContainerne {
+  display: flex;
+  flex-direction: row;
+  flex: 1;
+  margin-top: 15px;
+  margin-left: 20px;
+  margin-bottom: 20px;
+}
+.part1 {
+  display: flex;
+  flex-direction: row;
+}
+.part2 {
+  margin-left: 20px;
+  margin-right: 20px;
+}
+.imgSmall {
+  width: 75px;
+  height: 75px;
+  object-fit: cover;
+  border-radius: 10px;
+}
+.imgSmall.selected {
+  border: 2px solid #575757;
+}
+.imgsContainerne {
+  height: 400px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  flex: 1;
+  gap: 2px;
+  margin-right: 10px;
+}
+.imgBig {
+  width: 400px;
+  height: 400px;
+  object-fit: cover;
+}
+
+@media (max-width: 1200px) {
+}
+
+@media (max-width: 900px) {
+  .detailContainerne {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 600px) {
+  .productGrid {
+    grid-template-columns: 1fr; /* 1 column */
+  }
+}
+
+.namene {
+  font-weight: 600;
+  font-size: 20px;
+  margin-bottom: 5px;
+}
+.codene {
+  font-size: 16px;
+  color: #9e9b9b;
+  margin-bottom: 5px;
+}
+.pricene {
+  font-size: 16px;
+  color: #fc3131;
+  margin-bottom: 5px;
+  font-weight: 500;
+}
+.prne {
+  background-color: #f8f6f6;
+  color: #3e5c63;
+  padding: 10px 10px;
+  border-radius: 10px;
+  margin-bottom: 15px;
+}
+.BuyNowNe {
+  background-color: #efb26a;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  width: 100%;
+  font-weight: 600;
+  font-size: 18px;
+  margin-bottom: 15px;
+  font-family: "Baloo 2", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",
+    "Helvetica Neue", sans-serif;
+}
+
+.quantityne {
+  margin-bottom: 5px;
+  color: #3e5c63;
+}
+.EditNe {
+  background-color: #fff;
+  color: #efb26a;
+  padding: 10px 20px;
+  border: 1px solid #efb26a;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  width: 100%;
+  font-weight: 600;
+  font-size: 18px;
+  font-family: "Baloo 2", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",
+    "Helvetica Neue", sans-serif;
+}
+.billItemQuantityDetail {
+  border-color: #c1b9b9;
+  border-width: 1px;
+  border-style: solid;
+  display: flex;
+  flex-direction: row;
+  background-color: white;
+  margin-bottom: 5px;
+}
+.part3 {
+  width: 485px;
+  margin-right: 25px;
+}
+.part4 {
+  flex: 1;
+}
+.bluebgne {
+  background-color: #eaf9ff;
+  padding: 5px 10px;
+  color: #1e1e1e;
+  font-weight: initial;
+}
+.yellowbgne {
+  background-color: #fdf7f0;
+  padding: 5px 10px;
+  color: #1e1e1e;
+  font-weight: initial;
+}
+.viewSupplierBtn {
+  background-color: #3e5c63;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  padding: 10px 20px;
+  font-family: "Baloo 2", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",
+    "Helvetica Neue", sans-serif;
+  font-weight: 500;
+  margin-bottom: 15px;
+  cursor: pointer;
+}
