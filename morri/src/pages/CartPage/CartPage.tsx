@@ -1,6 +1,7 @@
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
+import ListAltIcon from '@mui/icons-material/ListAlt';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import LogoutIcon from '@mui/icons-material/Logout';
 import PersonIcon from '@mui/icons-material/Person';
@@ -146,7 +147,7 @@ const CartPage: React.FC = () => {
               <Typography>Hotline: 0939800899</Typography>
             </Box>
             <Box className="nav-item">
-              <ShoppingCartIcon />
+              <ListAltIcon />
               <Typography>Đơn hàng</Typography>
             </Box>
             <Box className="nav-item">
@@ -169,7 +170,7 @@ const CartPage: React.FC = () => {
       >
         <MenuItem onClick={handleClose}>
           <AccountCircleIcon className="menu-icon" />
-          <Typography>Thông tin cá nhân</Typography>
+          <Typography>Hồ sơ</Typography>
         </MenuItem>
         <MenuItem onClick={handleClose}>
           <LogoutIcon className="menu-icon" />
@@ -267,7 +268,7 @@ const CartPage: React.FC = () => {
           <Grid item xs={12} md={4}>
             <Paper className="order-summary">
               <Typography variant="h6" className="order-title">
-                Đơn hàng
+                <strong>Đơn hàng</strong>
               </Typography>
               <Box className="summary-row">
                 <Typography>Mặt hàng</Typography>
