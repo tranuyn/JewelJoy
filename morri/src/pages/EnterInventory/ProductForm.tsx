@@ -56,12 +56,12 @@ const ProductForm: React.FC<ProductFormProps> = ({
         <button onClick={(e) => handleAddForm(e)} className="designbth">
           <AddCircleOutlineIcon sx={{ color: "#FFA629" }} />
         </button>
-        <div className="formTitleP">Thông tin sản phẩm ({index})</div>
+        <div className="formTitleP">Thông tin sản phẩm</div>
         <button onClick={(e) => handleDeleteForm(e)} className="designbth">
           <RemoveCircleOutlineIcon sx={{ color: "#F24822" }} />
         </button>
       </div>
-      {/* 
+
       <InputCpn title="Tên sản phẩm (có kèm mã sản phẩm)" name="productName" />
       <div className="threeForm" style={{ width: "100%" }}>
         <InputCpn title="Mã sản phẩm" name="productCode" />
@@ -102,7 +102,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
       <div className="input-containerE">
         <label className="input-labelE">Mô tả sản phẩm</label>
         <textarea className="input-fieldE" style={{ maxWidth: "100%" }} />
-      </div> */}
+      </div>
 
       <div className="fiveForm">
         {[...Array(5)].map((_, index) => (

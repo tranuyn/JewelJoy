@@ -6,6 +6,7 @@ const CreateEI: React.FC = () => {
   const [formCount, setFormCount] = useState<number>(1);
   const [productForms, setProductForms] = useState<JSX.Element[]>([]);
   const hasMounted = useRef(false);
+  const lastFormRef = useRef<HTMLDivElement | null>(null);
   const removeForm = (index: number) => {
     console.log("Removing form at index:", index);
     console.log(
@@ -50,6 +51,9 @@ const CreateEI: React.FC = () => {
   }, [formCount]);
   useEffect(() => {
     console.log("Updated productForms:", productForms);
+    setTimeout(() => {
+      lastFormRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, 0);
   }, [productForms]);
 
   return (
@@ -92,7 +96,9 @@ const CreateEI: React.FC = () => {
 
       <div className="twoForm">
         {productForms.map((form, index) => (
-          <div key={index}>{form}</div>
+          <div ref={lastFormRef} key={index}>
+            {form}
+          </div>
         ))}
       </div>
     </div>
