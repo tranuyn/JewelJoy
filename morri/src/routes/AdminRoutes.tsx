@@ -1,15 +1,15 @@
 import React from "react";
 import { Navigate, Route } from "react-router-dom";
-import { ROLES } from "../constants/roles";
-import { ProtectedRoute } from "./ProtectedRoute";
 import AdminLayout from "../component/Layout/AdminLayout";
+import { ROLES } from "../constants/roles";
 import CustomerMangementPage from "../pages/admin/CustomerMangementPage/CustomerManagementPage";
-import SalaryPage from "../pages/admin/SalaryPage/salaryPage";
 import HistoryPage from "../pages/admin/HistoryPage/HistoryPage";
+import SalaryPage from "../pages/admin/SalaryPage/salaryPage";
+import AttendancePage from "../pages/AttendancePage/AttendancePage";
 import HomePage from "../pages/HomePage/homePage";
 import ProductsAndService from "../pages/ProductsAndServices/productsAndServicePage";
 import Unauthorization from "../pages/Unauthorization/Unauthorization";
-import AttendancePage from "../pages/AttendancePage/AttendancePage";
+import { ProtectedRoute } from "./ProtectedRoute";
 
 export const AdminRoutes = () => {
   return (
