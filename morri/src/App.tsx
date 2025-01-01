@@ -35,7 +35,7 @@ function App() {
       <Routes>
         {user?.role === "ADMIN" && AdminRoutes()}
         {user?.role === "SALE_STAFF" && SalesStaffRoutes()}
-        {user?.role === "INVENTORY_STAFF " && InventoryStaffRoutes()}
+        {user?.role === "INVENTORY_STAFF" && InventoryStaffRoutes()}
         {user?.role === ROLES.CUSTOMER && CustomerRoutes()}
         <Route path="/unauthorized" element={<Unauthorization />} />
         <Route path="*" element={<Navigate to="/unauthorized" />} />
