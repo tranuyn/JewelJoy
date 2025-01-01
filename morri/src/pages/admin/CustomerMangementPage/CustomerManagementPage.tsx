@@ -42,6 +42,7 @@ const CustomerManagementPage: React.FC = () => {
   const [isModalUpdateOpen, setIsModalUpdateOpen] = useState(false);
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [customerId, setCustomerId] = useState("");
   const [rowClicked, setRowClicked] = useState<Customer | null>(null);
   const [snackbarSeverity, setSnackbarSeverity] =
     useState<SnackbarSeverity>("info");
@@ -84,7 +85,8 @@ const CustomerManagementPage: React.FC = () => {
   const handleDelete = async (): Promise<void> => {
     try {
       if (rowClicked) {
-        const customerId = rowClicked.id;
+        setCustomerId(rowClicked.id);
+        // const customerId = rowClicked.id;
         const response = await fetch(
           `http://localhost:8080/customer/${customerId}`,
           {
@@ -246,15 +248,18 @@ const CustomerManagementPage: React.FC = () => {
         onDelete={(row) => setIsDeleteModalOpen(true)}
       />
 
-      <UpdateCustomer
-        isModalOpen={isModalUpdateOpen}
-        setIsModalOpen={setIsModalUpdateOpen}
-        handleUpdate={handleUpdate}
-      />
+      {/* <UpdateCustomer
+  isModalOpen={isModalUpdateOpen}
+  setIsModalOpen={setIsModalUpdateOpen}
+  initialData={rowClicked || {}}
+
+  handleUpdate={handleUpdate}
+ /> */}
+
       <DeleteComponent
         isModalOpen={isDeleteModalOpen}
         setIsModalOpen={setIsDeleteModalOpen}
-        deleteName="Customer"
+        deleteName={customerId}
         handleDelete={handleDelete}
       />
       <Snackbar
