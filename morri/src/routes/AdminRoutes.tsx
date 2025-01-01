@@ -6,19 +6,20 @@ import CustomerMangementPage from "../pages/admin/CustomerMangementPage/Customer
 import HistoryPage from "../pages/admin/HistoryPage/HistoryPage";
 import SalaryPage from "../pages/admin/SalaryPage/salaryPage";
 import AttendancePage from "../pages/AttendancePage/AttendancePage";
-import HomePage from "../pages/HomePage/homePage";
-import ProductsAndService from "../pages/ProductsAndServices/productsAndServicePage";
-import Unauthorization from "../pages/Unauthorization/Unauthorization"; 
-import { ProtectedRoute } from "./ProtectedRoute"; 
-import OrdersPage from "../pages/OrdersPage/ordersPage";
-import Inventory from "../pages/InventoryPage/Inventory";
-import Statistics from "../pages/StatisticsPage/Statistics"; 
-import ServicePage from "../pages/ServicePage/ServicePage";
-import StaffPage from "../pages/StaffPage/StaffPage";
-import SettingPage from "../pages/SettingPage/SettingPage";
 import CheckOut from "../pages/CheckOut/CheckOut";
 import CheckOutSuccess from "../pages/CheckOut/CheckOutSuccess";
-import ProductDetail from "../pages/ProductDetail/ProductDetail"; 
+import HomePage from "../pages/HomePage/homePage";
+import Inventory from "../pages/InventoryPage/Inventory";
+import OrdersPage from "../pages/OrdersPage/ordersPage";
+import ProductDetail from "../pages/ProductDetail/ProductDetail";
+import ProductsAndService from "../pages/ProductsAndServices/productsAndServicePage";
+import RepurchasePage from "../pages/RepurchasePage/RepurchasePage";
+import ServicePage from "../pages/ServicePage/ServicePage";
+import SettingPage from "../pages/SettingPage/SettingPage";
+import StaffPage from "../pages/StaffPage/StaffPage";
+import Statistics from "../pages/StatisticsPage/Statistics";
+import Unauthorization from "../pages/Unauthorization/Unauthorization";
+import { ProtectedRoute } from "./ProtectedRoute";
 
 
 export const AdminRoutes = () => {
@@ -48,6 +49,10 @@ export const AdminRoutes = () => {
       <Route path="/service" element={<ServicePage />} />
       <Route path="/unauthorized" element={<Unauthorization />} />
       <Route path="*" element={<Navigate to="/unauthorized" />} />
+
+      <Route path="/admin/repurchase" element={<RepurchasePage />} />
+
+
     </Route>
   );
 };
