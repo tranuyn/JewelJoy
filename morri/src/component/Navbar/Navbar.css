@@ -4,8 +4,9 @@
     align-items: center;
     padding: 8px 20px;
     background-color: white;
-    border-bottom: 2px solid #EFB26A;
+    border-bottom: 4px solid #EFB26A;
     height: 40px;
+    font-weight: 600;
   }
   
   .nav-section {
