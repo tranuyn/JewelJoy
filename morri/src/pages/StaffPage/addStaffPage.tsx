@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { Box, Modal } from "@mui/material";
 import TextBox from "../../component/TextBox/TextBox";
 import BtnComponent from "../../component/BtnComponent/BtnComponent";
-import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
 import WorkIcon from '@mui/icons-material/Work';
 import CakeIcon from '@mui/icons-material/Cake';
@@ -11,23 +10,71 @@ import CardIcon from '@mui/icons-material/CardMembership';
 import EmailIcon from '@mui/icons-material/Email';
 import PhoneIcon from '@mui/icons-material/Phone';
 import PersonIcon from '@mui/icons-material/Person';
+import TransgenderIcon from "@mui/icons-material/Transgender";
 
-interface StaffFormProps {
+interface Staff {
   isModalOpen: boolean;
   setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  handleAdd: (formData: FormData) => Promise<void>;
 }
 
-const AddStaffForm: React.FC<StaffFormProps> = ({ isModalOpen, setIsModalOpen }) => {
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+interface FormData {
+  name: string | number;
+  username: string | number;
+  password : string | number;
+  phoneNumber: string | number;
+  gender: string | number;
+  dateOfBirth: string | number;
+  email: string | number;
+  ngayVaoLam?: string | number;
+  luongCoBan: string | number;
+  cccd: string | number;
+  address: string | number;
+  role: string | number;
+}
 
-  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setSelectedImage(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+const AddStaffForm: React.FC<Staff> = ({ 
+  isModalOpen, 
+  setIsModalOpen, 
+  handleAdd 
+}) => {
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [username, setUsername] = useState<string | number>(""); // Tên đăng nhập
+  const [password,setPassword] = useState<string|number>("");
+  const [name, setName] = useState<string | number>(""); // Tên đầy đủ của người dùng
+  const [phoneNumber, setPhoneNumber] = useState<string | number>(""); // Số điện thoại
+  const [gender, setGender] = useState<string | number>("");
+  const [dateOfBirth, setDateOfBirth] = useState<string | number>(""); // Ngày sinh (định dạng ISO hoặc chuỗi)
+  const [email, setEmail] = useState<string | number>(""); // Email
+  const [cccd, setCccd] = useState<string | number>(""); // CCCD (Căn cước công dân)
+  const [avaURL, setAvaURL] = useState<string | number>(""); // URL ảnh đại diện
+  const [address, setAddress] = useState<string | number>(""); // Địa chỉ
+  const [ngayVaoLam, setNgayVaoLam] = useState<string | number>(new Date().toISOString().split("T")[0]); // Ngày vào làm
+  const [role, setRole] = useState<string | number>(""); // Vai trò
+  const [luongCoBan, setLuongCoBan] = useState<string | number>("");; // Lương cơ bản
+  const [isLoading, setLoading] = useState(false);
+
+  const handleAddModal = async () => {
+    const formData: FormData = {
+      name,
+      username,
+      password,
+      phoneNumber,
+      gender,
+      dateOfBirth,
+      email,
+      ngayVaoLam,
+      luongCoBan,
+      cccd,
+      address,
+      role,
+    };
+
+    setLoading(true);
+    try {
+      await handleAdd(formData);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -62,7 +109,6 @@ const AddStaffForm: React.FC<StaffFormProps> = ({ isModalOpen, setIsModalOpen })
         </div>
 
         <Box sx={{ display: "flex" }}>
-          {/* Left side - Avatar section */}
           <Box sx={{ 
             width: "200px",
             marginRight: "30px",
@@ -90,13 +136,13 @@ const AddStaffForm: React.FC<StaffFormProps> = ({ isModalOpen, setIsModalOpen })
               )}
             </Box>
             <label htmlFor="upload-photo">
-              <input
+              {/* <input
                 style={{ display: "none" }}
                 id="upload-photo"
                 type="file"
                 onChange={handleImageChange}
                 accept="image/*"
-              />
+              /> */}
               <button
                 style={{
                   display: "flex",
@@ -125,7 +171,7 @@ const AddStaffForm: React.FC<StaffFormProps> = ({ isModalOpen, setIsModalOpen })
                 datatype="date"
                 title="Ngày sinh"
                 placeholder="02/11/2004"
-                onChange={(value) => {}}
+                onChange={setDateOfBirth} 
                 icon={<CakeIcon style={{ color: "black" }} />}
               />
             </Box>
@@ -134,13 +180,12 @@ const AddStaffForm: React.FC<StaffFormProps> = ({ isModalOpen, setIsModalOpen })
                 datatype="date"
                 title="Ngày vào làm"
                 placeholder="02/11/2024"
-                onChange={(value) => {}}
+                onChange={setNgayVaoLam}
                 icon={<WorkIcon style={{ color: "black" }} />}
               />
             </Box>
           </Box>
 
-          {/* Right side - Form fields */}
           <Box sx={{ flex: 1 }}>
             <Box sx={{ 
               display: "grid", 
@@ -152,14 +197,19 @@ const AddStaffForm: React.FC<StaffFormProps> = ({ isModalOpen, setIsModalOpen })
                 datatype="string"
                 title="Tên"
                 placeholder="Nhập tên nhân viên"
-                onChange={(value) => {}}
+                onChange={setName}
               />
               <TextBox
                 datatype="string"
-                title="CCCD"
-                placeholder="Nhập CCCD"
-                onChange={(value) => {}}
-                icon={<CardIcon style={{ color: "black" }} />}
+                title="Tên đăng nhập"
+                placeholder="Nhập tên đăng nhập"
+                onChange={setUsername}
+              />
+               <TextBox
+                datatype="string"
+                title="Mật khẩu"
+                placeholder="Nhập mật khẩu"
+                onChange={setPassword}
               />
             </Box>
 
@@ -171,17 +221,43 @@ const AddStaffForm: React.FC<StaffFormProps> = ({ isModalOpen, setIsModalOpen })
             }}>
               <TextBox
                 datatype="string"
+                title="CCCD"
+                placeholder="Nhập CCCD"
+                onChange={setCccd}
+                icon={<CardIcon style={{ color: "black" }} />}
+              />
+              <TextBox
+                datatype="string"
                 title="Email"
                 placeholder="Nhập Email"
-                onChange={(value) => {}}
+                onChange={setEmail}
                 icon={<EmailIcon style={{ color: "black" }} />}
               />
+            </Box>
+
+            <Box sx={{ 
+              display: "grid", 
+              gridTemplateColumns: "1fr 1fr",
+              gap: "24px",
+              marginBottom: "8px"
+            }}>
               <TextBox
                 datatype="string"
                 title="SDT"
                 placeholder="Nhập SDT"
-                onChange={(value) => {}}
+                onChange={setPhoneNumber}
                 icon={<PhoneIcon style={{ color: "black" }} />}
+              />
+              <TextBox
+                datatype="select"
+                title="Giới tính"
+                placeholder="Chọn giới tính"
+                onChange={setGender}
+                icon={<TransgenderIcon style={{ color: "black" }} />}
+                options={[
+                  { label: "Nam", value: "MALE" },
+                  { label: "Nữ", value: "FEMALE" },
+                ]}
               />
             </Box>
 
@@ -195,21 +271,18 @@ const AddStaffForm: React.FC<StaffFormProps> = ({ isModalOpen, setIsModalOpen })
                 datatype="select"
                 title="Chức vụ"
                 placeholder="Chọn chức vụ"
-                onChange={(value) => {}}
+                onChange={setRole}
                 options={[
-                  { label: "Nhân viên", value: "staff" },
+                  { label: "Nhân viên bán hàng", value: "SALE_STAFF" },
+                  { label: "Nhân viên kho", value: "INVENTORY_STAFF" },
+                  { label: "Quản trị viên", value: "ADMIN" },
                 ]}
               />
               <TextBox
-                datatype="select"
-                title="Giới tính"
-                placeholder="Chọn giới tính"
-                onChange={(value) => {}}
-                options={[
-                  { label: "Nam", value: "male" },
-                  { label: "Nữ", value: "female" },
-                ]}
-                icon={<PersonIcon style={{ color: "black" }} />}
+                datatype="string"
+                title="Lương cơ bản"
+                placeholder="Nhập lương cơ bản"
+                onChange={setLuongCoBan}
               />
             </Box>
 
@@ -217,7 +290,7 @@ const AddStaffForm: React.FC<StaffFormProps> = ({ isModalOpen, setIsModalOpen })
               datatype="string"
               title="Địa chỉ"
               placeholder="Nhập địa chỉ"
-              onChange={(value) => {}}
+              onChange={setAddress}
               icon={<LocationOnIcon style={{ color: "black" }} />}
             />
           </Box>
@@ -232,7 +305,7 @@ const AddStaffForm: React.FC<StaffFormProps> = ({ isModalOpen, setIsModalOpen })
           <BtnComponent
             btnColorType="primary"
             btnText="Lưu"
-            onClick={() => {}}
+            onClick={handleAddModal}
           />
           <BtnComponent
             btnColorType="close"
