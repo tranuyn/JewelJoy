@@ -6,23 +6,11 @@ const CreateEI: React.FC = () => {
   const [formCount, setFormCount] = useState<number>(1);
   const [productForms, setProductForms] = useState<JSX.Element[]>([]);
   const hasMounted = useRef(false);
-  const lastFormRef = useRef<HTMLDivElement | null>(null);
   const removeForm = (index: number) => {
-    console.log("Removing form at index:", index);
-    console.log(
-      "Current length of productForms before removal:",
-      productForms.length
-    );
-
     if (productForms.length === 0) return;
-
     setProductForms((prevForms) => {
       const updatedForms = prevForms.filter(
         (form) => form.props.index !== index
-      );
-      console.log(
-        "Length of productForms after filtering:",
-        updatedForms.length
       );
       return updatedForms;
     });
@@ -36,7 +24,6 @@ const CreateEI: React.FC = () => {
     if (!hasMounted.current) {
       hasMounted.current = true; // Set to true after first render
     } else {
-      console.log("khoi tao"); // Log only after the first render
       const newForm = (
         <ProductForm
           index={formCount}
@@ -51,9 +38,6 @@ const CreateEI: React.FC = () => {
   }, [formCount]);
   useEffect(() => {
     console.log("Updated productForms:", productForms);
-    setTimeout(() => {
-      lastFormRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, 0);
   }, [productForms]);
 
   return (
@@ -96,9 +80,7 @@ const CreateEI: React.FC = () => {
 
       <div className="twoForm">
         {productForms.map((form, index) => (
-          <div ref={lastFormRef} key={index}>
-            {form}
-          </div>
+          <div key={index}>{form}</div>
         ))}
       </div>
     </div>
