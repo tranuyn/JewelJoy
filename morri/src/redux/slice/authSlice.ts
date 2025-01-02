@@ -5,9 +5,20 @@ const API_URL = "http://localhost:8081";
 
 interface User {
   id: string;
+  username: string;
+  email: string;
+  password?: string;
   name: string;
-  role: string;
-  // them
+  dateOfBirth: string;
+  faceId?: string;
+  gender: "MALE" | "FEMALE" | "OTHER";
+  phoneNumber?: string;
+  cccd?: string;
+  avaURL?: string;
+  address?: string;
+  ngayVaoLam?: string;
+  role: "ADMIN" | "INVENTORY_STAFF" | "CUSTOMER" | "SALE_STAFF";
+  luongCoBan?: string;
 }
 
 interface AuthState {
