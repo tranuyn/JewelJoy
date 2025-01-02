@@ -50,7 +50,7 @@ export const AdminRoutes = () => {
       <Route path="/unauthorized" element={<Unauthorization />} />
       <Route path="*" element={<Navigate to="/unauthorized" />} />
 
-      <Route path="/admin/repurchase" element={<RepurchasePage />} />
+      <Route path="/repurchase" element={<RepurchasePage />} />
 
 
     </Route>

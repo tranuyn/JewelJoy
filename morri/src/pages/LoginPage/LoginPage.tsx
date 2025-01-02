@@ -122,6 +122,7 @@ const Login: React.FC = () => {
     }
 
     try {
+      console.log("form state: ",formState)
       await login({
         email: formState.email,
         password: formState.password,
@@ -294,7 +295,7 @@ const Login: React.FC = () => {
                 Bạn chưa có tài khoản?{" "}
                 <span
                   className="switch-link login-switch"
-                  onClick={() => navigate("/forgotpassword")}
+                  onClick={() => navigate("/registeration")}
                 >
                   Đăng ký
                 </span>

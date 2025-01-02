@@ -3,7 +3,6 @@ import { Route } from "react-router-dom";
 import CartPage from "../pages/CartPage/CartPage";
 import Forgotpassword from "../pages/ForgotPassword/Forgotpassword";
 import Login from "../pages/LoginPage/LoginPage";
-import RepurchasePage from "../pages/RepurchasePage/RepurchasePage";
 import {
   default as Register,
   default as Registration,
@@ -26,7 +25,6 @@ export const PublicRoutes = () => {
       <Route path="/registeration" element={<Registration />} />
       <Route path="/forgotpassword" element={<Forgotpassword />} />
       <Route path="/cartpage" element={<CartPage />} />
-      <Route path="repurchase" element={<RepurchasePage />} />
 
       {/* <Route path="*" element={<NotFound />} /> */}
     </>
