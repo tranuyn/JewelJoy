@@ -1,5 +1,6 @@
 import React from "react";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
+import { useNavigate } from "react-router-dom";
 
 // Define the type for a single product
 interface ProductType {
@@ -29,6 +30,11 @@ const Product: React.FC<ProductProps> = ({ products, onSelectProduct }) => {
       .toString() // Chuyển thành chuỗi
       .replace(/\B(?=(\d{3})+(?!\d))/g, "."); // Thêm dấu chấm sau mỗi 3 chữ số
   }
+
+  const navigator = useNavigate();
+  function viewProductDetail(id: string) {
+    navigator(`/products/detail/${id}`);
+  }
   return (
     <div className="productContainer">
       {products.length === 0 ? (
@@ -44,12 +50,19 @@ const Product: React.FC<ProductProps> = ({ products, onSelectProduct }) => {
                 />
               </div>
               <img
+                onClick={() => viewProductDetail(product.id)}
                 className="pimgcontainer"
                 src={product.imageUrl[0]}
                 alt={product.name}
               />
-              <div className="productName">{product.name}</div>
               <div
+                className="productName"
+                onClick={() => viewProductDetail(product.id)}
+              >
+                {product.name}
+              </div>
+              <div
+                onClick={() => viewProductDetail(product.id)}
                 style={{
                   display: "flex",
                   flexDirection: "row",

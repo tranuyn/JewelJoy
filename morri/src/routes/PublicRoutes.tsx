@@ -1,12 +1,12 @@
 import React from "react";
-import { Navigate, Route } from "react-router-dom";
-import NotFound from "../pages/NotFound/NotFound";
+import { Route } from "react-router-dom";
+import CartPage from "../pages/CartPage/CartPage";
+import Forgotpassword from "../pages/ForgotPassword/Forgotpassword";
+import Login from "../pages/LoginPage/LoginPage";
 import {
   default as Register,
   default as Registration,
 } from "../pages/SignUp/SignUpPage";
-import Forgotpassword from "../pages/ForgotPassword/Forgotpassword";
-import Login from "../pages/LoginPage/LoginPage";
 // import { useAuth } from "../services/useAuth";
 
 export const PublicRoutes = () => {
@@ -24,6 +24,7 @@ export const PublicRoutes = () => {
 
       <Route path="/registeration" element={<Registration />} />
       <Route path="/forgotpassword" element={<Forgotpassword />} />
+      <Route path="/cartpage" element={<CartPage />} />
 
       {/* <Route path="*" element={<NotFound />} /> */}
     </>

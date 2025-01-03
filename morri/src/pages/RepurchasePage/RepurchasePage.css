@@ -1,0 +1,80 @@
+/* .customer-management {
+  padding: 20px;
+} */
+
+.tab-container {
+    margin: auto;
+    width: 100%;
+  }
+  
+  .details-section {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .details-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .count {
+    color: #666;
+    font-size: 0.9em;
+    margin-left: 8px;
+  }
+  
+  .actions {
+    display: flex;
+    gap: 10px;
+  }
+  
+  .icon-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+  }
+  
+  .filters {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  
+  .filter {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    background-color: #f0c399;
+    color: black;
+  }
+  
+  .customer-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .customer-table th,
+  .customer-table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .customer-table th {
+    font-weight: 500;
+    color: #666;
+  }
+  
+  .customer-table tbody tr:hover {
+    background-color: #f5f5f5;
+  }
+  
+  .customer-table input[type="radio"] {
+    cursor: pointer;
+  }
+  
