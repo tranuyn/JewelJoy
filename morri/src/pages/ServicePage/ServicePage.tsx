@@ -1,108 +1,112 @@
-
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./service.css";
 import Header from "../../component/Title_header/Header";
 import TabBar from "../../component/Tabbar/TabBar";
 import { Box } from "@mui/material";
-import TableComponent from "../../component/TableComponent/TableComponent";
 import SearchComponent from "../../component/SearchComponent/SearchComponent";
 import BtnComponent from "../../component/BtnComponent/BtnComponent";
 import DeleteComponent from "../../component/DeleteComponent/DeleteComponent";
 import DynamicAddForm from "./dynamicAddForm";
 import DynamicUpdateForm from "./dynamicUpdateForm";
+import ServiceComponent from "../../component/ServiceComponent/ServiceComponent";
+import TableComponent from "../../component/TableComponent/TableComponent";
 
-interface Column {
-  field: string;
-  headerName: string;
-  width?: number;
-  align?: "left" | "center" | "right";
+// Types
+interface Service {
+  id: string;
+  serviceName: string;
+  serviceDescription: string;
+  serviceUrl: string | null;
+  price: number | null;
 }
 
-const serviceColumns: Column[] = [
-  { field: "serviceCode", headerName: "Mã dịch vụ" },
-  { field: "serviceName", headerName: "Tên dịch vụ" },
-  { field: "price", headerName: "Số tiền" },
-  { field: "description", headerName: "Mô tả" },
-];
+interface Staff {
+  id: string;
+  name: string;
+  email: string;
+  avaURL: string;
+}
 
-const bookingColumns: Column[] = [
-  { field: "customerName", headerName: "Tên khách hàng" },
-  { field: "registrationDate", headerName: "Ngày đăng ký" },
-  { field: "serviceCode", headerName: "Mã dịch vụ" },
-  { field: "serviceStatus", headerName: "Tình trạng dịch vụ" },
-  { field: "gender", headerName: "Giới tính" },
-  { field: "phoneNumber", headerName: "SĐT" },
-];
+interface ServiceBooking {
+  id: string;
+  nameService: string;
+  services: Service[];
+  description: string;
+  staffLapHoaDon: Staff | null;
+  staffLamDichVu: Staff | null;
+  quantity: number;
+  totalPrice: number;
+  createdAt: string;
+  deliveryDate: string;
+  deliverystatus: string;
+}
 
-const serviceData = [
-  {
-    serviceCode: "DV001",
-    serviceName: "Massage",
-    price: "500,000 VND",
-    description: "Thư giãn toàn thân",
-  },
-  {
-    serviceCode: "DV002",
-    serviceName: "Xông hơi",
-    price: "300,000 VND",
-    description: "Làm sạch và thư giãn cơ thể",
-  },
-];
-
-const bookingData = [
-  {
-    customerName: "Nguyễn Văn A",
-    registrationDate: "20/12/2024",
-    serviceCode: "DV001",
-    serviceStatus: "Đã hoàn thành",
-    gender: "Nam",
-    phoneNumber: "091234567",
-  },
-  {
-    customerName: "Trần Thị B",
-    registrationDate: "21/12/2024",
-    serviceCode: "DV002",
-    serviceStatus: "Đang xử lý",
-    gender: "Nữ",
-    phoneNumber: "098765432",
-  },
+const bookingColumns = [
+  { field: "nameService", headerName: "Mã đặt lịch" },
+  { field: "createdAt", headerName: "Ngày tạo" },
+  { field: "deliveryDate", headerName: "Ngày giao" },
+  { field: "deliverystatus", headerName: "Trạng thái" },
+  { field: "quantity", headerName: "Số lượng" },
+  { field: "totalPrice", headerName: "Tổng tiền" },
+  { field: "staffName", headerName: "Nhân viên lập" },
 ];
 
 const ServicePage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>("Dịch vụ");
   const [searchKeyword, setSearchKeyword] = useState("");
+  const [services, setServices] = useState<Service[]>([]);
+  const [bookings, setBookings] = useState<ServiceBooking[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isModalUpdateOpen, setIsModalUpdateOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState<any>(null);
 
+  const tabs = ["Dịch vụ", "Đặt lịch"];
+
+  useEffect(() => {
+    fetchData();
+  }, [activeTab]);
+
+  const fetchData = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      if (activeTab === "Dịch vụ") {
+        const response = await fetch("http://localhost:8081/service");
+        const data = await response.json();
+        setServices(data);
+      } else {
+        const response = await fetch("http://localhost:8081/phieuDichVu");
+        const data = await response.json();
+        setBookings(data);
+      }
+    } catch (err) {
+      setError("Failed to fetch data. Please try again later.");
+      console.error("Fetch error:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSearch = (value: string) => {
     setSearchKeyword(value);
   };
 
-  const tabs = ["Dịch vụ", "Đặt lịch"];
-
   const handleDelete = async (): Promise<void> => {
     try {
       // Implement delete logic here
+      console.log("Deleting row:", selectedRow);
+      setIsDeleteModalOpen(false);
     } catch (error) {
       console.error("Error deleting:", error);
     }
   };
 
-  // const handleUpdate = async (): Promise<void> => {
-  //   try {
-  //     // Implement update logic here
-  //   } catch (error) {
-  //     console.error("Error updating:", error);
-  //   }
-  // };
-
   const handleUpdate = async (): Promise<void> => {
     try {
-      // Implement your update logic here
       console.log("Updating row:", selectedRow);
-      // After successful update:
       setIsModalUpdateOpen(false);
     } catch (error) {
       console.error("Error updating:", error);
@@ -114,24 +118,14 @@ const ServicePage: React.FC = () => {
     setIsModalUpdateOpen(true);
   };
 
-  // Function to get the appropriate columns based on active tab
-  const getColumns = () => {
-    switch (activeTab) {
-      case "Đặt lịch":
-        return bookingColumns;
-      default:
-        return serviceColumns;
-    }
-  };
-
-  // Function to get the appropriate data based on active tab
-  const getData = () => {
-    switch (activeTab) {
-      case "Đặt lịch":
-        return bookingData;
-      default:
-        return serviceData;
-    }
+  const formatBookingData = (bookings: ServiceBooking[]) => {
+    return bookings.map(booking => ({
+      ...booking,
+      createdAt: new Date(booking.createdAt).toLocaleDateString("vi-VN"),
+      deliveryDate: new Date(booking.deliveryDate).toLocaleDateString("vi-VN"),
+      totalPrice: `${booking.totalPrice.toLocaleString("vi-VN")} VND`,
+      staffName: booking.staffLapHoaDon?.name || "Chưa phân công"
+    }));
   };
 
   return (
@@ -171,21 +165,52 @@ const ServicePage: React.FC = () => {
           onSearch={handleSearch}
         />
       </Box>
-      <div style={{ padding: "10px" }}></div>
-      {/* <TableComponent
-        columns={getColumns()}
-        data={getData()}
-        onRowClick={(row) => console.log("Row clicked:", row)}
-        onEdit={(row) => setIsModalUpdateOpen(true)}
-        onDelete={(row) => setIsDeleteModalOpen(true)}
-      /> */}
-<TableComponent
-        columns={getColumns()}
-        data={getData()}
-        onRowClick={(row) => console.log("Row clicked:", row)}
-        onEdit={handleEdit}
-        onDelete={(row) => setIsDeleteModalOpen(true)}
-      />
+
+      {loading && <div className="loading">Loading...</div>}
+      {error && <div className="error">{error}</div>}
+
+      {!loading && !error && (
+        <div style={{ padding: "20px" }}>
+          {activeTab === "Dịch vụ" ? (
+            <div className="services-grid">
+              {services
+                .filter((service) =>
+                  service.serviceName
+                    .toLowerCase()
+                    .includes(searchKeyword.toLowerCase())
+                )
+                .map((service) => (
+                  <ServiceComponent
+                    key={service.id}
+                    serviceName={service.serviceName}
+                    serviceCode={service.id}
+                    description={service.serviceDescription}
+                    price={service.price?.toString() || "0"}
+                    imageUrl={service.serviceUrl || undefined}
+                    onEdit={() => handleEdit(service)}
+                  />
+                ))}
+            </div>
+          ) : (
+            <TableComponent
+              columns={bookingColumns}
+              data={formatBookingData(
+                bookings.filter((booking) =>
+                  booking.nameService
+                    .toLowerCase()
+                    .includes(searchKeyword.toLowerCase())
+                )
+              )}
+              onRowClick={(row) => console.log("Row clicked:", row)}
+              onEdit={handleEdit}
+              onDelete={(row) => {
+                setSelectedRow(row);
+                setIsDeleteModalOpen(true);
+              }}
+            />
+          )}
+        </div>
+      )}
 
       <DynamicUpdateForm
         isModalOpen={isModalUpdateOpen}

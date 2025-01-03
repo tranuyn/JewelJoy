@@ -32,7 +32,7 @@ const DynamicUpdateForm: React.FC<DynamicUpdateFormProps> = ({
             title="Mã dịch vụ *"
             placeholder="Nhập mã dịch vụ"
             onChange={(value) => {}}
-            defaultValue={currentData?.serviceCode || ""}
+            defaultValue={currentData?.id || ""}
             disabled={true} // Usually service code shouldn't be editable
           />
           <TextBox
@@ -54,7 +54,7 @@ const DynamicUpdateForm: React.FC<DynamicUpdateFormProps> = ({
             title="Mô tả"
             placeholder="Nhập mô tả dịch vụ"
             onChange={(value) => {}}
-            defaultValue={currentData?.description || ""}
+            defaultValue={currentData?.serviceDescription || ""}
           />
         </>
       );

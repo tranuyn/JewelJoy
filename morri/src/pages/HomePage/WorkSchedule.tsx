@@ -26,21 +26,20 @@ const WorkSchedule: React.FC = () => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    const loadEmployees = async () => {
+      try {
+        const data = await scheduleService.getEmployees();
+        setEmployees(data);
+      } catch (error) {
+        console.error("Error loading employees:", error);
+      }
+    };
     loadEmployees();
   }, []);
 
   useEffect(() => {
     loadScheduleData(formatDate(selectedDate));
   }, [selectedDate]);
-
-  const loadEmployees = async () => {
-    try {
-      const data = await scheduleService.getEmployees();
-      setEmployees(data);
-    } catch (error) {
-      console.error("Error loading employees:", error);
-    }
-  };
 
   const getDaysInMonth = (date: Date): { firstDay: Date; lastDay: Date } => {
     const year = date.getFullYear();
@@ -197,7 +196,7 @@ const WorkSchedule: React.FC = () => {
             {currentMonth.toLocaleString("default", {
               month: "numeric",
             })}{" "}
-            Năm {" "}{currentMonth.getFullYear()}
+            Năm {currentMonth.getFullYear()}
           </span>
           <div>
             <button

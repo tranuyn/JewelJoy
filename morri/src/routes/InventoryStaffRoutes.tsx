@@ -7,12 +7,7 @@ import ProductsAndService from "../pages/ProductsAndServices/productsAndServiceP
 import RepurchasePage from "../pages/RepurchasePage/RepurchasePage";
 
 import Unauthorization from "../pages/Unauthorization/Unauthorization";
-import { ProtectedRoute } from "./ProtectedRoute";
-import OrdersPage from "../pages/OrdersPage/ordersPage";
-import AttendancePage from "../pages/AttendancePage/AttendancePage";
-import StaffPage from "../pages/StaffPage/StaffPage";
-import SettingPage from "../pages/SettingPage/SettingPage";
-import ProductDetail from "../pages/ProductDetail/ProductDetail";
+import { ProtectedRoute } from "./ProtectedRoute"; 
 import EnterInventory from "../pages/EnterInventory/EnterInventory";
 
 export const InventoryStaffRoutes = () => {
