@@ -54,8 +54,7 @@ const TableComponent: React.FC<TableComponentProps> = ({
     }
   };
   const StyledIconButton = styled(IconButton)`
-    padding: 6px;
-    margin: 0 4px;
+    margin:  4px 0;
   `;
 
   return (
@@ -67,7 +66,7 @@ const TableComponent: React.FC<TableComponentProps> = ({
               {columns.map((column) => (
                 <th
                   key={column.field}
-                  className="table-header"
+                  className="theadContainer"
                   style={{
                     textAlign: column.align || "center",
                     width: column.width,
@@ -76,7 +75,7 @@ const TableComponent: React.FC<TableComponentProps> = ({
                   {column.headerName}
                 </th>
               ))}
-              <th className="table-header" style={{ width: 100 }}>
+              <th className="theadContainer" style={{ width: 100 }}>
                 Options
               </th>
             </tr>

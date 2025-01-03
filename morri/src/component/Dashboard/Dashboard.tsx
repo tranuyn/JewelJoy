@@ -48,7 +48,7 @@ const menuItems = [
     id: "import",
     icon: <ImportWarehouseIcon />,
     label: "Nhập kho",
-    path: "/hehe",
+    path: "/enter-inventory",
   },
   {
     id: "returns",

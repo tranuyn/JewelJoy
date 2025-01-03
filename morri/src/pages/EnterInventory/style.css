@@ -1,0 +1,139 @@
+.EinventoryContainer {
+  background-color: #f9fcff;
+  flex: 1;
+  padding: 10px;
+}
+.formEnterContainer {
+  background-color: white;
+  border-radius: 10px;
+  border: 1px solid #cdc8c8;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.formTitleE {
+  color: #354665;
+  font-size: 18px;
+  font-weight: 600;
+  margin: 10px 0px;
+}
+.formTitleP {
+  color: #354665;
+  font-size: 18px;
+  font-weight: 600;
+  margin: 10px 10px;
+  text-align: center;
+  flex: 1;
+}
+.threeForm {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.twoForm {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+.fiveForm {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+  margin-top: 10px;
+  max-width: 100%;
+}
+@media (max-width: 1200px) {
+  .threeForm {
+    grid-template-columns: repeat(2, 1fr); /* 3 columns */
+  }
+  .fiveForm {
+    grid-template-columns: repeat(4, 1fr); /* 3 columns */
+  }
+}
+
+@media (max-width: 1000px) {
+  .twoForm {
+    grid-template-columns: repeat(1, 1fr); /* 3 columns */
+  }
+  .fiveForm {
+    grid-template-columns: repeat(4, 1fr); /* 3 columns */
+  }
+}
+
+@media (max-width: 900px) {
+  .threeForm {
+    grid-template-columns: repeat(2, 1fr); /* 2 columns */
+  }
+  .fiveForm {
+    grid-template-columns: repeat(4, 1fr); /* 3 columns */
+  }
+}
+
+@media (max-width: 600px) {
+  .threeForm {
+    grid-template-columns: 1fr; /* 1 column */
+  }
+  .fiveForm {
+    grid-template-columns: repeat(3, 1fr); /* 3 columns */
+  }
+}
+.input-containerE {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  overflow: hidden;
+}
+.input-labelE {
+  font-size: 16px;
+  color: #354665;
+  margin-bottom: 5px;
+}
+.input-fieldE {
+  padding: 10px;
+  border: 1px solid #a6bcda;
+  border-radius: 5px;
+  margin-bottom: 10px;
+}
+.input-fieldE:focus {
+  outline: none; /* Bỏ viền outline mặc định */
+  border-color: #2196f3; /* Màu xanh */
+
+  box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.1);
+}
+.productFormContainer {
+  display: flex;
+  flex-direction: column;
+  width: 50%;
+}
+.img-inputp {
+  width: 100%;
+  height: auto;
+  border: 1px solid #a6bcda;
+  border-radius: 5px;
+  overflow: "hidden";
+  color: transparent;
+  background-color: aliceblue;
+  box-sizing: border-box;
+}
+
+.img-inputp::-webkit-file-upload-button {
+  visibility: visible;
+  width: 100%;
+  padding: 5px;
+  border: none;
+  font-size: 14px;
+}
+.img-preview {
+  width: 100%;
+  aspect-ratio: 1/1;
+  object-fit: cover;
+  margin-top: 10px;
+}
+.designbth {
+  border: none;
+  background-color: #fff;
+  padding: 0;
+}

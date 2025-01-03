@@ -1,12 +1,61 @@
 .orderPage {
-    height: 100%;
-    /* background-color: #F9FCFF; */
+  height: 100%;
+  /* background-color: #F9FCFF; */
 }
 
 .numberOfPageContainer {
-    display: flex;
-    justify-self: right;
-    margin-top: 20px;
-    flex: 1;
-    align-items: center;
+  display: flex;
+  justify-self: right;
+  margin-top: 20px;
+  flex: 1;
+  align-items: center;
+}
+
+.order-details {
+  padding: 0.5rem;
+  background-color: #f9f9f9;
+}
+
+.inner-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.inner-table th,
+.inner-table td {
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  text-align: left;
+  text-align: center;
+}
+
+.inner-table th {
+  background-color: #f5f5f5;
+  font-weight:600;
+  text-align: center;
+}
+
+.inner-table img {
+  border-radius: 4px;
+}
+
+tr:hover {
+  background-color: #f5f5f5;
+}
+
+.expanded-row {
+  background-color: #e8f4ff;
+}
+
+.options {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.edit-button.active {
+  background-color: #e3f2fd;
+  color: #1976d2;
 }

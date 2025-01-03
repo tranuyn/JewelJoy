@@ -12,6 +12,12 @@ import SettingPage from "../pages/SettingPage/SettingPage";
 import StaffPage from "../pages/StaffPage/StaffPage";
 import Unauthorization from "../pages/Unauthorization/Unauthorization";
 import { ProtectedRoute } from "./ProtectedRoute";
+import OrdersPage from "../pages/OrdersPage/ordersPage";
+import AttendancePage from "../pages/AttendancePage/AttendancePage";
+import StaffPage from "../pages/StaffPage/StaffPage";
+import SettingPage from "../pages/SettingPage/SettingPage";
+import ProductDetail from "../pages/ProductDetail/ProductDetail";
+import EnterInventory from "../pages/EnterInventory/EnterInventory";
 
 export const InventoryStaffRoutes = () => {
   return (
@@ -29,6 +35,7 @@ export const InventoryStaffRoutes = () => {
 
       <Route path="/products" element={<ProductsAndService />} />
       <Route path="/products/detail/:id" element={<ProductDetail />} />
+      <Route path="/enter-inventory" element={<EnterInventory />} />
       <Route path="/orders" element={<OrdersPage />} />
       <Route path="/unauthorized" element={<Unauthorization />} />
       <Route path="/repurchase" element={<RepurchasePage />} />
