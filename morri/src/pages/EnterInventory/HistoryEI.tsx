@@ -6,6 +6,7 @@ export interface Column {
   id:
     | "id"
     | "date"
+    | "supplier"
     | "actors"
     | "listProduct"
     | "totalPrice"
@@ -17,6 +18,7 @@ export interface Column {
 const columns: Column[] = [
   { id: "id", label: "Mã phiếu" },
   { id: "date", label: "Ngày tạo phiếu" },
+  { id: "supplier", label: "Nhà cung cấp" },
   { id: "actors", label: "Tác nhân" },
   { id: "listProduct", label: "Danh sách sản phẩm" },
   { id: "totalPrice", label: "Tổng giá trị" },
@@ -27,6 +29,7 @@ const columns: Column[] = [
 interface Data {
   id: string;
   date: string;
+  supplier: string;
   actors: string;
   listProduct: string;
   totalPrice: number;
@@ -37,26 +40,39 @@ interface Data {
 const createData = (
   id: string,
   date: string,
+  supplier: string,
   actors: string,
   listProduct: string,
   totalPrice: number,
   note: string,
   options: string
 ): Data => {
-  return { id, date, actors, listProduct, totalPrice, note, options };
+  return { id, date, supplier, actors, listProduct, totalPrice, note, options };
 };
 
-const rows: Data[] = Array.from({ length: 100 }, (_, index) =>
+// Tạo dữ liệu mẫu
+const rows: Data[] = [
   createData(
-    `PH${index + 1}`,
+    "PNK001203",
     new Date().toLocaleDateString(),
-    `Tác nhân ${index + 1}`,
-    `Sản phẩm ${index + 1}`,
-    parseFloat((Math.random() * 1000000).toFixed(2)),
-    "Ghi chú...",
-    "..."
-  )
-);
+    "Cocoon",
+    "Trinh Tran Phuong Tuan",
+    "PNJ Jasmine ZTMXY000005",
+    799.999,
+    "Ngọc đẹp",
+    "Edit / Delete"
+  ),
+  createData(
+    "PNK001203",
+    new Date().toLocaleDateString(),
+    "Cocoon",
+    "Trinh Tran Phuong Tuan",
+    "Nhẫn Vàng 14K Disney|PNJ Jasmine 0000Y003145",
+    777.55,
+    "Nhẫn cặp đôi",
+    "Edit / Delete"
+  ),
+];
 
 const HistoryEI: React.FC = () => {
   const [page, setPage] = useState<number>(0);
