@@ -3,6 +3,7 @@ import "./style.css";
 import InputCpn from "./inputComponent";
 import ProductForm from "./ProductForm";
 import CachedIcon from "@mui/icons-material/Cached";
+import axios from "axios";
 interface Staff {
   id: string;
   username: string;
@@ -26,10 +27,12 @@ interface FormProductData {
   weight: number;
   chiPhiPhatSinh: number;
   enteredQuantity: number;
+  images: File[];
 }
 
 const CreateEI: React.FC = () => {
   const [formCount, setFormCount] = useState<number>(1);
+  const [error, setError] = useState<string | null>(null);
   const [inventoryStaff, setInventoryStaff] = useState<Staff[]>([]);
   const [isSupplierExist, setIsSupplierExist] = useState(false);
   const [formProductData, setProductFormData] = useState<FormProductData[]>([
@@ -47,6 +50,7 @@ const CreateEI: React.FC = () => {
       weight: 0,
       chiPhiPhatSinh: 0,
       enteredQuantity: 1,
+      images: [],
     },
   ]);
 
@@ -62,6 +66,7 @@ const CreateEI: React.FC = () => {
     dateEnter: "",
     totalValue: "",
     note: "",
+    images: [],
   });
   const hasMounted = useRef(false);
 
@@ -76,21 +81,6 @@ const CreateEI: React.FC = () => {
 
     setFormCount((prev) => prev - 1);
   };
-
-  // const removeForm = (index: number) => {
-  //   if (productForms.length === 0) return;
-  //   setProductForms((prevForms) => {
-  //     const updatedForms = prevForms.filter(
-  //       (form) => form.props.index !== index
-  //     );
-  //     return updatedForms;
-  //   });
-  //   console.log("trc khi xoa " + formProductData);
-  //   setProductFormData((prevData) =>
-  //     prevData.filter((_, i) => i !== index - 1)
-  //   );
-  //   console.log("sau khi xoa " + formProductData);
-  // };
 
   const addProductForm = () => {
     setProductFormData((prevData) => [
@@ -109,6 +99,7 @@ const CreateEI: React.FC = () => {
         weight: 0,
         chiPhiPhatSinh: 0,
         enteredQuantity: 1,
+        images: [],
       },
     ]);
     setFormCount((prev) => prev + 1);
@@ -137,6 +128,7 @@ const CreateEI: React.FC = () => {
             weight: 0,
             chiPhiPhatSinh: 0,
             enteredQuantity: 1,
+            images: [],
           }} // Truyền dữ liệu cho form mới
           setProductFormData={setProductFormData}
         />
@@ -221,6 +213,179 @@ const CreateEI: React.FC = () => {
     }
   };
 
+  const uploadImages = async (images: File[]) => {
+    if (images.length === 0) {
+      console.error("No images provided for upload.");
+    }
+    if (images.length > 0) {
+      try {
+        const uploadedUrls = await Promise.all(
+          images.map(async (image) => {
+            const formData = new FormData();
+            formData.append("file", image);
+            formData.append("upload_preset", "morriweb");
+            formData.append("cloud_name", "dzdso60ms");
+            formData.append("api_key", "112278112619619"); // API key vẫn ở trong formData
+
+            try {
+              const response = await fetch(
+                "https://api.cloudinary.com/v1_1/dzdso60ms/image/upload",
+                {
+                  method: "POST",
+                  body: formData,
+                }
+              );
+
+              // Kiểm tra xem yêu cầu có thành công không
+              if (!response.ok) {
+                throw new Error("Upload failed");
+              }
+
+              const data = await response.json();
+              console.log("Response from Cloudinary:", data.url);
+              return data.secure_url; // Hoặc data.url, tùy thuộc vào cấu trúc phản hồi
+            } catch (error) {
+              console.error("Error uploading image:", error);
+              return null; // Hoặc xử lý lỗi theo cách bạn muốn
+            }
+          })
+        );
+
+        return uploadedUrls;
+
+        // Trả về mảng các URL
+      } catch (error) {
+        alert(error);
+        throw error;
+      }
+    }
+    return [];
+  };
+
+  const handleSubmit = async (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+    if (!formData.staffEmail) {
+      alert(
+        "Thông tin nhân viên không hợp lệ. Vui lòng điền thông tin nhân viên."
+      );
+      return;
+    }
+    if (
+      !formData.supplierAddress ||
+      !formData.supplierName ||
+      !formData.supplierPhone
+    ) {
+      alert(
+        "Thông tin Nhà cung cấp không hợp lệ. Vui lòng nhập đầy đủ thông tin Nhà cung cấp."
+      );
+      return;
+    }
+    alert("Tạo phiếu nhập kho thành công");
+    // setError(null);
+    // try {
+    //   const images = await uploadImages(formProductData[0].images);
+    //   console.error(images);
+    // } catch (e) {
+    //   console.error("Error uploading images:", e);
+    // }
+
+    // const productlist = await createProduct();
+    // await createSupplier();
+
+    // try {
+    //   const response = await fetch("http://localhost:8081/inventory/create", {
+    //     method: "POST",
+    //     headers: {
+    //       "Content-Type": "application/json",
+    //       Authentication:
+    //         "Bearer + eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIyMjUyMDk1N0BjaHQuZWR1LnZuIiwiaWF0IjoxNzM1OTA0Mjc1LCJyb2xlIjoiQURNSU4iLCJleHAiOjE3MzU5NDAyNzV9.JOh6cJnuPxZz7Y9Dlfnpyb-5m2W40zmLua7wFbphi98",
+    //     },
+    //     body: JSON.stringify({
+    //       supplier: formData.supplierId,
+    //       user: formData.staffId,
+    //       totalPrice: 10000000,
+    //       inventoryProducts: productlist,
+    //     }),
+    //   });
+
+    //   if (!response.ok) {
+    //     throw new Error("Không thể tạo ncc");
+    //   } else alert("Tao phieu nhap kho thanh cong");
+    // } catch (error) {
+    //   alert(error);
+    // }
+  };
+  const createSupplier = async () => {
+    try {
+      const response = await fetch("http://localhost:8081/supplier/create", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          supplierName: formData.supplierName,
+          supplierPhone: formData.supplierPhone,
+          supplierAddress: formData.supplierAddress,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Không thể tạo ncc");
+      }
+
+      const data = await response.json();
+      setFormData((prevData) => ({
+        ...prevData,
+        supplierId: data.id,
+      }));
+      return data;
+    } catch (error) {
+      console.error("Error creating ncc:", error);
+    }
+  };
+
+  const createProduct = async () => {
+    const mapProduct = [];
+
+    for (const data of formProductData) {
+      const images = await uploadImages(data.images);
+      const response = await fetch("http://localhost:8081/jewelry/create", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authentication:
+            "Bearer + eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIyMjUyMDk1N0BjaHQuZWR1LnZuIiwiaWF0IjoxNzM1OTA0Mjc1LCJyb2xlIjoiQURNSU4iLCJleHAiOjE3MzU5NDAyNzV9.JOh6cJnuPxZz7Y9Dlfnpyb-5m2W40zmLua7wFbphi98",
+        },
+        body: JSON.stringify({
+          name: data.name,
+          code: data.code,
+          description: data.description,
+          material: data.material,
+          sellingPrice: data.sellingPrice,
+          costPrice: data.costPrice,
+          imageUrl: images,
+          loaiSanPham: data.loaiSanPham,
+          quantity: data.enteredQuantity,
+          weight: data.weight,
+          chiPhiPhatSinh: data.chiPhiPhatSinh,
+        }),
+      });
+
+      if (!response.ok) {
+        mapProduct.push({
+          product: data.id,
+          enteredQuantity: data.enteredQuantity,
+        });
+      }
+
+      const jsonResponse = await response.json();
+      mapProduct.push({
+        product: jsonResponse.id,
+        enteredQuantity: data.enteredQuantity,
+      });
+    }
+    return mapProduct; // Hoặc xử lý theo nhu cầu
+  };
   return (
     <div className="enter-inventory-page">
       <div className="threeForm">
@@ -315,6 +480,26 @@ const CreateEI: React.FC = () => {
           />
         ))}
       </div>
+
+      <div className="submit-btn">
+        <div style={{ flex: 1 }}></div>
+        <button
+          style={{
+            backgroundColor: "#2196f3",
+            padding: "10px 20px",
+            marginBottom: "20px",
+            color: "white",
+            borderRadius: "5px",
+            cursor: "pointer",
+            fontSize: "16px",
+            fontWeight: "bold",
+          }}
+          onClick={handleSubmit}
+        >
+          Thêm vào kho
+        </button>
+      </div>
+      {error && <div className="error">{error}</div>}
     </div>
   );
 };

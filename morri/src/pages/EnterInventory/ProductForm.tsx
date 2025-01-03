@@ -19,6 +19,7 @@ interface FormProductData {
   enteredQuantity: number;
   weight: number;
   chiPhiPhatSinh: number;
+  images: File[];
 }
 
 interface ProductFormProps {
@@ -38,6 +39,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
 }) => {
   const [isExist, setIsExist] = useState(false);
   const [formData, setFormData] = useState<FormProductData>(formProductData);
+  const [imagestemp, setImagestemp] = useState<string[]>([]);
 
   useEffect(() => {
     setFormData(formProductData); // Cập nhật khi dữ liệu từ cha thay đổi
@@ -78,6 +80,11 @@ const ProductForm: React.FC<ProductFormProps> = ({
       );
       if (!response.ok) {
         setIsExist(false);
+        setFormData((prevData) => ({
+          ...prevData,
+          id: "",
+        }));
+
         throw new Error("Không thể lấy dữ liệu");
       }
       const data = await response.json();
@@ -111,34 +118,73 @@ const ProductForm: React.FC<ProductFormProps> = ({
     console.log("index in form: " + index);
     removeForm(index);
   };
-  const [images, setImages] = useState<string[]>([]);
-  const handleImageChange = (
+
+  const handleImageChange = async (
     e: React.ChangeEvent<HTMLInputElement>,
-    index: number
+    imageIndex: number
   ) => {
-    const file = e.target.files?.[0]; // Lấy file đã chọn
+    const file = e.target.files?.[0];
     if (file) {
-      const newImages = [...images];
-      const reader = new FileReader();
+      try {
+        const dataUrl = await readFileAsDataURL(file);
+        const newImages = [...imagestemp];
+        newImages[imageIndex] = dataUrl;
+        setImagestemp(newImages);
 
-      reader.onloadend = () => {
-        newImages[index] = reader.result as string; // Đảm bảo kiểu dữ liệu là string (Data URL)
-        setImages(newImages);
-      };
+        // Update the form data with new images array
+        setProductFormData((prevData) => {
+          const newData = [...prevData];
+          const currentImages = newData[index - 1].images || []; // Lấy mảng hình ảnh hiện tại
 
-      reader.readAsDataURL(file); // Đọc file và chuyển thành Data URL
+          // Cập nhật mảng hình ảnh
+          newData[index - 1] = {
+            ...newData[index - 1],
+            images: [...currentImages, file], // Thêm file vào mảng images
+          };
+          return newData;
+        });
+      } catch (error) {
+        console.error("Error reading file:", error);
+      }
     }
   };
-  const handleDeleteImage = (
-    e: React.MouseEvent<HTMLButtonElement>,
-    index: number
-  ) => {
-    e.preventDefault();
-    const newImages = [...images];
-    newImages.splice(index, 1); // Xóa 1 ảnh tại vị trí index
-    setImages(newImages);
+  const readFileAsDataURL = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        if (typeof reader.result === "string") {
+          resolve(reader.result);
+        } else {
+          reject(new Error("Failed to read file"));
+        }
+      };
+      reader.onerror = () => reject(new Error("Failed to read file"));
+      reader.readAsDataURL(file);
+    });
   };
 
+  const handleDeleteImage = (
+    e: React.MouseEvent<HTMLButtonElement>,
+    imageIndex: number
+  ) => {
+    e.preventDefault();
+    const newImages = [...imagestemp];
+    newImages.splice(imageIndex, 1); // Remove image at imageIndex
+    setImagestemp(newImages);
+
+    // Update the form data with new images array
+    setProductFormData((prevData) => {
+      const newData = [...prevData];
+      const currentImages = newData[index - 1].images || []; // Lấy mảng hình ảnh hiện tại
+
+      // Cập nhật mảng hình ảnh
+      newData[index - 1] = {
+        ...newData[index - 1],
+        images: currentImages.filter((_, idx) => idx !== imageIndex), // Lọc ra hình ảnh không cần thiết
+      };
+      return newData;
+    });
+  };
   return (
     <form className="formEnterContainer" style={{ marginTop: "20px" }}>
       <div style={{ display: "flex", width: "100%" }}>
@@ -181,7 +227,6 @@ const ProductForm: React.FC<ProductFormProps> = ({
           <label className="input-labelE">Loại sản phẩm</label>
           <select
             className="input-fieldE"
-            defaultValue=""
             name="loaiSanPham"
             value={formData.loaiSanPham}
             onChange={handleInputChange}
@@ -288,10 +333,10 @@ const ProductForm: React.FC<ProductFormProps> = ({
                 className="img-inputp"
                 onChange={(e) => handleImageChange(e, index)}
               />
-              {images[index] && (
+              {imagestemp[index] && (
                 <div className="img-container">
                   <img
-                    src={images[index]}
+                    src={imagestemp[index]}
                     alt={`Selected preview ${index}`}
                     className="img-preview"
                   />

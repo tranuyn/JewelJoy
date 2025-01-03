@@ -147,3 +147,10 @@
   align-items: center;
   display: flex;
 }
+
+.submit-btn {
+  padding: 10px 20px;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+}
