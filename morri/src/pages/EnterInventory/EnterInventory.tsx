@@ -34,16 +34,7 @@ const EnterInventory: React.FC = () => {
         />
       </div>
 
-      {activeTab === "Tạo phiếu nhập kho" ? (
-        <CreateEI />
-      ) : (
-        <HistoryEI
-          page={page}
-          rowsPerPage={rowsPerPage}
-          onPageChange={handleChangePage}
-          onRowsPerPageChange={handleChangeRowsPerPage}
-        />
-      )}
+      {activeTab === "Tạo phiếu nhập kho" ? <CreateEI /> : <HistoryEI />}
     </div>
   );
 };

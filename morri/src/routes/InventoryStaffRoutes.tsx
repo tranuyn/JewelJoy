@@ -2,14 +2,10 @@ import React from "react";
 import { Navigate, Route } from "react-router-dom";
 import AdminLayout from "../component/Layout/AdminLayout";
 import { ROLES } from "../constants/roles";
-import AttendancePage from "../pages/AttendancePage/AttendancePage";
 import HomePage from "../pages/HomePage/homePage";
-import OrdersPage from "../pages/OrdersPage/ordersPage";
-import ProductDetail from "../pages/ProductDetail/ProductDetail";
 import ProductsAndService from "../pages/ProductsAndServices/productsAndServicePage";
 import RepurchasePage from "../pages/RepurchasePage/RepurchasePage";
-import SettingPage from "../pages/SettingPage/SettingPage";
-import StaffPage from "../pages/StaffPage/StaffPage";
+
 import Unauthorization from "../pages/Unauthorization/Unauthorization";
 import { ProtectedRoute } from "./ProtectedRoute";
 import OrdersPage from "../pages/OrdersPage/ordersPage";

@@ -82,6 +82,7 @@
 }
 .input-containerE {
   display: flex;
+  flex: 1;
   flex-direction: column;
   width: 100%;
   overflow: hidden;
@@ -136,4 +137,13 @@
   border: none;
   background-color: #fff;
   padding: 0;
+}
+.CachedIconContainer1:hover {
+  cursor: pointer; /* Change cursor on hover */
+  border-radius: 20px;
+}
+.CachedIconContainer1 {
+  justify-content: center;
+  align-items: center;
+  display: flex;
 }
