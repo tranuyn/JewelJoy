@@ -20,16 +20,6 @@
   border-collapse: collapse;
 }
 
-/* Các header trong bảng */
-.table-header {
-  background-color: #cbd5e1;
-  padding: 12px;
-  font-weight: 600;
-  color: #333;
-  border-bottom: 2px solid #e0e0e0;
-  border-right: 0.5px solid #e0e0e0;
-}
-
 /* Hover khi di chuột vào dòng bảng */
 .table-row {
   transition: background-color 0.2s;
@@ -43,8 +33,6 @@
 /* Các ô trong bảng */
 .table-cell {
   padding: 12px;
-  border-bottom: 1px solid #e0e0e0;
-  border-right: 0.5px solid #e0e0e0;
 }
 
 /* Cột tùy chọn (Options) */
@@ -55,11 +43,8 @@
   width: 100px;
 }
 
-/* Các button sửa */
 .edit-button {
   color: #ced6d8 !important;
-  margin-right: 8px !important;
-  width: 35px;
 }
 
 .edit-button:hover {
@@ -69,7 +54,6 @@
 /* Các button xóa */
 .delete-button {
   color: #ced6d8 !important;
-  width: 35px;
 }
 
 .delete-button:hover {

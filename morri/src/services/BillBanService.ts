@@ -2,22 +2,51 @@
 
 interface Customer {
   name: string;
+  id: string
+}
+interface Staff {
+  username: string;
+  id: string
 }
 
-interface BillBan {
+interface Product {
+  id: string;
+  name: string;
+  code: string;
+  sellingPrice: number;
+  imageUrl: string[];  
+}
+
+export interface OrderDetail {
+  product: Product;
+  quantity: number;
+  unitPrice: number;
+  subtotal: number;
+}
+
+export interface BillBan {
   id: string;
   customer: Customer;
-  orderDetails: any[];
-  createdAt: string;
+  staff: Staff;
+  orderDetails: OrderDetail[];
+  createAt: string;
+  totalPrice: number;  
+  status: 'ON_DELIVERY' | 'COMPLETED';
 }
 
-// Định nghĩa interface cho phản hồi API của bạn
 export interface BillBanResponse {
   code: string;
   customer: string;
+  customerId: string;
+  staffName: string;
+  staffId: string;
   order: number;
   date: string;
+  dateTime: string;
   options: number;
+  orderDetails: OrderDetail[];
+  totalPrice: number;  
+  status: 'ON_DELIVERY' | 'COMPLETED';  
 }
 
 const BASE_URL = "http://localhost:8081/billBan";
@@ -29,13 +58,20 @@ export const getAllBillBans = async (): Promise<BillBanResponse[]> => {
     throw new Error("Không thể tải dữ liệu đơn hàng!");
   }
   const data: BillBan[] = await response.json();
-
+  
   return data.map((bill) => ({
     code: bill.id,
     customer: bill.customer.name,
+    customerId: bill.customer.id,
+    staffName: bill.staff.username,
+    staffId: bill.staff.id,
     order: bill.orderDetails.length,
-    date: new Date(bill.createdAt).toLocaleDateString(),
-    options: 0, // Tạm thời để 0
+    dateTime: bill.createAt,
+    date: new Date(bill.createAt).toLocaleDateString(),
+    options: 0,
+    orderDetails: bill.orderDetails,
+    totalPrice: bill.totalPrice,
+    status: bill.status,
   }));
 };
 
