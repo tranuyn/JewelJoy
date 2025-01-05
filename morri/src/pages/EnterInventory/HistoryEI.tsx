@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState, ReactNode } from "react";
 import KeyboardArrowLeftRoundedIcon from "@mui/icons-material/KeyboardArrowLeftRounded";
 import KeyboardArrowRightRoundedIcon from "@mui/icons-material/KeyboardArrowRightRounded";
 
@@ -7,20 +7,36 @@ export interface Column {
     | "id"
     | "date"
     | "supplier"
-    | "actors"
-    | "listProduct"
+    | "staff"
+    | "name"
+    | "inventoryProducts"
     | "totalPrice"
     | "note"
     | "options";
   label: string;
 }
 
+{
+  /* <div key={item.id} style={{ display: 'flex', marginBottom: '8px' }}>
+<img 
+  src={item.product.imageUrl[0]} 
+  alt={item.product.name}
+  style={{ width: '50px', height: '50px', marginRight: '8px' }}
+/>
+<div>
+  <div>{item.product.name}</div>
+  <div>SL: {item.enteredQuantity}</div>
+</div>
+</div> */
+}
+
 const columns: Column[] = [
   { id: "id", label: "Mã phiếu" },
   { id: "date", label: "Ngày tạo phiếu" },
   { id: "supplier", label: "Nhà cung cấp" },
-  { id: "actors", label: "Tác nhân" },
-  { id: "listProduct", label: "Danh sách sản phẩm" },
+  { id: "staff", label: "Người lập phiếu" },
+  { id: "name", label: "Mô tả phiếu" },
+  { id: "inventoryProducts", label: "Danh sách sản phẩm" },
   { id: "totalPrice", label: "Tổng giá trị" },
   { id: "note", label: "Ghi chú" },
   { id: "options", label: "Options" },
@@ -30,8 +46,9 @@ interface Data {
   id: string;
   date: string;
   supplier: string;
-  actors: string;
-  listProduct: string;
+  staff: string;
+  name: string;
+  inventoryProducts: ReactNode;
   totalPrice: number;
   note: string;
   options: string;
@@ -41,42 +58,116 @@ const createData = (
   id: string,
   date: string,
   supplier: string,
-  actors: string,
-  listProduct: string,
+  staff: string,
+  name: string,
+  inventoryProducts: ReactNode,
   totalPrice: number,
   note: string,
   options: string
 ): Data => {
-  return { id, date, supplier, actors, listProduct, totalPrice, note, options };
+  return {
+    id,
+    date,
+    supplier,
+    staff,
+    name,
+    inventoryProducts,
+    totalPrice,
+    note,
+    options,
+  };
 };
-
-// Tạo dữ liệu mẫu
-const rows: Data[] = [
-  createData(
-    "PNK001203",
-    new Date().toLocaleDateString(),
-    "Cocoon",
-    "Trinh Tran Phuong Tuan",
-    "PNJ Jasmine ZTMXY000005",
-    799.999,
-    "Ngọc đẹp",
-    "Edit / Delete"
-  ),
-  createData(
-    "PNK001203",
-    new Date().toLocaleDateString(),
-    "Cocoon",
-    "Trinh Tran Phuong Tuan",
-    "Nhẫn Vàng 14K Disney|PNJ Jasmine 0000Y003145",
-    777.55,
-    "Nhẫn cặp đôi",
-    "Edit / Delete"
-  ),
-];
 
 const HistoryEI: React.FC = () => {
   const [page, setPage] = useState<number>(0);
   const [rowsPerPage, setRowsPerPage] = useState<number>(5);
+  const [rows, setRows] = useState<Data[]>([]);
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+
+    const options = { year: "numeric", month: "long", day: "numeric" };
+    const formattedDate = date.toLocaleDateString("vi-VN"); // Định dạng ngày theo tiếng Việt
+
+    const formattedTime = date.toLocaleTimeString("vi-VN", {
+      hour: "2-digit",
+      minute: "2-digit",
+    }); // Định dạng giờ
+
+    return `${formattedDate}\n${formattedTime}`; // Kết hợp ngày và giờ với xuống dòng
+  };
+
+  const fetchData = async () => {
+    try {
+      const response = await fetch("http://localhost:8081/inventory", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization:
+            "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIyMjUyMDk1N0BjaHQuZWR1LnZuIiwiaWF0IjoxNzM2MTA4MjQzLCJyb2xlIjoiQURNSU4iLCJleHAiOjE3MzYxNDQyNDN9.PIPD7WdlZbGCC2bvnk_5KKjGsjDlT51FfPfu0HJ-GUk",
+        },
+      });
+
+      if (!response.ok) {
+        console.log(await response.json());
+        throw new Error("Không thể tải dữ liệu đơn hàng!");
+      }
+
+      const data = await response.json();
+      console.log(data);
+
+      // Chuyển đổi dữ liệu API để phù hợp với cấu trúc bảng
+      const transformedRows = data.map((item: any) => {
+        return createData(
+          item.id,
+          formatDate(item.ngayNhapKho),
+          item.supplier?.supplierName || "Không xác định",
+          item.user?.name || "Không xác định",
+          item?.name || "Không xác định",
+          <div>
+            {item?.inventoryProducts?.map((product: any) => (
+              <div
+                key={product.id}
+                style={{
+                  display: "flex",
+                  marginBottom: "8px",
+                  alignItems: "center",
+                  gap: "8px",
+                }}
+              >
+                <img
+                  src={product?.product?.imageUrl[0]}
+                  alt={product?.product?.name}
+                  style={{
+                    width: "40px",
+                    height: "40px",
+                    objectFit: "cover",
+                  }}
+                />
+                <div style={{ textAlign: "left" }}>
+                  <div style={{ fontWeight: "500" }}>
+                    {product?.product?.name}
+                  </div>
+                  <div>SL: {product.enteredQuantity}</div>
+                </div>
+              </div>
+            )) || <div>Không có sản phẩm</div>}
+          </div>,
+          item?.totalPrice || 0,
+          item.note || "",
+          "Options"
+        );
+      });
+
+      setRows(transformedRows);
+    } catch (error) {
+      console.error("Error fetching data: ", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   const handleChangePage = (newPage: number) => {
     setPage(newPage);
@@ -108,11 +199,16 @@ const HistoryEI: React.FC = () => {
             ))}
           </tr>
         </thead>
-        <tbody>
+        <tbody style={{ backgroundColor: "white" }}>
           {displayedRows.map((row) => (
             <tr key={row.id}>
               {columns.map((column) => (
-                <td key={column.id}>{row[column.id]}</td>
+                <td
+                  key={column.id}
+                  style={{ padding: "8px", textAlign: "center" }}
+                >
+                  {row[column.id]}
+                </td>
               ))}
             </tr>
           ))}

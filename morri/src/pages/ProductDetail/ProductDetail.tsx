@@ -3,28 +3,31 @@ import { useNavigate, useParams } from "react-router-dom";
 import "./style.css";
 import Header from "../ProductsAndServices/header";
 import TabBar from "../../component/Tabbar/TabBar";
+import { useAuth } from "../../services/useAuth";
+import ProductForm from "./ProductModal";
 
-interface ProductType {
+interface FormProductData {
   id: string;
   name: string;
   code: string;
+  description: string;
   material: string;
   sellingPrice: number;
   costPrice: number;
-  imageUrl: string[];
-  quantity: number;
-  weight: number;
-  loaiSanPham: string;
-  description: string;
   status: string;
+  imageUrl: string[];
+  loaiSanPham: string;
+  quantity: number;
+  enteredQuantity: number;
+  weight: number;
   chiPhiPhatSinh: number;
-  supplerId: object;
+  images: File[];
 }
 
 const ProductDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-
-  const [product, setProduct] = useState<ProductType | null>(null);
+  const { isAuthenticated, user, validateAuthStatus } = useAuth();
+  const [product, setProduct] = useState<FormProductData | null>(null);
   const [activeTab, setActiveTab] = useState("Tất cả");
   const [selectedImgIndex, setSelectedImgIndex] = useState(0);
   const [quantityToBuy, setQuantityToBuy] = useState(1);
@@ -55,6 +58,16 @@ const ProductDetail: React.FC = () => {
       default:
         return <div></div>;
     }
+  };
+
+  const [isOpen, setIsOpen] = useState(false);
+
+  const openModal = () => {
+    setIsOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsOpen(false);
   };
 
   useEffect(() => {
@@ -186,7 +199,14 @@ const ProductDetail: React.FC = () => {
           <button className="BuyNowNe" onClick={() => handleBuyNow()}>
             Mua ngay
           </button>
-          <button className="EditNe">Chỉnh sửa thông tin</button>
+          {user?.role === "ADMIN" && (
+            <button className="EditNe" onClick={() => openModal()}>
+              Chỉnh sửa thông tin
+            </button>
+          )}
+          {user?.role === "CUSTOMER" && (
+            <button className="EditNe">Thêm vào giỏ hàng</button>
+          )}
         </div>
       </div>
 
@@ -212,10 +232,29 @@ const ProductDetail: React.FC = () => {
           </div>
         </div>
         <div className="part4">
-          <button className="viewSupplierBtn">Xem nhà cung cấp</button>
+          {(user?.role === "ADMIN" ||
+            user?.role === "INVENTORY_STAFF" ||
+            user?.role === "SALE_STAFF") && (
+            <button className="viewSupplierBtn">Xem nhà cung cấp</button>
+          )}
           <div>{product.description}</div>
         </div>
       </div>
+
+      {isOpen && (
+        <div id="myModal" className="modalEditProduct">
+          <div className="modalEditProduct-content">
+            <div className="hii">
+              <div className="namene">Cập nhật thông tin sản phẩm</div>
+              <span className="close" onClick={closeModal}>
+                &times;
+              </span>
+            </div>
+            <ProductForm data={product} setData={() => console.log("hehe")} />
+            <button className="editbutoon">Cập nhật</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
