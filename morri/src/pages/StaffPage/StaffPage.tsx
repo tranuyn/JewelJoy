@@ -6,9 +6,10 @@ import SearchComponent from "../../component/SearchComponent/SearchComponent";
 import BtnComponent from "../../component/BtnComponent/BtnComponent";
 import DeleteComponent from "../../component/DeleteComponent/DeleteComponent";
 import Header from "../../component/Title_header/Header";
-import AddStaffForm from "./addStaffPage";
-import UpdateStaffForm from "./updateStaffPage";
+import AddStaffForm from "./addStaffPage"; 
 import Snackbar from "../../component/Snackbar/Snackbar";
+// import UpdateStaffForm from "./updateStaffPage";
+import UpdateStaffForm, { UpdateStaffData } from "./updateStaffPage";
 
 interface Staff {
   id: string;
@@ -199,19 +200,19 @@ const StaffPage: React.FC = () => {
       setSnackbarVisible(true);
       setIsModalOpen(false);
     }
-  };
+  }; 
 
-  const handleUpdate = async (formData: Staff): Promise<void> => {
+  const handleUpdate = async (formData: UpdateStaffData ): Promise<void> => {
     try {
       if (selectedStaff) {
-        const response = await fetch(`http://localhost:8080/user/${selectedStaff.id}`, {
+        const response = await fetch(`http://localhost:8081/user/${selectedStaff.id}`, {
           method: "PATCH",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify(formData),
         });
-
+  
         if (response.ok) {
           setSnackbarSeverity("success");
           setSnackbarMessage("Cập nhật nhân viên thành công!");
@@ -267,7 +268,13 @@ const StaffPage: React.FC = () => {
         //   setIsDeleteModalOpen(true);
         // }}
         onRowClick={(row) => console.log("Row clicked:", row)}
-          onEdit={(row) => setIsModalUpdateOpen(true)}
+          // onEdit={(row) => setIsModalUpdateOpen(true)}
+          onEdit={(row) => {
+            const staffToEdit = staffs.find(staff => staff.id === row.id) || null;
+            console.log("editting", staffToEdit);
+            setSelectedStaff(staffToEdit);
+            setIsModalUpdateOpen(true);
+          }}
           onDelete={(row) => setIsDeleteModalOpen(true)}
       />
 
@@ -279,12 +286,12 @@ const StaffPage: React.FC = () => {
 
       {selectedStaff && (
         <>
-          {/* <UpdateStaffForm
+          <UpdateStaffForm
             isModalOpen={isModalUpdateOpen}
             setIsModalOpen={setIsModalUpdateOpen}
-            initialData={selectedStaff}
-            handleUpdate={handleUpdateModal}
-          /> */}
+            staffData={selectedStaff}
+            handleUpdate={handleUpdate}
+          />
           <DeleteComponent
             isModalOpen={isDeleteModalOpen}
             setIsModalOpen={setIsDeleteModalOpen}
