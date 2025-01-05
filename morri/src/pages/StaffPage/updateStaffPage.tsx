@@ -12,27 +12,63 @@ import EmailIcon from '@mui/icons-material/Email';
 import PhoneIcon from '@mui/icons-material/Phone';
 import PersonIcon from '@mui/icons-material/Person';
 
-interface Staff {
+// interface Staff {
+//   isModalOpen: boolean;
+//   setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
+//   handleUpdate: () => Promise<void>;
+//   staffData?: {
+//     name: string;
+//     dateOfBirth: string;
+//     phoneNumber: string;
+//     position: string;
+//     gender: string;
+//     startDate: string;
+//     email: string;
+//     address: string;
+//     cccd: string;
+//     avatar?: string;
+//   };
+// }
+interface UpdateStaffFormProps {
   isModalOpen: boolean;
   setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  handleUpdate: () => Promise<void>;
+  handleUpdate: (formData: UpdateStaffData) => Promise<void>;
   staffData?: {
+    id: string;
     name: string;
-    dateOfBirth: string;
-    phoneNumber: string;
-    position: string;
-    gender: string;
-    startDate: string;
+    username: string;
     email: string;
-    address: string;
+    dateOfBirth: string;
+    gender: string;
+    phoneNumber: string;
     cccd: string;
-    avatar?: string;
+    address: string;
+    ngayVaoLam: string | null;
+    role: string;
+    luongCoBan: string | null;
+    avaURL: string | null;
   };
 }
 
-const UpdateStaffForm: React.FC<Staff> = ({ 
-  isModalOpen, 
-  setIsModalOpen, 
+export interface UpdateStaffData {
+  name: string;
+  username: string;
+  email: string;
+  dateOfBirth: string;
+  gender: string;
+  phoneNumber: string;
+  cccd: string;
+  address: string;
+  ngayVaoLam: string | null;
+  role: string;
+  luongCoBan: string | null;
+}
+
+
+const UpdateStaffForm: React.FC<UpdateStaffFormProps> = ({ 
+  isModalOpen,
+  setIsModalOpen,
+  staffData,
   handleUpdate,
 }) => {
   // const [selectedImage, setSelectedImage] = useState<string | null>(staffData?.avatar || null);
@@ -48,18 +84,38 @@ const UpdateStaffForm: React.FC<Staff> = ({
   //   }
   // };
   const [loading, setLoading] = useState(false);
+  const [formData, setFormData] = useState<UpdateStaffData>({
+    name: staffData?.name || '',
+    username: staffData?.username || '',
+    email: staffData?.email || '',
+    dateOfBirth: staffData?.dateOfBirth || '',
+    gender: staffData?.gender || '',
+    phoneNumber: staffData?.phoneNumber || '',
+    cccd: staffData?.cccd || '',
+    address: staffData?.address || '',
+    ngayVaoLam: staffData?.ngayVaoLam || null,
+    role: staffData?.role || '',
+    luongCoBan: staffData?.luongCoBan || null,
+  });
+
+  const handleInputChange = (field: keyof UpdateStaffData) => (value: string) => {
+    setFormData((prevData) => ({
+      ...prevData,
+      [field]: value,
+    }));
+  };
+  
   const handleUpdateModal = async () => {
     setLoading(true);
     try {
-      await handleUpdate();
+      await handleUpdate(formData);
       setIsModalOpen(false);
     } catch (error) {
-      console.error("Error deleting:", error);
+      console.error("Error updating:", error);
     } finally {
       setLoading(false);
     }
   };
-
 
   return (
     <Modal
