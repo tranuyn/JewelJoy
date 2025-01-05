@@ -40,7 +40,7 @@ const columns: Column[] = [
   { id: "order", label: "Số lượng sản phẩm" },
   { id: "totalPrice", label: "Tổng giá" },
   { id: "date", label: "Ngày đặt" },
-  { id: "options", label: "Tùy chọn" }, 
+  { id: "options", label: "Tùy chọn" },
 ];
 
 // Thêm biến columns động dựa theo activeTab
@@ -82,7 +82,8 @@ const OrdersPage: React.FC = () => {
       setLoading(true);
       setError(null);
       try {
-        const data = await getAllBillBans(); // Gọi API từ service
+        const data = await getAllBillBans();
+        console.log("data" + data); // Gọi API từ service
         setRows(data); // Cập nhật dữ liệu vào state
       } catch (err) {
         setError("Không thể tải dữ liệu đơn hàng!");
@@ -287,7 +288,9 @@ const OrdersPage: React.FC = () => {
                           ) : column.id === "options" ? ( // Kiểm tra cột "options"
                             <>
                               <StyledIconButton
-                                className={`edit-button ${editingOrderCode === row.code ? "active" : ""}`}
+                                className={`edit-button ${
+                                  editingOrderCode === row.code ? "active" : ""
+                                }`}
                                 size="small"
                                 onClick={(event) => handleEdit(row, event)}
                               >
@@ -320,7 +323,9 @@ const OrdersPage: React.FC = () => {
                                   <th>Số lượng</th>
                                   <th>Đơn giá</th>
                                   <th>Thành tiền</th>
-                                  {editingOrderCode === row.code && <th>Thao tác</th>}
+                                  {editingOrderCode === row.code && (
+                                    <th>Thao tác</th>
+                                  )}
                                 </tr>
                               </thead>
                               <tbody>
