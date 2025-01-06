@@ -11,7 +11,7 @@ import UpdateCustomer from "./updateCustomer";
 import DeleteComponent from "../../../component/DeleteComponent/DeleteComponent";
 import Snackbar from "../../../component/Snackbar/Snackbar";
 
-interface Customer {
+export interface Customer {
   id: string;
   name: string;
   gioiTinh: string;
@@ -35,6 +35,8 @@ type SnackbarSeverity = "success" | "error" | "warning" | "info";
 
 const CustomerManagementPage: React.FC = () => {
   const [customers, setCustomers] = useState<Customer[]>([]);
+  const [filteredCustomers, setFilteredCustomers] = useState<Customer[]>([]);
+
   const [activeTab, setActiveTab] = useState<string>("Khách hàng bán");
   const [searchKeyword, setSearchKeyword] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -52,6 +54,34 @@ const CustomerManagementPage: React.FC = () => {
   useEffect(() => {
     fetchCustomers();
   }, []);
+  useEffect(() => {
+    filterCustomers();
+  }, [searchKeyword, customers]);
+  const filterCustomers = () => {
+    if (!searchKeyword.trim()) {
+      setFilteredCustomers(customers);
+      return;
+    }
+
+    const keyword = searchKeyword.toLowerCase().trim();
+    const filtered = customers.filter((customer) => {
+      return (
+        customer.name.toLowerCase().includes(keyword) ||
+        customer.email?.toLowerCase().includes(keyword) ||
+        customer.phoneNumber?.toLowerCase().includes(keyword) ||
+        customer.id.toLowerCase().includes(keyword) ||
+        formatDate(customer.dateOfBirth).toLowerCase().includes(keyword) ||
+        formatDate(customer.ngayDangKyThanhVien)
+          .toLowerCase()
+          .includes(keyword) ||
+        (customer.gioiTinh === "MALE" ? "Nam" : "Nữ")
+          .toLowerCase()
+          .includes(keyword)
+      );
+    });
+
+    setFilteredCustomers(filtered);
+  };
 
   const fetchCustomers = async () => {
     try {
@@ -68,7 +98,7 @@ const CustomerManagementPage: React.FC = () => {
     return new Date(dateString).toLocaleDateString();
   };
 
-  const transformedData = customers.map((customer) => ({
+  const transformedData = filteredCustomers.map((customer) => ({
     ID: customer.id,
     name: customer.name,
     email: customer.email || "N/A",
@@ -169,6 +199,7 @@ const CustomerManagementPage: React.FC = () => {
           ngayDangKyThanhVien: formData.registrationDate,
         }),
       });
+      console.log("response: " + JSON.stringify(response));
 
       if (response.ok) {
         setSnackbarSeverity("success");
@@ -213,12 +244,12 @@ const CustomerManagementPage: React.FC = () => {
           handleAdd={handleAdd}
         />
         <Box sx={{ marginRight: "300px" }}>
-          <TabBar
+          {/* <TabBar
             tabs={tabs}
             onTabChange={setActiveTab}
             defaultTab="Khách hàng bán"
             styleType="custom"
-          />
+          /> */}
         </Box>
         <SearchComponent
           placeholder="Search customers..."
@@ -248,13 +279,12 @@ const CustomerManagementPage: React.FC = () => {
         onDelete={(row) => setIsDeleteModalOpen(true)}
       />
 
-      {/* <UpdateCustomer
-  isModalOpen={isModalUpdateOpen}
-  setIsModalOpen={setIsModalUpdateOpen}
-  initialData={rowClicked || {}}
-
-  handleUpdate={handleUpdate}
- /> */}
+      <UpdateCustomer
+        isModalOpen={isModalUpdateOpen}
+        setIsModalOpen={setIsModalUpdateOpen}
+        initialData={rowClicked}
+        handleUpdate={handleUpdate}
+      />
 
       <DeleteComponent
         isModalOpen={isDeleteModalOpen}

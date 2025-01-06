@@ -1,28 +1,63 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Box, Modal, CircularProgress } from "@mui/material";
 import TextBox from "../../../component/TextBox/TextBox";
 import BtnComponent from "../../../component/BtnComponent/BtnComponent";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import PhoneIcon from "@mui/icons-material/Phone";
 import TransgenderIcon from "@mui/icons-material/Transgender";
-interface Customer {
+import { Customer } from "./CustomerManagementPage";
+
+interface CustomerProps {
   isModalOpen: boolean;
   setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  handleUpdate: () => Promise<void>;
+  handleUpdate: (formData: FormData) => Promise<void>;
+  initialData: Customer | null;
 }
-const UpdateCustomer: React.FC<Customer> = ({
+interface FormData {
+  name: string | number;
+  phoneNumber: string | number;
+  gioiTinh: string | number;
+  dateOfBirth: string | number;
+  email: string | number;
+  registrationDate?: string | number;
+}
+
+const UpdateCustomer: React.FC<CustomerProps> = ({
   isModalOpen,
   setIsModalOpen,
   handleUpdate,
+  initialData,
 }) => {
-  const [loading, setLoading] = useState(false);
+  console.log("Initial data: " + JSON.stringify(initialData));
+  const [name, setName] = useState<string | number>(initialData?.name || "");
+  const [phoneNumber, setPhoneNumber] = useState<string | number>(
+    initialData?.phoneNumber || ""
+  );
+  const [gioiTinh, setGioiTinh] = useState<string | number>(
+    initialData?.gioiTinh || ""
+  );
+  const [dateOfBirth, setDateOfBirth] = useState<string | number>(
+    initialData?.dateOfBirth || ""
+  );
+  const [email, setEmail] = useState<string | number>(initialData?.email || "");
+  const [registrationDate, setRegistrationDate] = useState<string | number>(
+    initialData?.ngayDangKyThanhVien || new Date().toISOString().split("T")[0]
+  );
+  const [isLoading, setLoading] = useState(false);
+
   const handleUpdateModal = async () => {
+    const formData: FormData = {
+      name,
+      phoneNumber,
+      gioiTinh,
+      dateOfBirth,
+      email,
+      registrationDate,
+    };
+
     setLoading(true);
     try {
-      await handleUpdate();
-      setIsModalOpen(false);
-    } catch (error) {
-      console.error("Error deleting:", error);
+      await handleUpdate(formData);
     } finally {
       setLoading(false);
     }
@@ -55,36 +90,37 @@ const UpdateCustomer: React.FC<Customer> = ({
             textAlign: "center",
           }}
         >
-          Cập Nhật Nhân Viên
+          Cập nhật Khách Hàng
         </div>
+
         <TextBox
           datatype="string"
-          title="Mã KH"
-          placeholder=""
-          onChange={(value) => {}}
-          defaultValue=""
+          title="Tên khách hàng"
+          value={name}
+          defaultValue={initialData?.name}
+          placeholder="Nhập tên khách hàng"
+          onChange={(value) => setName(value)}
         />
+
         <Box
-          sx={{
-            display: "flex",
-            // justifyContent: "space-between",
-            gap: 10,
-            width: "100%",
-            marginRight: "10px",
-          }}
+          sx={{ display: "flex", gap: 10, width: "100%", marginRight: "10px" }}
         >
           <TextBox
-            datatype="number"
+            datatype="string"
             title="SDT"
             placeholder="Nhập số điện thoại..."
-            onChange={(value) => {}}
+            value={phoneNumber}
+            onChange={setPhoneNumber}
+            defaultValue={initialData?.phoneNumber}
             icon={<PhoneIcon style={{ color: "black" }} />}
           />
           <TextBox
             datatype="select"
             title="Giới tính"
             placeholder="Chọn giới tính"
-            onChange={(value) => {}}
+            value={gioiTinh}
+            onChange={setGioiTinh}
+            defaultValue={initialData?.gioiTinh === "MALE" ? "Nam" : "Nữ"}
             icon={<TransgenderIcon style={{ color: "black" }} />}
             options={[
               { label: "Nam", value: "Nam" },
@@ -92,10 +128,10 @@ const UpdateCustomer: React.FC<Customer> = ({
             ]}
           />
         </Box>
+
         <Box
           sx={{
             display: "flex",
-            // justifyContent: "space-between",
             gap: 14,
             flexDirection: "row",
             marginRight: "10px",
@@ -106,42 +142,35 @@ const UpdateCustomer: React.FC<Customer> = ({
             datatype="date"
             title="Ngày sinh"
             placeholder="Nhập ngày sinh"
-            onChange={(value) => {}}
+            defaultValue={initialData?.dateOfBirth}
+            value={dateOfBirth}
+            onChange={setDateOfBirth}
             icon={<CalendarMonthIcon style={{ color: "black" }} />}
           />
           <TextBox
-            datatype="date"
-            title="Ngày ĐK thành viên"
-            placeholder=""
-            onChange={(value) => {}}
-            icon={<CalendarMonthIcon style={{ color: "black" }} />}
-            //   defaultValue=`${New Date()}`
+            datatype="string"
+            title="Email"
+            placeholder="Nhập email"
+            value={email}
+            defaultValue={initialData?.email}
+            onChange={setEmail}
+            icon={<PhoneIcon style={{ color: "black" }} />}
           />
         </Box>
-        <TextBox
-          datatype="string"
-          title="Email"
-          placeholder="Nhập email"
-          onChange={(value) => {}}
-        />
-        <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2 }}>
-          <BtnComponent
-            btnColorType="close"
-            btnText={"Đóng"}
-            onClick={() => setIsModalOpen(false)}
-          />
+
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "flex-end",
+            marginTop: "20px",
+          }}
+        >
           <BtnComponent
             btnColorType="primary"
-            btnText={
-              loading ? <CircularProgress size={20} color="inherit" /> : "Lưu"
-            }
-            onClick={handleUpdate}
-            disabled={loading}
+            btnText={isLoading ? <CircularProgress size={24} /> : "Cập nhật"}
+            onClick={handleUpdateModal}
           />
         </Box>
-        {/* <Box sx={{ width: 400 }}>
-          <CircularProgress color="primary" />
-        </Box> */}
       </Box>
     </Modal>
   );
