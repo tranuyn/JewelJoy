@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
 import { Box, Modal } from "@mui/material";
 import TextBox from "../../component/TextBox/TextBox";
 import BtnComponent from "../../component/BtnComponent/BtnComponent";
+import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
 
 interface DynamicAddFormProps {
   isModalOpen: boolean;
@@ -14,11 +15,81 @@ const DynamicAddForm: React.FC<DynamicAddFormProps> = ({
   setIsModalOpen,
   formType,
 }) => {
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+
+  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setSelectedImage(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const renderFormFields = () => {
     if (formType === "Dịch vụ") {
       return (
         <>
-          <TextBox
+        <Box sx={{ flex: 1, display: "grid", gridTemplateColumns: "1fr 1fr",  gap: "0 0px" }}>
+          {/* Chức năng chọn ảnh để upload */}
+          <Box sx={{ display: "flex", gap: "0px", marginBottom: "8px" }}>
+            <Box sx={{
+              width: "200px",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center"
+            }}>
+              <Box sx={{
+                width: "150px",
+                height: "150px",
+                borderRadius: "50%",
+                backgroundColor: "#f0f0f0",
+                marginBottom: "30px",
+                overflow: "hidden"
+              }}>
+                {selectedImage ? (
+                  <img 
+                    src={selectedImage} 
+                    alt="Selected" 
+                    style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                  />
+                ) : (
+                  <Box sx={{ width: "100%", height: "100%", backgroundColor: "#E0E0E0" }} />
+                )}
+              </Box>
+              <label htmlFor="upload-photo">
+                <input
+                  style={{ display: "none" }}
+                  id="upload-photo"
+                  type="file"
+                  onChange={handleImageChange}
+                  accept="image/*"
+                />
+                <button
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "16px",
+                    backgroundColor: "#264850",
+                    color: "white",
+                    border: "none",
+                    borderRadius: "8px",
+                    padding: "8px 16px",
+                    cursor: "pointer",
+                    fontSize: "14px",
+                  }}
+                  onClick={() => document.getElementById("upload-photo")?.click()}
+                >
+                  <PhotoCameraIcon style={{ fontSize: "20px" }} />
+                  Chọn ảnh
+                </button>
+              </label>
+            </Box>
+          </Box>
+          <Box>
+        <TextBox
             datatype="string"
             title="Mã dịch vụ *"
             placeholder="Nhập mã dịch vụ"
@@ -46,6 +117,9 @@ const DynamicAddForm: React.FC<DynamicAddFormProps> = ({
             onChange={(value) => {}}
             defaultValue=""
           />
+          
+          </Box>
+        </Box>
         </>
       );
     } else if (formType === "Đặt lịch") {

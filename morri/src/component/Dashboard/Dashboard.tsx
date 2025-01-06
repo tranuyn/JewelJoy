@@ -1,24 +1,24 @@
-import React, { useState } from "react";
-import "./Dashboard.css";
-import MenuIcon from "@mui/icons-material/Menu";
-import HomeIcon from "@mui/icons-material/Home";
-import DiamondIcon from "@mui/icons-material/Diamond";
-import OrderIcon from "@mui/icons-material/ReceiptLong";
-import WarehouseIcon from "@mui/icons-material/Warehouse";
-import ImportWarehouseIcon from "@mui/icons-material/Input";
-import ShoppingBagIcon from "@mui/icons-material/ShoppingBag";
-import HistoryIcon from "@mui/icons-material/History";
 import BarChartIcon from "@mui/icons-material/BarChart";
-import GroupsIcon from "@mui/icons-material/Groups";
-import PersonIcon from "@mui/icons-material/Person";
-import ServiceIcon from "@mui/icons-material/SupportAgent";
+import DiamondIcon from "@mui/icons-material/Diamond";
 import TimeKeepingIcon from "@mui/icons-material/EventAvailable";
-import SettingsIcon from "@mui/icons-material/Settings";
-import LogoImage from "./logo.png";
-import LogoutIcon from "@mui/icons-material/Logout";
+import GroupsIcon from "@mui/icons-material/Groups";
+import HistoryIcon from "@mui/icons-material/History";
+import HomeIcon from "@mui/icons-material/Home";
+import ImportWarehouseIcon from "@mui/icons-material/Input";
 import LocalAtmOutlinedIcon from "@mui/icons-material/LocalAtmOutlined";
+import LogoutIcon from "@mui/icons-material/Logout";
+import MenuIcon from "@mui/icons-material/Menu";
+import PersonIcon from "@mui/icons-material/Person";
+import OrderIcon from "@mui/icons-material/ReceiptLong";
+import SettingsIcon from "@mui/icons-material/Settings";
+import ShoppingBagIcon from "@mui/icons-material/ShoppingBag";
+import ServiceIcon from "@mui/icons-material/SupportAgent";
+import WarehouseIcon from "@mui/icons-material/Warehouse";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../services/useAuth";
+import "./Dashboard.css";
+import LogoImage from "./logo.png";
 
 interface DashboardProps {
   onToggle: (collapsed: boolean) => void;
@@ -48,7 +48,7 @@ const menuItems = [
     id: "import",
     icon: <ImportWarehouseIcon />,
     label: "Nhập kho",
-    path: "/hehe",
+    path: "/enter-inventory",
   },
   {
     id: "returns",

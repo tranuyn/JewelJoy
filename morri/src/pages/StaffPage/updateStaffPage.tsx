@@ -12,38 +12,108 @@ import EmailIcon from '@mui/icons-material/Email';
 import PhoneIcon from '@mui/icons-material/Phone';
 import PersonIcon from '@mui/icons-material/Person';
 
-interface StaffFormProps {
+// interface Staff {
+//   isModalOpen: boolean;
+//   setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
+//   handleUpdate: () => Promise<void>;
+//   staffData?: {
+//     name: string;
+//     dateOfBirth: string;
+//     phoneNumber: string;
+//     position: string;
+//     gender: string;
+//     startDate: string;
+//     email: string;
+//     address: string;
+//     cccd: string;
+//     avatar?: string;
+//   };
+// }
+interface UpdateStaffFormProps {
   isModalOpen: boolean;
   setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  handleUpdate: (formData: UpdateStaffData) => Promise<void>;
   staffData?: {
+    id: string;
     name: string;
-    dateOfBirth: string;
-    phoneNumber: string;
-    position: string;
-    gender: string;
-    startDate: string;
+    username: string;
     email: string;
-    address: string;
+    dateOfBirth: string;
+    gender: string;
+    phoneNumber: string;
     cccd: string;
-    avatar?: string;
+    address: string;
+    ngayVaoLam: string | null;
+    role: string;
+    luongCoBan: string | null;
+    avaURL: string | null;
   };
 }
 
-const UpdateStaffForm: React.FC<StaffFormProps> = ({ 
-  isModalOpen, 
-  setIsModalOpen, 
-  staffData 
-}) => {
-  const [selectedImage, setSelectedImage] = useState<string | null>(staffData?.avatar || null);
+export interface UpdateStaffData {
+  name: string;
+  username: string;
+  email: string;
+  dateOfBirth: string;
+  gender: string;
+  phoneNumber: string;
+  cccd: string;
+  address: string;
+  ngayVaoLam: string | null;
+  role: string;
+  luongCoBan: string | null;
+}
 
-  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setSelectedImage(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+
+const UpdateStaffForm: React.FC<UpdateStaffFormProps> = ({ 
+  isModalOpen,
+  setIsModalOpen,
+  staffData,
+  handleUpdate,
+}) => {
+  // const [selectedImage, setSelectedImage] = useState<string | null>(staffData?.avatar || null);
+
+  // const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  //   const file = event.target.files?.[0];
+  //   if (file) {
+  //     const reader = new FileReader();
+  //     reader.onloadend = () => {
+  //       setSelectedImage(reader.result as string);
+  //     };
+  //     reader.readAsDataURL(file);
+  //   }
+  // };
+  const [loading, setLoading] = useState(false);
+  const [formData, setFormData] = useState<UpdateStaffData>({
+    name: staffData?.name || '',
+    username: staffData?.username || '',
+    email: staffData?.email || '',
+    dateOfBirth: staffData?.dateOfBirth || '',
+    gender: staffData?.gender || '',
+    phoneNumber: staffData?.phoneNumber || '',
+    cccd: staffData?.cccd || '',
+    address: staffData?.address || '',
+    ngayVaoLam: staffData?.ngayVaoLam || null,
+    role: staffData?.role || '',
+    luongCoBan: staffData?.luongCoBan || null,
+  });
+
+  const handleInputChange = (field: keyof UpdateStaffData) => (value: string) => {
+    setFormData((prevData) => ({
+      ...prevData,
+      [field]: value,
+    }));
+  };
+  
+  const handleUpdateModal = async () => {
+    setLoading(true);
+    try {
+      await handleUpdate(formData);
+      setIsModalOpen(false);
+    } catch (error) {
+      console.error("Error updating:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -95,7 +165,7 @@ const UpdateStaffForm: React.FC<StaffFormProps> = ({
               marginLeft: "20px",
               overflow: "hidden"
             }}>
-              {selectedImage ? (
+              {/* {selectedImage ? (
                 <img 
                   src={selectedImage} 
                   alt="Selected" 
@@ -103,16 +173,16 @@ const UpdateStaffForm: React.FC<StaffFormProps> = ({
                 />
               ) : (
                 <Box sx={{ width: "100%", height: "100%", backgroundColor: "#E0E0E0" }} />
-              )}
+              )} */}
             </Box>
             <label htmlFor="upload-photo">
-              <input
+              {/* <input
                 style={{ display: "none" }}
                 id="upload-photo"
                 type="file"
                 onChange={handleImageChange}
                 accept="image/*"
-              />
+              /> */}
               <button
                 style={{
                   display: "flex",
@@ -143,7 +213,7 @@ const UpdateStaffForm: React.FC<StaffFormProps> = ({
                 placeholder="Nhập ngày sinh"
                 onChange={(value) => {}}
                 icon={<CakeIcon style={{ color: "black" }} />}
-                defaultValue={staffData?.dateOfBirth}
+                // defaultValue={staffData?.dateOfBirth}
               />
             </Box>
             <Box sx={{ width: "100%" }}>
@@ -153,7 +223,7 @@ const UpdateStaffForm: React.FC<StaffFormProps> = ({
                 placeholder="Nhập ngày vào làm"
                 onChange={(value) => {}}
                 icon={<WorkIcon style={{ color: "black" }} />}
-                defaultValue={staffData?.startDate}
+                // defaultValue={staffData?.startDate}
               />
             </Box>
           </Box>
@@ -171,7 +241,7 @@ const UpdateStaffForm: React.FC<StaffFormProps> = ({
                 title="Tên"
                 placeholder="Nhập tên nhân viên"
                 onChange={(value) => {}}
-                defaultValue={staffData?.name}
+                // defaultValue={staffData?.name}
               />
               <TextBox
                 datatype="string"
@@ -179,7 +249,7 @@ const UpdateStaffForm: React.FC<StaffFormProps> = ({
                 placeholder="Nhập CCCD"
                 onChange={(value) => {}}
                 icon={<CardIcon style={{ color: "black" }} />}
-                defaultValue={staffData?.cccd}
+                // defaultValue={staffData?.cccd}
               />
             </Box>
 
@@ -195,7 +265,7 @@ const UpdateStaffForm: React.FC<StaffFormProps> = ({
                 placeholder="Nhập Email"
                 onChange={(value) => {}}
                 icon={<EmailIcon style={{ color: "black" }} />}
-                defaultValue={staffData?.email}
+                // defaultValue={staffData?.email}
               />
               <TextBox
                 datatype="string"
@@ -203,7 +273,7 @@ const UpdateStaffForm: React.FC<StaffFormProps> = ({
                 placeholder="Nhập SDT"
                 onChange={(value) => {}}
                 icon={<PhoneIcon style={{ color: "black" }} />}
-                defaultValue={staffData?.phoneNumber}
+                // defaultValue={staffData?.phoneNumber}
               />
             </Box>
 
@@ -222,7 +292,7 @@ const UpdateStaffForm: React.FC<StaffFormProps> = ({
                   { label: "Nhân viên", value: "staff" },
                   { label: "Quản lý", value: "manager" },
                 ]}
-                defaultValue={staffData?.position}
+                // defaultValue={staffData?.position}
               />
               <TextBox
                 datatype="select"
@@ -234,7 +304,7 @@ const UpdateStaffForm: React.FC<StaffFormProps> = ({
                   { label: "Nữ", value: "female" },
                 ]}
                 icon={<PersonIcon style={{ color: "black" }} />}
-                defaultValue={staffData?.gender}
+                // defaultValue={staffData?.gender}
               />
             </Box>
 
@@ -244,7 +314,7 @@ const UpdateStaffForm: React.FC<StaffFormProps> = ({
               placeholder="Nhập địa chỉ"
               onChange={(value) => {}}
               icon={<LocationOnIcon style={{ color: "black" }} />}
-              defaultValue={staffData?.address}
+              // defaultValue={staffData?.address}
             />
           </Box>
         </Box>
@@ -258,7 +328,7 @@ const UpdateStaffForm: React.FC<StaffFormProps> = ({
           <BtnComponent
             btnColorType="primary"
             btnText="Cập nhật"
-            onClick={() => {}}
+            onClick={handleUpdateModal}
           />
           <BtnComponent
             btnColorType="close"

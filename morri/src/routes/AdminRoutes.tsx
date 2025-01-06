@@ -21,6 +21,7 @@ import Statistics from "../pages/StatisticsPage/Statistics";
 import Unauthorization from "../pages/Unauthorization/Unauthorization";
 import { ProtectedRoute } from "./ProtectedRoute";
 
+import EnterInventory from "../pages/EnterInventory/EnterInventory";
 
 export const AdminRoutes = () => {
   return (
@@ -44,15 +45,13 @@ export const AdminRoutes = () => {
       <Route path="/admin/statistics" element={<Statistics />} />
       <Route path="orders" element={<OrdersPage />} />
       <Route path="inventory" element={<Inventory />} />
-
+      <Route path="/enter-inventory" element={<EnterInventory />} />
       <Route path="/attendance" element={<AttendancePage />} />
       <Route path="/service" element={<ServicePage />} />
       <Route path="/unauthorized" element={<Unauthorization />} />
       <Route path="*" element={<Navigate to="/unauthorized" />} />
 
-      <Route path="/admin/repurchase" element={<RepurchasePage />} />
-
-
+      <Route path="/repurchase" element={<RepurchasePage />} />
     </Route>
   );
 };
