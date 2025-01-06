@@ -33,10 +33,18 @@ const DiemDanh = () => {
       );
     }
   };
+  const getCurrentDate = () => {
+    return new Date().toLocaleDateString("vi-VN", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  };
   return (
     <>
       <div>
-        
+        <h3> Chào buổi sáng! Hôm nay là ngày {getCurrentDate()}</h3>
         <Box
           sx={{
             display: "flex",
