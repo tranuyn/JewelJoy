@@ -110,7 +110,7 @@ const VaoLam: React.FC<XinVangProps> = ({
           {
             headers: {
               "Content-Type": "application/octet-stream",
-              Authorization: `Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIyMjUyMDk1N0BjaHQuZWR1LnZuIiwiaWF0IjoxNzM1NjI1MjM3LCJyb2xlIjoiQURNSU4iLCJleHAiOjE3MzU2NjEyMzd9.Vrbmxev2llngaBH7spi-YvRyx-6bd4YT11zpBFVOwQs`,
+              Authorization: `Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIyMjUyMDk1N0BjaHQuZWR1LnZuIiwiaWF0IjoxNzM1ODkxMDgyLCJyb2xlIjoiQURNSU4iLCJleHAiOjE3MzU5MjcwODJ9.ah1e-r5ovKf4Q3IDV3aDqeUUEcKuRS8K8aoX2PFtyU4`,
             },
           }
         );
@@ -125,7 +125,7 @@ const VaoLam: React.FC<XinVangProps> = ({
         {
           headers: {
             "Content-Type": "application/octet-stream",
-            Authorization: `Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIyMjUyMDk1N0BjaHQuZWR1LnZuIiwiaWF0IjoxNzM1NjI1MjM3LCJyb2xlIjoiQURNSU4iLCJleHAiOjE3MzU2NjEyMzd9.Vrbmxev2llngaBH7spi-YvRyx-6bd4YT11zpBFVOwQs`,
+            Authorization: `Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIyMjUyMDk1N0BjaHQuZWR1LnZuIiwiaWF0IjoxNzM1ODkxMDgyLCJyb2xlIjoiQURNSU4iLCJleHAiOjE3MzU5MjcwODJ9.ah1e-r5ovKf4Q3IDV3aDqeUUEcKuRS8K8aoX2PFtyU4`,
           },
         }
       );
