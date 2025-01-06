@@ -4,6 +4,8 @@ import InputCpn from "./inputComponent";
 import ProductForm from "./ProductForm";
 import CachedIcon from "@mui/icons-material/Cached";
 import axios from "axios";
+import Backdrop from "@mui/material/Backdrop";
+import CircularProgress from "@mui/material/CircularProgress";
 interface Staff {
   id: string;
   username: string;
@@ -49,7 +51,7 @@ const CreateEI: React.FC = () => {
       quantity: 0,
       weight: 0,
       chiPhiPhatSinh: 0,
-      enteredQuantity: 1,
+      enteredQuantity: 0,
       images: [],
     },
   ]);
@@ -66,9 +68,18 @@ const CreateEI: React.FC = () => {
     dateEnter: "",
     totalValue: "",
     note: "",
+    name: "",
     images: [],
   });
   const hasMounted = useRef(false);
+
+  const [open, setOpen] = React.useState(false);
+  const handleClose = () => {
+    setOpen(false);
+  };
+  const handleOpen = () => {
+    setOpen(true);
+  };
 
   const removeForm = (indexToRemove: number) => {
     if (formProductData.length <= 1) return;
@@ -280,40 +291,36 @@ const CreateEI: React.FC = () => {
       );
       return;
     }
-    alert("Tạo phiếu nhập kho thành công");
-    // setError(null);
-    // try {
-    //   const images = await uploadImages(formProductData[0].images);
-    //   console.error(images);
-    // } catch (e) {
-    //   console.error("Error uploading images:", e);
-    // }
+    setError(null);
+    setOpen(true);
+    await createSupplier();
+    const productlist = await createProduct();
+    console.log("product list", productlist);
 
-    // const productlist = await createProduct();
-    // await createSupplier();
+    try {
+      const response = await fetch("http://localhost:8081/inventory/create", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          supplier: formData.supplierId,
+          user: formData.staffId,
+          totalPrice: 10000000,
+          inventoryProducts: productlist,
+          name: formData.name,
+        }),
+      });
 
-    // try {
-    //   const response = await fetch("http://localhost:8081/inventory/create", {
-    //     method: "POST",
-    //     headers: {
-    //       "Content-Type": "application/json",
-    //       Authentication:
-    //         "Bearer + eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIyMjUyMDk1N0BjaHQuZWR1LnZuIiwiaWF0IjoxNzM1OTA0Mjc1LCJyb2xlIjoiQURNSU4iLCJleHAiOjE3MzU5NDAyNzV9.JOh6cJnuPxZz7Y9Dlfnpyb-5m2W40zmLua7wFbphi98",
-    //     },
-    //     body: JSON.stringify({
-    //       supplier: formData.supplierId,
-    //       user: formData.staffId,
-    //       totalPrice: 10000000,
-    //       inventoryProducts: productlist,
-    //     }),
-    //   });
-
-    //   if (!response.ok) {
-    //     throw new Error("Không thể tạo ncc");
-    //   } else alert("Tao phieu nhap kho thanh cong");
-    // } catch (error) {
-    //   alert(error);
-    // }
+      if (!response.ok) {
+        const errorData = await response.json();
+        alert("Tạo phiếu nhập kho thất bại: " + errorData.detail);
+        throw new Error("Không thể tạo ncc");
+      } else alert("Tạo phiếu nhập kho thành công");
+    } catch (error) {
+      alert(error);
+    }
+    setOpen(false);
   };
   const createSupplier = async () => {
     try {
@@ -345,47 +352,72 @@ const CreateEI: React.FC = () => {
   };
 
   const createProduct = async () => {
-    const mapProduct = [];
+    // Khởi tạo mảng kết quả
+    const mapProduct: { product: string; enteredQuantity: number }[] = [];
 
-    for (const data of formProductData) {
-      const images = await uploadImages(data.images);
-      const response = await fetch("http://localhost:8081/jewelry/create", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authentication:
-            "Bearer + eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIyMjUyMDk1N0BjaHQuZWR1LnZuIiwiaWF0IjoxNzM1OTA0Mjc1LCJyb2xlIjoiQURNSU4iLCJleHAiOjE3MzU5NDAyNzV9.JOh6cJnuPxZz7Y9Dlfnpyb-5m2W40zmLua7wFbphi98",
-        },
-        body: JSON.stringify({
-          name: data.name,
-          code: data.code,
-          description: data.description,
-          material: data.material,
-          sellingPrice: data.sellingPrice,
-          costPrice: data.costPrice,
-          imageUrl: images,
-          loaiSanPham: data.loaiSanPham,
-          quantity: data.enteredQuantity,
-          weight: data.weight,
-          chiPhiPhatSinh: data.chiPhiPhatSinh,
-        }),
-      });
+    // Tạo các promise để gửi tất cả các yêu cầu API song song
+    const productPromises = formProductData.map(async (data) => {
+      try {
+        const existingProduct = await fetch(
+          `http://localhost:8081/jewelry/getProductByCode/${data.code}`
+        );
+        if (existingProduct.ok) {
+          const existingProductData = await existingProduct.json();
+          // Cập nhật mảng kết quả với sản phẩm đã tồn tại
+          return {
+            product: existingProductData.id,
+            enteredQuantity: data.enteredQuantity,
+          };
+        } else {
+          const images = await uploadImages(data.images);
+          const body = {
+            name: data.name,
+            code: data.code,
+            description: data.description,
+            material: data.material,
+            sellingPrice: data.sellingPrice,
+            costPrice: data.costPrice,
+            imageUrl: images,
+            loaiSanPham: data.loaiSanPham,
+            quantity: data.enteredQuantity,
+            weight: data.weight,
+            chiPhiPhatSinh: data.chiPhiPhatSinh,
+            supplierId: formData.supplierId,
+          };
+          console.log(body);
 
-      if (!response.ok) {
-        mapProduct.push({
-          product: data.id,
-          enteredQuantity: data.enteredQuantity,
-        });
+          const response = await fetch("http://localhost:8081/jewelry/create", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(body),
+          });
+
+          const jsonResponse = await response.json();
+          console.log("Response from API:", jsonResponse);
+          // Trả về kết quả cho sản phẩm mới
+          return {
+            product: jsonResponse.id,
+            enteredQuantity: data.enteredQuantity,
+          };
+        }
+      } catch (error) {
+        console.error("Lỗi khi tạo sản phẩm:", error);
+        return null; // Hoặc bạn có thể trả về giá trị mặc định hoặc xử lý lỗi tùy thích
       }
+    });
 
-      const jsonResponse = await response.json();
-      mapProduct.push({
-        product: jsonResponse.id,
-        enteredQuantity: data.enteredQuantity,
-      });
-    }
-    return mapProduct; // Hoặc xử lý theo nhu cầu
+    // Đợi tất cả các promise hoàn thành và loại bỏ các giá trị null nếu có lỗi
+    const results = await Promise.all(productPromises);
+    // Cập nhật mapProduct với các kết quả hợp lệ
+    results.forEach((result) => {
+      if (result) mapProduct.push(result);
+    });
+
+    return mapProduct; // Trả về kết quả sau khi tất cả sản phẩm được xử lý
   };
+
   return (
     <div className="enter-inventory-page">
       <div className="threeForm">
@@ -462,9 +494,25 @@ const CreateEI: React.FC = () => {
         </form>
         <form className="formEnterContainer">
           <div className="formTitleE">Thông tin phiếu nhập kho</div>
-          <InputCpn title="Ngày nhập" name="dateEnter" type="date" />
-          <InputCpn title="Tổng giá trị phiếu" type="tel" name="ivtrValue" />
-          <InputCpn title="Ghi chú" name="note" />
+          <InputCpn
+            title="Ngày nhập"
+            name="dateEnter"
+            type="date"
+            value={formData.dateEnter}
+            onChange={handleInputChange}
+          />
+          <InputCpn
+            title="Mô tả"
+            name="name"
+            value={formData.name}
+            onChange={handleInputChange}
+          />
+          <InputCpn
+            title="Ghi chú"
+            name="note"
+            value={formData.note}
+            onChange={handleInputChange}
+          />
         </form>
       </div>
 
@@ -500,6 +548,13 @@ const CreateEI: React.FC = () => {
         </button>
       </div>
       {error && <div className="error">{error}</div>}
+      <Backdrop
+        sx={(theme) => ({ color: "#fff", zIndex: theme.zIndex.drawer + 1 })}
+        open={open}
+        onClick={handleClose}
+      >
+        <CircularProgress color="inherit" />
+      </Backdrop>
     </div>
   );
 };

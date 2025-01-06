@@ -42,7 +42,11 @@ const ProductForm: React.FC<ProductFormProps> = ({
   const [imagestemp, setImagestemp] = useState<string[]>([]);
 
   useEffect(() => {
-    setFormData(formProductData); // Cập nhật khi dữ liệu từ cha thay đổi
+    // Chỉ cập nhật formData khi formProductData thay đổi, nhưng giữ lại dữ liệu người dùng nhập
+    setFormData((prevData) => ({
+      ...prevData,
+      ...formProductData,
+    }));
   }, [formProductData]);
 
   const handleInputChange = (
@@ -91,18 +95,18 @@ const ProductForm: React.FC<ProductFormProps> = ({
       setIsExist(true);
       setFormData((prevData) => ({
         ...prevData,
-        id: data.id,
-        name: data.name,
-        code: data.code,
-        description: data.description,
-        material: data.material,
-        sellingPrice: data.sellingPrice,
-        costPrice: data.costPrice,
-        imageUrl: data.imageUrl,
-        quantity: data.quantity,
-        loaiSanPham: data.loaiSanPham,
-        weight: data.weight,
-        chiPhiPhatSinh: data.chiPhiPhatSinh,
+        id: data.id || prevData.id, // Giữ lại ID cũ nếu không có
+        name: data.name || prevData.name,
+        code: data.code || prevData.code,
+        description: data.description || prevData.description,
+        material: data.material || prevData.material,
+        sellingPrice: data.sellingPrice || prevData.sellingPrice,
+        costPrice: data.costPrice || prevData.costPrice,
+        imageUrl: data.imageUrl || prevData.imageUrl,
+        quantity: data.quantity || prevData.quantity,
+        loaiSanPham: data.loaiSanPham || prevData.loaiSanPham,
+        weight: data.weight || prevData.weight,
+        chiPhiPhatSinh: data.chiPhiPhatSinh || prevData.chiPhiPhatSinh,
       }));
     } catch (error) {
       console.error("Error fetching user data:", error);
@@ -246,7 +250,6 @@ const ProductForm: React.FC<ProductFormProps> = ({
           <label className="input-labelE">Nguyên liệu</label>
           <select
             className="input-fieldE"
-            defaultValue=""
             value={formData.material}
             name="material"
             onChange={handleInputChange}
@@ -269,30 +272,35 @@ const ProductForm: React.FC<ProductFormProps> = ({
           name="costPrice"
           value={formData.costPrice.toString()}
           type="number"
+          onChange={handleInputChange}
         />
         <InputCpn
           title="Giá bán"
           name="sellingPrice"
           value={formData.sellingPrice.toString()}
           type="number"
+          onChange={handleInputChange}
         />
         <InputCpn
           title="Chi phí phát sinh"
           name="chiPhiPhatSinh"
           type="number"
           value={formData.chiPhiPhatSinh.toString()}
+          onChange={handleInputChange}
         />
         <InputCpn
           title="số lượng đang có"
           name="quantity"
           value={formData.quantity.toString()}
           type="tel"
+          onChange={handleInputChange}
         />
         <InputCpn
           title="số lượng nhập"
-          name="enterdQuantity"
+          name="enteredQuantity"
           value={formData.enteredQuantity.toString()}
           type="tel"
+          onChange={handleInputChange}
         />
       </div>
 
