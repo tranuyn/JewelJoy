@@ -154,3 +154,19 @@
   flex-direction: row;
   align-items: flex-end;
 }
+
+.three-icon {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.editbtn:hover {
+  color: #2a91f8 !important;
+  cursor: pointer;
+}
+
+.editbtn {
+  color: rgba(0, 0, 0, 0.1) !important;
+  margin: 4px 0;
+}

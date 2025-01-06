@@ -1,7 +1,14 @@
 import React, { useEffect, useState, ReactNode } from "react";
 import KeyboardArrowLeftRoundedIcon from "@mui/icons-material/KeyboardArrowLeftRounded";
 import KeyboardArrowRightRoundedIcon from "@mui/icons-material/KeyboardArrowRightRounded";
-
+import TableComponent from "../../component/TableComponent/TableComponent";
+import DeleteComponent from "../../component/DeleteComponent/DeleteComponent";
+import { Box, Modal, CircularProgress } from "@mui/material";
+import BtnComponent from "../../component/BtnComponent/BtnComponent";
+import BorderColorIcon from "@mui/icons-material/BorderColor";
+import DeleteIcon from "@mui/icons-material/Delete";
+import FeedIcon from "@mui/icons-material/Feed";
+import { useNavigate } from "react-router-dom";
 export interface Column {
   id:
     | "id"
@@ -14,20 +21,6 @@ export interface Column {
     | "note"
     | "options";
   label: string;
-}
-
-{
-  /* <div key={item.id} style={{ display: 'flex', marginBottom: '8px' }}>
-<img 
-  src={item.product.imageUrl[0]} 
-  alt={item.product.name}
-  style={{ width: '50px', height: '50px', marginRight: '8px' }}
-/>
-<div>
-  <div>{item.product.name}</div>
-  <div>SL: {item.enteredQuantity}</div>
-</div>
-</div> */
 }
 
 const columns: Column[] = [
@@ -51,7 +44,7 @@ interface Data {
   inventoryProducts: ReactNode;
   totalPrice: number;
   note: string;
-  options: string;
+  options: ReactNode;
 }
 
 const createData = (
@@ -63,7 +56,7 @@ const createData = (
   inventoryProducts: ReactNode,
   totalPrice: number,
   note: string,
-  options: string
+  options: ReactNode
 ): Data => {
   return {
     id,
@@ -82,6 +75,23 @@ const HistoryEI: React.FC = () => {
   const [page, setPage] = useState<number>(0);
   const [rowsPerPage, setRowsPerPage] = useState<number>(5);
   const [rows, setRows] = useState<Data[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [deleteName, setDeleteName] = useState("");
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+
+  const handleConfirmDelete = async () => {
+    setLoading(true);
+    try {
+      // await handleDelete();
+      setIsModalOpen(false);
+    } catch (error) {
+      console.error("Error deleting:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -155,7 +165,15 @@ const HistoryEI: React.FC = () => {
           </div>,
           item?.totalPrice || 0,
           item.note || "",
-          "Options"
+          <div className="three-icon">
+            <FeedIcon
+              fontSize="small"
+              className="editbtn"
+              onClick={() => navigate(`/enter-inventory/${item.id}`)}
+            />
+            <BorderColorIcon fontSize="small" className="editbtn" />
+            <DeleteIcon fontSize="small" className="editbtn" />
+          </div>
         );
       });
 
@@ -192,7 +210,11 @@ const HistoryEI: React.FC = () => {
             {columns.map((column) => (
               <th
                 key={column.id}
-                style={{ padding: "8px", textAlign: "center" }}
+                style={{
+                  padding: "8px",
+                  textAlign: "center",
+                  maxWidth: column.id === "id" ? "200px" : "auto",
+                }}
               >
                 {column.label}
               </th>
@@ -201,11 +223,16 @@ const HistoryEI: React.FC = () => {
         </thead>
         <tbody style={{ backgroundColor: "white" }}>
           {displayedRows.map((row) => (
-            <tr key={row.id}>
+            <tr key={row.id} className="EIrow">
               {columns.map((column) => (
                 <td
                   key={column.id}
-                  style={{ padding: "8px", textAlign: "center" }}
+                  style={{
+                    padding: "8px",
+                    textAlign: "center",
+                    maxWidth: "100px",
+                    wordWrap: "break-word",
+                  }}
                 >
                   {row[column.id]}
                 </td>
@@ -238,6 +265,57 @@ const HistoryEI: React.FC = () => {
           <KeyboardArrowRightRoundedIcon />
         </button>
       </div>
+
+      <Modal
+        open={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <Box
+          sx={{
+            backgroundColor: "#fff",
+            padding: 4,
+            borderRadius: 2,
+            boxShadow: 24,
+            maxWidth: 400,
+            width: "100%",
+          }}
+        >
+          <div
+            style={{
+              fontWeight: "bold",
+              fontSize: "16px",
+              marginBottom: "16px",
+            }}
+          >
+            Bạn có chắc chắn muốn xoá{" "}
+            <span style={{ color: "#d32f2f" }}>{deleteName}</span> không?
+          </div>
+          <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2 }}>
+            <BtnComponent
+              btnColorType="close"
+              btnText="Huỷ"
+              onClick={() => setIsModalOpen(false)}
+            />
+            <BtnComponent
+              btnColorType="primary"
+              btnText={
+                loading ? (
+                  <CircularProgress size={20} color="inherit" />
+                ) : (
+                  "Xác nhận"
+                )
+              }
+              onClick={handleConfirmDelete}
+              disabled={loading}
+            />
+          </Box>
+        </Box>
+      </Modal>
     </div>
   );
 };

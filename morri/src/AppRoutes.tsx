@@ -12,6 +12,7 @@ import CheckOut from "./pages/CheckOut/CheckOut";
 import CheckOutSuccess from "./pages/CheckOut/CheckOutSuccess";
 import ProductDetail from "./pages/ProductDetail/ProductDetail";
 import EnterInventory from "./pages/EnterInventory/EnterInventory";
+import ViewOrEdit from "./pages/EnterInventory/ViewOrEdit/ViewOrEdit";
 
 const AppRoutes = () => {
   return (
@@ -33,6 +34,7 @@ const AppRoutes = () => {
         <Route path="/services" element={<SalaryPage />} />
         <Route path="/inventory" element={<SalaryPage />} />
         <Route path="/enter-inventory" element={<EnterInventory />} />
+        <Route path="/enter-inventory/:id" element={<ViewOrEdit />} />
         <Route path="/settings" element={<SalaryPage />} />
         <Route path="/statistics" element={<SalaryPage />} />
         <Route path="/attendance" element={<SalaryPage />} />

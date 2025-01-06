@@ -14,7 +14,7 @@ import StaffPage from "../pages/StaffPage/StaffPage";
 import SettingPage from "../pages/SettingPage/SettingPage";
 import ProductDetail from "../pages/ProductDetail/ProductDetail";
 import OrdersPage from "../pages/OrdersPage/ordersPage";
-
+import ViewOrEdit from "../pages/EnterInventory/ViewOrEdit/ViewOrEdit";
 export const InventoryStaffRoutes = () => {
   return (
     <Route
@@ -32,6 +32,7 @@ export const InventoryStaffRoutes = () => {
       <Route path="/products" element={<ProductsAndService />} />
       <Route path="/products/detail/:id" element={<ProductDetail />} />
       <Route path="/enter-inventory" element={<EnterInventory />} />
+      <Route path="/enter-inventory/:id" element={<ViewOrEdit />} />
       <Route path="/orders" element={<OrdersPage />} />
       <Route path="/unauthorized" element={<Unauthorization />} />
       <Route path="/repurchase" element={<RepurchasePage />} />

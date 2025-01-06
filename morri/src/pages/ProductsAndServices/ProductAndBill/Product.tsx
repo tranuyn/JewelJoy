@@ -33,6 +33,7 @@ const Product: React.FC<ProductProps> = ({ products, onSelectProduct }) => {
 
   const navigator = useNavigate();
   function viewProductDetail(id: string) {
+    console.log("viewProductDetail");
     navigator(`/products/detail/${id}`);
   }
   return (

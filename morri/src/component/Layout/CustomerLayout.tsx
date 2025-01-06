@@ -1,7 +1,9 @@
 import React from "react";
-import { Outlet } from "react-router-dom";
 import { Navbar } from "../Navbar/Navbar";
 import "./CustomerLayout.css";
+import { Outlet } from "react-router-dom";
+import ProductsAndService from "../../pages/ProductsAndServices/productsAndServicePage";
+import ProductDetail from "../../pages/ProductDetail/ProductDetail";
 
 const CustomerLayout: React.FC = () => {
   return (
@@ -9,6 +11,7 @@ const CustomerLayout: React.FC = () => {
       <Navbar />
       <main className="customer-content">
         {/* <Outlet /> */}
+        <Outlet />
       </main>
     </div>
   );
