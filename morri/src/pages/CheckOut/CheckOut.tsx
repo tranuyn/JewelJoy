@@ -44,6 +44,9 @@ const Checkout = () => {
       setQuantities(location.state.quantities);
     }
   }, [location.state]);
+  const handleSetCustomerInfo = (info: any) => {
+    setCustomerInfo(info);
+  };
 
   const handleBuyNow = async (updatedProducts: ProductType[]) => {
     if (!staffInfo) {
@@ -61,12 +64,13 @@ const Checkout = () => {
       setError(
         "Thông tin khách hàng không hợp lệ. Vui lòng nhập đầy đủ thông tin khách hàng."
       );
+      console.log("indfo" + customerInfo.name);
       return;
     }
     setError(null);
     setSelectedProducts(updatedProducts);
     await createCustomer();
-    createOrder(customerInfo.phoneNumber);
+    createOrder(customerInfo.id);
   };
 
   const createCustomer = async () => {
@@ -74,7 +78,7 @@ const Checkout = () => {
       const dateOfBirth = customerInfo.dateOfBirth
         ? new Date(customerInfo.dateOfBirth).toISOString().split("T")[0]
         : "";
-      const response = await fetch("http://localhost:8081/customer/", {
+      const response = await fetch("http://localhost:8081/customer/create", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -88,10 +92,19 @@ const Checkout = () => {
       });
 
       if (!response.ok) {
+        console.log("tạo customer thất bại");
         throw new Error("Không thể tạo khách hàng");
       }
 
       const data = await response.json();
+      console.log(JSON.stringify(data));
+      setCustomerInfo({
+        phoneNumber: data.phoneNumber,
+        name: data.name,
+        gioiTinh: data.gioiTinh,
+        dateOfBirth: customerInfo.dateOfBirth,
+        id: data.id,
+      });
       return data;
     } catch (error) {
       console.error("Error creating customer:", error);
@@ -100,29 +113,35 @@ const Checkout = () => {
 
   const createOrder = async (phone: string) => {
     try {
+      const body = {
+        staff: staffInfo.id,
+        createAt: new Date().toISOString(),
+        customer: customerInfo.id,
+        orderDetails: selectedProducts.map((product) => ({
+          product: product.id,
+          quantity: product.quantityInBill,
+          unitPrice: product.sellingPrice,
+          subtotal: product.sellingPrice * product.quantityInBill,
+        })),
+        paymentMethod: selectedButton,
+        status: "COMPLETED",
+        note: note,
+        totalPrice: selectedProducts.reduce(
+          (total, product) =>
+            total + product.sellingPrice * product.quantityInBill,
+          0
+        ),
+      };
+
+      console.log(body);
+
       const response = await fetch("http://localhost:8081/billBan/create", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          staff: { email: staffInfo.email },
-          createAt: new Date().toISOString(),
-          customer: { phoneNumber: phone },
-          orderDetails: selectedProducts.map((product) => ({
-            product: { id: product.id },
-            quantity: product.quantityInBill,
-            unitPrice: product.sellingPrice,
-            subtotal: product.sellingPrice * product.quantityInBill,
-          })),
-          paymentMethod: selectedButton,
-          status: "COMPLETED",
-          note: note,
-          totalPrice: selectedProducts.reduce(
-            (total, product) =>
-              total + product.sellingPrice * product.quantityInBill,
-            0
-          ),
+          body,
         }),
       });
 
@@ -133,7 +152,7 @@ const Checkout = () => {
       }
 
       const data = await response.json();
-      console.log(data);
+
       navigate(`/products/checkout/${data.id}`, {
         state: {
           selectedProducts,
@@ -205,7 +224,7 @@ const Checkout = () => {
         </div>
       ) : (
         <div>
-          <CustomerSection setCustomerInfo={setCustomerInfo} />
+          <CustomerSection setCustomerInfo={handleSetCustomerInfo} />
           <StaffSection setStaffInfo={setStaffInfo} />
           <Bill
             selectedProducts={selectedProducts}

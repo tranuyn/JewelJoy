@@ -19,6 +19,7 @@ interface ProductType {
   material: string;
   sellingPrice: number;
   imageUrl: string[];
+  quantity: number;
   quantityInBill: number;
   loaiSanPham: string;
 }
@@ -51,6 +52,30 @@ const ProductsAndService: React.FC = () => {
         ]);
       }
     }
+  };
+
+  const handleDeleteProduct = (id: string) => {
+    console.log("hehe");
+    setSelectedProducts((prev) => prev.filter((p) => p.id !== id));
+    console.log("sau khi xoa" + setSelectedProducts);
+  };
+
+  const handleIncreaseProduct = (id: string) => {
+    setSelectedProducts((prev) =>
+      prev.map((p) =>
+        p.id === id ? { ...p, quantityInBill: p.quantityInBill + 1 } : p
+      )
+    );
+  };
+
+  const handleDecreaseProduct = (id: string) => {
+    setSelectedProducts((prev) =>
+      prev.map((p) =>
+        p.id === id && p.quantityInBill > 1
+          ? { ...p, quantityInBill: p.quantityInBill - 1 }
+          : p
+      )
+    );
   };
 
   const tabs = [
@@ -96,7 +121,12 @@ const ProductsAndService: React.FC = () => {
               user?.role === "INVENTORY_STAFF" ||
               user?.role === "SALE_STAFF") && (
               <div className="bill-container">
-                <Bill selectedProducts={selectedProducts} />
+                <Bill
+                  selectedProducts={selectedProducts}
+                  onRemoveProduct={handleDeleteProduct}
+                  onIncreaseProduct={handleIncreaseProduct}
+                  onDecreaseProduct={handleDecreaseProduct}
+                />
               </div>
             )}
           </div>
@@ -118,7 +148,12 @@ const ProductsAndService: React.FC = () => {
               user?.role === "INVENTORY_STAFF" ||
               user?.role === "SALE_STAFF") && (
               <div className="bill-container">
-                <Bill selectedProducts={selectedProducts} />
+                <Bill
+                  selectedProducts={selectedProducts}
+                  onRemoveProduct={handleDeleteProduct}
+                  onIncreaseProduct={handleIncreaseProduct}
+                  onDecreaseProduct={handleDecreaseProduct}
+                />
               </div>
             )}
           </div>
@@ -140,7 +175,12 @@ const ProductsAndService: React.FC = () => {
               user?.role === "INVENTORY_STAFF" ||
               user?.role === "SALE_STAFF") && (
               <div className="bill-container">
-                <Bill selectedProducts={selectedProducts} />
+                <Bill
+                  selectedProducts={selectedProducts}
+                  onRemoveProduct={handleDeleteProduct}
+                  onIncreaseProduct={handleIncreaseProduct}
+                  onDecreaseProduct={handleDecreaseProduct}
+                />
               </div>
             )}
           </div>
@@ -162,7 +202,12 @@ const ProductsAndService: React.FC = () => {
               user?.role === "INVENTORY_STAFF" ||
               user?.role === "SALE_STAFF") && (
               <div className="bill-container">
-                <Bill selectedProducts={selectedProducts} />
+                <Bill
+                  selectedProducts={selectedProducts}
+                  onRemoveProduct={handleDeleteProduct}
+                  onIncreaseProduct={handleIncreaseProduct}
+                  onDecreaseProduct={handleDecreaseProduct}
+                />
               </div>
             )}
           </div>
@@ -184,7 +229,12 @@ const ProductsAndService: React.FC = () => {
               user?.role === "INVENTORY_STAFF" ||
               user?.role === "SALE_STAFF") && (
               <div className="bill-container">
-                <Bill selectedProducts={selectedProducts} />
+                <Bill
+                  selectedProducts={selectedProducts}
+                  onRemoveProduct={handleDeleteProduct}
+                  onIncreaseProduct={handleIncreaseProduct}
+                  onDecreaseProduct={handleDecreaseProduct}
+                />
               </div>
             )}
           </div>
@@ -205,7 +255,12 @@ const ProductsAndService: React.FC = () => {
               user?.role === "INVENTORY_STAFF" ||
               user?.role === "SALE_STAFF") && (
               <div className="bill-container">
-                <Bill selectedProducts={selectedProducts} />
+                <Bill
+                  selectedProducts={selectedProducts}
+                  onRemoveProduct={handleDeleteProduct}
+                  onIncreaseProduct={handleIncreaseProduct}
+                  onDecreaseProduct={handleDecreaseProduct}
+                />
               </div>
             )}
           </div>

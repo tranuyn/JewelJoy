@@ -9,21 +9,32 @@ interface ProductType {
   material: string;
   sellingPrice: number;
   imageUrl: string[];
+  quantity: number;
   quantityInBill: number;
   loaiSanPham: string;
 }
 
 interface BillProps {
-  selectedProducts: ProductType[]; // Array of selected products
-  // onRemoveProduct: (id: string) => void; // Function to remove a product
+  selectedProducts: ProductType[];
+  onRemoveProduct: (id: string) => void;
+  onIncreaseProduct: (id: string) => void;
+  onDecreaseProduct: (id: string) => void;
 }
 
-const Bill: React.FC<BillProps> = ({ selectedProducts }) => {
+const Bill: React.FC<BillProps> = ({
+  selectedProducts,
+  onRemoveProduct,
+  onIncreaseProduct,
+  onDecreaseProduct,
+}) => {
   const [quantities, setQuantities] = useState<Record<string, number>>({});
   const [selectedProductInBill, setSelectedProducts] =
     useState<ProductType[]>(selectedProducts);
 
+  const [dropdownOpen, setDropdownOpen] = useState<string | null>(null);
+
   const navigate = useNavigate();
+
   useEffect(() => {
     if (selectedProducts.length > 0) {
       const initialQuantities = selectedProducts.reduce((acc, product) => {
@@ -38,41 +49,43 @@ const Bill: React.FC<BillProps> = ({ selectedProducts }) => {
     setSelectedProducts(selectedProducts);
   }, [selectedProducts]);
 
-  const [dropdownOpen, setDropdownOpen] = useState<string | null>(null);
-
   const incrementQuantity = (id: string) => {
-    setQuantities((prev) => ({ ...prev, [id]: prev[id] + 1 }));
+    // Increment the product quantity in the bill
+    setQuantities((prev) => {
+      const newQuantity = (prev[id] || 0) + 1;
+      onIncreaseProduct(id); // Call the onIncreaseProduct callback
+      return { ...prev, [id]: newQuantity };
+    });
   };
 
   const decrementQuantity = (id: string) => {
-    if (quantities[id] === 1) return;
-    setQuantities((prev) => ({
-      ...prev,
-      [id]: prev[id] - 1,
-    }));
+    // Decrement the product quantity in the bill
+    if (quantities[id] > 1) {
+      setQuantities((prev) => {
+        const newQuantity = (prev[id] || 0) - 1;
+        onDecreaseProduct(id); // Call the onDecreaseProduct callback
+        return { ...prev, [id]: newQuantity };
+      });
+    }
   };
 
+  // Toggle dropdown logic
   const toggleDropdown = (id: string) => {
-    console.log("toggleDropdown " + id);
-    setDropdownOpen(dropdownOpen === id ? null : id);
-    console.log(dropdownOpen);
+    setDropdownOpen(dropdownOpen === id ? null : id); // Close if the same dropdown is clicked
   };
 
+  // Remove product logic
   const handleDelete = (id: string) => {
-    const updatedProducts = selectedProductInBill.filter((p) => p.id !== id);
-    setSelectedProducts(updatedProducts);
-    setDropdownOpen(null); // Close dropdown after deleting
+    onRemoveProduct(id); // Call the onRemoveProduct function passed via props
+    setDropdownOpen(null); // Close the dropdown after removing product
   };
 
   function formatPrice(price: number): string {
     if (isNaN(price)) {
-      return "0"; // Trả về "0" nếu giá trị không hợp lệ
+      return "0"; // Return "0" if the value is not a valid number
     }
 
-    // Chuyển giá trị thành chuỗi và chia thành các nhóm 3 chữ số
-    return price
-      .toString() // Chuyển thành chuỗi
-      .replace(/\B(?=(\d{3})+(?!\d))/g, "."); // Thêm dấu chấm sau mỗi 3 chữ số
+    return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "."); // Format the price with a dot separator for thousands
   }
 
   const handleBuyNow = () => {
@@ -134,7 +147,7 @@ const Bill: React.FC<BillProps> = ({ selectedProducts }) => {
                           </button>
                           <button
                             className="billdropdown-content-button"
-                            onClick={() => setDropdownOpen(null)}
+                            onClick={() => setDropdownOpen(null)} // Close the dropdown without removing product
                           >
                             Hủy
                           </button>
@@ -185,7 +198,7 @@ const Bill: React.FC<BillProps> = ({ selectedProducts }) => {
         </div>
       </div>
 
-      <button className="BuyNowButton" onClick={() => handleBuyNow()}>
+      <button className="BuyNowButton" onClick={handleBuyNow}>
         Mua ngay
       </button>
     </div>

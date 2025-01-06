@@ -9,6 +9,7 @@ interface ProductType {
   material: string;
   sellingPrice: number;
   imageUrl: string[];
+  quantity: number;
   quantityInBill: number;
   loaiSanPham: string;
 }
