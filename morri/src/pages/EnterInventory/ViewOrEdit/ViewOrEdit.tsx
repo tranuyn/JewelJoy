@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import "../style.css";
 import InputCpn from "../inputComponent";
-import ProductForm from "../ProductForm";
+import ProductForm from "./productForm";
 import CachedIcon from "@mui/icons-material/Cached";
 import { useParams } from "react-router-dom";
 import axios from "axios";
@@ -117,8 +117,6 @@ const ViewOrEdit: React.FC = () => {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          Authorization:
-            "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIyMjUyMDk1N0BjaHQuZWR1LnZuIiwiaWF0IjoxNzM2MTA4MjQzLCJyb2xlIjoiQURNSU4iLCJleHAiOjE3MzYxNDQyNDN9.PIPD7WdlZbGCC2bvnk_5KKjGsjDlT51FfPfu0HJ-GUk",
         },
       });
       if (!response.ok) {
@@ -167,7 +165,9 @@ const ViewOrEdit: React.FC = () => {
   };
   return (
     <div className="enter-inventory-page">
-      <div>Mã phiếu nhập kho: {formData?.id}</div>
+      <div className="formTitlePP" style={{ color: "#EFB26A" }}>
+        Mã phiếu nhập kho: {formData?.id}
+      </div>
       <div className="threeForm">
         <form className="formEnterContainer">
           <div className="formTitleE">Thông tin nhà cung cấp</div>
@@ -275,18 +275,11 @@ const ViewOrEdit: React.FC = () => {
         </form>
       </div>
 
-      {/* <div className="twoForm">
+      <div className="twoForm">
         {formProductData.map((data, arrayIndex) => (
-          <ProductForm
-            key={`product-form-${arrayIndex}`}
-            index={arrayIndex + 1}
-            addProductForm={addProductForm}
-            removeForm={removeForm}
-            formProductData={data}
-            setProductFormData={setProductFormData}
-          />
+          <ProductForm formProductData={data} />
         ))}
-      </div> */}
+      </div>
 
       <div className="submit-btn">
         <div style={{ flex: 1 }}></div>

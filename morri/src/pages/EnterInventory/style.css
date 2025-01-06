@@ -26,6 +26,13 @@
   text-align: center;
   flex: 1;
 }
+.formTitlePP {
+  color: #354665;
+  font-size: 18px;
+  font-weight: 600;
+  margin: 10px 10px;
+  text-align: center;
+}
 .threeForm {
   display: grid;
   grid-template-columns: repeat(3, 1fr);

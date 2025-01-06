@@ -9,6 +9,8 @@ import BorderColorIcon from "@mui/icons-material/BorderColor";
 import DeleteIcon from "@mui/icons-material/Delete";
 import FeedIcon from "@mui/icons-material/Feed";
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { useAuth } from "../../services/useAuth";
 export interface Column {
   id:
     | "id"
@@ -79,6 +81,7 @@ const HistoryEI: React.FC = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [deleteName, setDeleteName] = useState("");
   const [loading, setLoading] = useState(false);
+  const { token } = useAuth();
   const navigate = useNavigate();
 
   const handleConfirmDelete = async () => {
@@ -107,19 +110,27 @@ const HistoryEI: React.FC = () => {
     return `${formattedDate}\n${formattedTime}`; // Kết hợp ngày và giờ với xuống dòng
   };
 
+  const { logout } = useAuth();
+
+  const handleLogout = () => {
+    logout();
+    // navigate("/login");
+  };
   const fetchData = async () => {
     try {
       const response = await fetch("http://localhost:8081/inventory", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          Authorization:
-            "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIyMjUyMDk1N0BjaHQuZWR1LnZuIiwiaWF0IjoxNzM2MTA4MjQzLCJyb2xlIjoiQURNSU4iLCJleHAiOjE3MzYxNDQyNDN9.PIPD7WdlZbGCC2bvnk_5KKjGsjDlT51FfPfu0HJ-GUk",
         },
       });
+      console.log("token" + token);
 
       if (!response.ok) {
-        console.log(await response.json());
+        if (response.status === 403) {
+          handleLogout();
+        }
+        console.log("hehe" + (await response.json()));
         throw new Error("Không thể tải dữ liệu đơn hàng!");
       }
 

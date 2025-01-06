@@ -5,7 +5,7 @@ import { useCallback } from "react";
 
 export const useAuth = () => {
   const dispatch = useAppDispatch();
-  const { user, isAuthenticated, loading, error } = useAppSelector(
+  const { user, isAuthenticated, loading, error, token } = useAppSelector(
     (state: RootState) => state.auth
   );
 
@@ -29,6 +29,7 @@ export const useAuth = () => {
     isAuthenticated,
     loading,
     error,
+    token,
     login: loginUser,
     logout: logoutUser,
     validateAuthStatus,
