@@ -90,3 +90,8 @@
   border-width: 1px; /* Added 'px' for units */
   border-style: solid; /* Specify the border style */
 }
+.serviceGrid3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* 4 columns by default */
+  gap: 10px; /* Space between items */
+}
