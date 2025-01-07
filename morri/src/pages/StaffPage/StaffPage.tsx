@@ -8,10 +8,11 @@ import DeleteComponent from "../../component/DeleteComponent/DeleteComponent";
 import Header from "../../component/Title_header/Header";
 import AddStaffForm from "./addStaffPage"; 
 import Snackbar from "../../component/Snackbar/Snackbar";
-// import UpdateStaffForm from "./updateStaffPage";
-import UpdateStaffForm, { UpdateStaffData } from "./updateStaffPage";
+import UpdateStaffForm from "./updateStaffPage";
+import axios from "axios";
 
-interface Staff {
+
+export interface Staff {
   id: string;
   username: string;
   email: string;
@@ -28,8 +29,10 @@ interface Staff {
 }
 
 const columns = [
+  // { field: "ID", headerName: "ID nhân viên" },
   { field: "name", headerName: "Tên nhân viên" },
   { field: "username", headerName: "Tên đăng nhập" },
+  { field: "email", headerName: "Email" },
   { field: "dateOfBirth", headerName: "Ngày sinh" },
   { field: "phoneNumber", headerName: "SDT" },
   { field: "role", headerName: "Chức vụ" },
@@ -42,14 +45,17 @@ type SnackbarSeverity = "success" | "error" | "warning" | "info";
 
 const StaffPage: React.FC = () => {
   const [staffs, setStaffs] = useState<Staff[]>([]);
+  const [filteredStaffs, setFilteredStaffs] = useState<Staff[]>([]);
+
   const [searchKeyword, setSearchKeyword] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isModalUpdateOpen, setIsModalUpdateOpen] = useState(false);
-  const [selectedStaff, setSelectedStaff] = useState<Staff | null>(null);
+   const [staffID, setStaffID] = useState("");
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState<SnackbarSeverity>("info");
+  const [rowClicked, setRowClicked] = useState<Staff | null>(null);
 
   useEffect(() => {
     fetchStaffs();
@@ -57,6 +63,37 @@ const StaffPage: React.FC = () => {
 
   const handleCloseSnackbar = () => {
     setSnackbarVisible(false);
+  };
+
+  useEffect(() => {
+    filterStaffs();
+  }, [searchKeyword, staffs]);
+  const filterStaffs = () => {
+    if (!searchKeyword.trim()) {
+      setFilteredStaffs(staffs);
+      return;
+    }
+
+    const keyword = searchKeyword.toLowerCase().trim();
+    const filtered = staffs.filter((staff) => {
+      return (
+        staff.name.toLowerCase().includes(keyword) || staff.username.toLowerCase().includes(keyword) ||
+        staff.email?.toLowerCase().includes(keyword) ||
+        staff.phoneNumber?.toLowerCase().includes(keyword) ||
+        staff.id.toLowerCase().includes(keyword) ||
+        formatDate(staff.dateOfBirth).toLowerCase().includes(keyword) ||
+        formatDate(staff.ngayVaoLam)
+          .toLowerCase()
+          .includes(keyword) ||
+        (staff.gender === "MALE" ? "Nam" : "Nữ")
+          .toLowerCase()
+          .includes(keyword) || (staff.role === "SALE_STAFF" ? "Nhân viên bán hàng" : "Nhân viên kho")
+          .toLowerCase()
+          .includes(keyword)
+      );
+    });
+
+    setFilteredStaffs(filtered);
   };
 
   const fetchStaffs = async () => {
@@ -95,43 +132,50 @@ const StaffPage: React.FC = () => {
     }).format(Number(salary));
   };
 
-  const transformedData = staffs.map((staff) => ({
+  const transformedData = filteredStaffs.map((staff) => ({
+    ID: staff.id,
     name: staff.name,
     username: staff.username,
+    email: staff.email || "N/A",
     dateOfBirth: formatDate(staff.dateOfBirth),
-    phoneNumber: staff.phoneNumber,
+    phoneNumber: staff.phoneNumber || "N/A",
     role: formatRole(staff.role),
     gender: staff.gender === "MALE" ? "Nam" : "Nữ",
     ngayVaoLam: formatDate(staff.ngayVaoLam),
     luongCoBan: formatSalary(staff.luongCoBan),
   }));
+  
   const handleSearch = (value: string) => {
-    setSearchKeyword(value.toLowerCase());
+    // setSearchKeyword(value.toLowerCase());
+    setSearchKeyword(value);
   };
 
   const handleDelete = async (): Promise<void> => {
     try {
-      if (selectedStaff) {
-        const response = await fetch(`http://localhost:8080/user/${selectedStaff.id}`, {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-
-        if (response.ok) {
-          setSnackbarSeverity("success");
-          setSnackbarMessage("Xóa nhân viên thành công!");
-          setSnackbarVisible(true);
-          setIsDeleteModalOpen(false);
-          await fetchStaffs();
-        } else {
-          throw new Error("Failed to delete staff");
-        }
-      } else {
+      if (!rowClicked) {
         setSnackbarSeverity("error");
         setSnackbarMessage("Vui lòng chọn nhân viên để xóa!");
         setSnackbarVisible(true);
+        setIsDeleteModalOpen(false);
+        return;
+      }
+
+      const response = await fetch(`http://localhost:8081/user/${rowClicked.id}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (response.ok) {
+        setSnackbarSeverity("success");
+        setSnackbarMessage("Xóa nhân viên thành công!");
+        setSnackbarVisible(true);
+        setIsDeleteModalOpen(false);
+        await fetchStaffs();
+        setRowClicked(null); // Reset selected row after successful deletion
+      } else {
+        throw new Error("Failed to delete staff");
       }
     } catch (error) {
       setSnackbarSeverity("error");
@@ -141,6 +185,11 @@ const StaffPage: React.FC = () => {
     }
   };
 
+  const formatToISODate = (dateString: string | number) => {
+    if (!dateString) return null;
+    const date = new Date(dateString);
+    return date.toISOString().split("T")[0] + "T00:00:00";
+  };
   const handleAdd = async (formData: {
     name: string | number;
     username: string | number;
@@ -156,80 +205,115 @@ const StaffPage: React.FC = () => {
     role: string | number; }
   ): Promise<void> => {
     try {
-      console.log("formdata:", formData);
-      const formatDate = (dateString: string | number) => {
-        if (typeof dateString === 'string') {
-            return dateString + 'T00:00:00';
-        }
-        return dateString;
+      const token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIyMjUyMDk1N0BjaHQuZWR1LnZuIiwiaWF0IjoxNzM2MTYwMjc2LCJyb2xlIjoiQURNSU4iLCJleHAiOjE3MzYxOTYyNzZ9.vIkMqbErDcLNjw0BlxnsI9GyVHWqnWegX5LzGIxUIkk";
+
+      console.log("formdata:", JSON.stringify(formData)); 
+      const requestData = {
+        name: formData.name,
+        username: formData.username,
+        email: formData.email || undefined,
+        dateOfBirth: formatToISODate(formData.dateOfBirth),
+        phoneNumber: formData.phoneNumber,
+        password: formData.password,
+        role: formData.role,
+        gender: formData.gender === "Nam" ? "MALE" : "FEMALE",   
+        ngayVaoLam: formData.ngayVaoLam ? formatToISODate(formData.ngayVaoLam) : null,
+        luongCoBan: formData.luongCoBan,
+        cccd: formData.cccd,
+        address: formData.address
     };
 
-      const response = await fetch("http://localhost:8081/user/create", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name: formData.name,
-          username: formData.username,
-          email: formData.email,
-          dateOfBirth:  formData.ngayVaoLam ? formatDate(formData.dateOfBirth) : undefined  ,
-          phoneNumber: formData.phoneNumber,
-          password: formData.password,
-          role: formData.role,
-          gender: formData.gender,
-          ngayVaoLam: formData.ngayVaoLam ? formatDate(formData.ngayVaoLam) : undefined,
-          luongCoBan: formData.luongCoBan,
-        }),
-      });
-      console.log("response :", response);
+    console.log("Request data:", requestData);
 
- 
-      if (response.ok) {
+    const axiosConfig = {
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/json'
+        },
+        validateStatus: function (status: number) {
+            return status >= 200 && status < 300;  
+        }
+    };
+
+    const response = await axios.post(
+        'http://localhost:8081/user/create',
+        requestData,
+        axiosConfig
+    );
+
+    console.log("Response:", response.data);
+
+    if (response.status === 200 || response.status === 201) {
         setSnackbarSeverity("success");
         setSnackbarMessage("Thêm nhân viên thành công!");
         setSnackbarVisible(true);
         setIsModalOpen(false);
         await fetchStaffs();
-      } else {
-        throw new Error("Failed to add staff");
-      }
+    }
     } catch (error) {
       setSnackbarSeverity("error");
       setSnackbarMessage("Lỗi khi thêm nhân viên!");
       setSnackbarVisible(true);
+      console.log("error", error)
       setIsModalOpen(false);
     }
   }; 
 
-  const handleUpdate = async (formData: UpdateStaffData ): Promise<void> => {
-    try {
-      if (selectedStaff) {
-        const response = await fetch(`http://localhost:8081/user/${selectedStaff.id}`, {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(formData),
-        });
+  // const handleUpdate = async (formData: UpdateStaffData ): Promise<void> => {
+  //   try {
+  //     if (selectedStaff) {
+  //       const response = await fetch(`http://localhost:8081/user/${selectedStaff.id}`, {
+  //         method: "PATCH",
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //         },
+  //         body: JSON.stringify(formData),
+  //       });
   
-        if (response.ok) {
-          setSnackbarSeverity("success");
-          setSnackbarMessage("Cập nhật nhân viên thành công!");
-          setSnackbarVisible(true);
-          setIsModalUpdateOpen(false);
-          await fetchStaffs();
-        } else {
-          throw new Error("Failed to update staff");
-        }
+  //       if (response.ok) {
+  //         setSnackbarSeverity("success");
+  //         setSnackbarMessage("Cập nhật nhân viên thành công!");
+  //         setSnackbarVisible(true);
+  //         setIsModalUpdateOpen(false);
+  //         await fetchStaffs();
+  //       } else {
+  //         throw new Error("Failed to update staff");
+  //       }
+  //     }
+  //   } catch (error) {
+  //     setSnackbarSeverity("error");
+  //     setSnackbarMessage("Lỗi khi cập nhật nhân viên!");
+  //     setSnackbarVisible(true);
+  //     setIsModalUpdateOpen(false);
+  //   }
+  // };
+
+  const handleUpdate = async (): Promise<void> => {
+    try {
+      const response = await fetch(`http://localhost:8081/user/`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({}),
+      });
+
+      if (response.ok) {
+        setSnackbarSeverity("success");
+        setSnackbarMessage("Cập nhật nhân viên thành công!");
+        setSnackbarVisible(true);
+        setIsModalUpdateOpen(false);
+        await fetchStaffs();
       }
     } catch (error) {
       setSnackbarSeverity("error");
-      setSnackbarMessage("Lỗi khi cập nhật nhân viên!");
+      setSnackbarMessage("Error cập nhật nhân viên!");
       setSnackbarVisible(true);
       setIsModalUpdateOpen(false);
     }
   };
+
 
   return (
     <div className="staff-management">
@@ -258,23 +342,31 @@ const StaffPage: React.FC = () => {
       <TableComponent
         columns={columns}
         data={transformedData}
-        // onRowClick={(row) => setSelectedStaff(staffs.find(staff => staff.id === row.id) || null)}
-        // onEdit={(row) => {
-        //   setSelectedStaff(staffs.find(staff => staff.id === row.id) || null);
-        //   setIsModalUpdateOpen(true);
-        // }}
-        // onDelete={(row) => {
-        //   setSelectedStaff(staffs.find(staff => staff.id === row.id) || null);
-        //   setIsDeleteModalOpen(true);
-        // }}
-        onRowClick={(row) => console.log("Row clicked:", row)}
-          // onEdit={(row) => setIsModalUpdateOpen(true)}
-          onEdit={(row) => {
-            const staffToEdit = staffs.find(staff => staff.id === row.id) || null;
-            console.log("editting", staffToEdit);
-            setSelectedStaff(staffToEdit);
-            setIsModalUpdateOpen(true);
-          }}
+        // onRowClick={(row) => console.log("Row clicked:", row)}
+        //   onEdit={(row) => {
+        //     const staffToEdit = staffs.find(staff => staff.id === row.id) || null;
+        //     console.log("editting", staffToEdit);
+        //     setSelectedStaff(staffToEdit);
+        //     setIsModalUpdateOpen(true);
+        //   }}
+        onRowClick={(row) =>
+          setRowClicked({
+            id: row.ID,
+            name: row.name,
+            username: row.username,
+            email: row.email,
+            dateOfBirth: row.dateOfBirth,
+            phoneNumber: row.phoneNumber,
+            role: row.role,
+            gender: row.gender === "Nam" ? "MALE" : "FEMALE",
+            ngayVaoLam: row.ngayVaoLam,
+            luongCoBan: row.luongCoBan,
+            cccd: row.cccd || '',
+            address: row.address || '', 
+            avaURL: row.avaURL || null,
+          })
+        }
+        onEdit={(row) => setIsModalUpdateOpen(true)}
           onDelete={(row) => setIsDeleteModalOpen(true)}
       />
 
@@ -284,22 +376,18 @@ const StaffPage: React.FC = () => {
         handleAdd={handleAdd}
       />
 
-      {selectedStaff && (
-        <>
           <UpdateStaffForm
             isModalOpen={isModalUpdateOpen}
             setIsModalOpen={setIsModalUpdateOpen}
-            staffData={selectedStaff}
+            initialData={rowClicked}
             handleUpdate={handleUpdate}
           />
           <DeleteComponent
             isModalOpen={isDeleteModalOpen}
             setIsModalOpen={setIsDeleteModalOpen}
-            deleteName={selectedStaff.name}
+            deleteName={rowClicked?.name || ''}
             handleDelete={handleDelete}
           />
-        </>
-      )}
 
       <Snackbar
         snackbarSeverity={snackbarSeverity}

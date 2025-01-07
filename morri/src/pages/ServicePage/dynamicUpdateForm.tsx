@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Box, Modal } from "@mui/material";
 import TextBox from "../../component/TextBox/TextBox";
 import BtnComponent from "../../component/BtnComponent/BtnComponent";
@@ -6,11 +6,12 @@ import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
 import { uploadImages } from "../../services/cloudinaryService";
 import { Service } from "../ServicePage/ServicePage";
 
-interface DynamicAddFormProps {
+interface DynamicUpdateFormProps {
   isModalOpen: boolean;
   setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
   formType: string;
-  updateServices: (newService: Service) => void;
+  handleUpdate: (updatedService: Service) => Promise<void>;
+  currentData?: any;
 }
 
 interface ServiceFormData {
@@ -20,14 +21,20 @@ interface ServiceFormData {
   price: string;
 }
 
-const DynamicAddForm: React.FC<DynamicAddFormProps> = ({
+const formatDateToISO = (date: string): string => {
+  const [day, month, year] = date.split('/');
+  return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+};
+
+const DynamicUpdateForm: React.FC<DynamicUpdateFormProps> = ({
   isModalOpen,
   setIsModalOpen,
   formType,
-  updateServices,
+  handleUpdate,
+  currentData
 }) => {
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
-  const [imageFile, setImageFile] = useState<File | null>(null); // Lưu file ảnh
+  const [selectedImage, setSelectedImage] = useState<string | null>("https://via.placeholder.com/50");
+  const [imageFile, setImageFile] = useState<File | null>(null);
   const [formData, setFormData] = useState<ServiceFormData>({
     serviceName: "",
     serviceDescription: "",
@@ -36,10 +43,27 @@ const DynamicAddForm: React.FC<DynamicAddFormProps> = ({
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  useEffect(() => {
+    // Set the initial image if currentData has a serviceUrl
+  //   if (currentData?.serviceUrl) {
+  //     setSelectedImage(currentData.serviceUrl);
+  //   }
+  // }, [currentData]);
+  if (currentData) {
+    setFormData({
+      serviceName: currentData.serviceName || "",
+      serviceDescription: currentData.serviceDescription || "",
+      serviceUrl: currentData.serviceUrl || null,
+      price: currentData.price?.toString() || "",
+    });
+    setSelectedImage(currentData.serviceUrl || "https://via.placeholder.com/50");
+  }
+}, [currentData]);
+
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      setImageFile(file); // Lưu file để upload
+      setImageFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
         setSelectedImage(reader.result as string);
@@ -54,44 +78,77 @@ const DynamicAddForm: React.FC<DynamicAddFormProps> = ({
     setIsSubmitting(true);
 
     try {
-      // Upload hình ảnh lên Cloudinary trước
-      let uploadedImageUrl = null;
+      let uploadedImageUrl = selectedImage;
       if (imageFile) {
         uploadedImageUrl = await uploadImages(imageFile);
         if (!uploadedImageUrl) throw new Error("Failed to upload image");
       }
+      const updates: Partial<Service> = {
+        id: currentData.id, // Keep the original ID
+        serviceName: formData.serviceName,
+        serviceDescription: formData.serviceDescription,
+        serviceUrl: uploadedImageUrl,
+        price: parseFloat(formData.price)
+      };
 
-      // Gửi dữ liệu dịch vụ lên server
-      const response = await fetch("http://localhost:8081/service/create", {
-        method: "POST",
+      
+      // Only include changed fields
+      if (formData.serviceName !== currentData.serviceName) {
+        updates.serviceName = formData.serviceName;
+      }
+      if (formData.serviceDescription !== currentData.serviceDescription) {
+        updates.serviceDescription = formData.serviceDescription;
+      }
+      if (uploadedImageUrl !== currentData.serviceUrl) {
+        updates.serviceUrl = uploadedImageUrl;
+      }
+      if (formData.price !== currentData.price?.toString()) {
+        updates.price = parseFloat(formData.price);
+      }
+
+      // const response = await fetch("http://localhost:8081/service/create", {
+      //   method: "POST",
+      //   headers: {
+      //     "Content-Type": "application/json",
+      //   },
+      //   body: JSON.stringify({
+      //     serviceName: formData.serviceName,
+      //     serviceDescription: formData.serviceDescription,
+      //     serviceUrl: uploadedImageUrl,
+      //     price: parseFloat(formData.price),
+      //   }),
+      // });
+      const response = await fetch(`http://localhost:8081/service/${currentData.id}`, {
+        method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          serviceName: formData.serviceName,
-          serviceDescription: formData.serviceDescription,
-          serviceUrl: uploadedImageUrl,
-          price: parseFloat(formData.price),
-        }),
+        body: JSON.stringify(updates),
       });
-
       if (!response.ok) {
         throw new Error("Failed to create service");
       }
 
-      const newService = await response.json(); // Lấy dịch vụ mới từ server
-     
-      updateServices(newService);
-      // Reset form và đóng modal
-      setFormData({
-        serviceName: "",
-        serviceDescription: "",
-        serviceUrl: null,
-        price: "",
-      });
-      setSelectedImage(null);
-      setImageFile(null);
+      if (!response.ok) {
+        throw new Error("Failed to update service");
+      }
+
+      const updatedService = await response.json();
+      
+      // Call the handleUpdate prop with the updated service
+      await handleUpdate(updatedService);
+      
       setIsModalOpen(false);
+      
+      // Reset form and close modal
+      // setFormData({
+      //   serviceName: "",
+      //   serviceDescription: "",
+      //   serviceUrl: null,
+      //   price: "",
+      // });
+      // setSelectedImage("https://via.placeholder.com/50");
+      // setImageFile(null);
     } catch (error) {
       console.error("Error creating service:", error);
       alert("Failed to create service. Please try again.");
@@ -129,14 +186,12 @@ const DynamicAddForm: React.FC<DynamicAddFormProps> = ({
                 overflow: "hidden",
               }}
             >
-              {selectedImage ? (
+              {selectedImage && (
                 <img
                   src={selectedImage}
                   alt="Selected"
                   style={{ width: "100%", height: "100%", objectFit: "cover" }}
                 />
-              ) : (
-                <Box sx={{ width: "100%", height: "100%", backgroundColor: "#E0E0E0" }} />
               )}
             </Box>
             <label htmlFor="upload-photo">
@@ -173,24 +228,71 @@ const DynamicAddForm: React.FC<DynamicAddFormProps> = ({
               title="Tên dịch vụ *"
               placeholder="Nhập tên dịch vụ"
               onChange={(value) => handleInputChange("serviceName", value)}
-              value={formData.serviceName}
+              defaultValue={currentData?.serviceName || ""}
             />
             <TextBox
               datatype="number"
               title="Số tiền *"
               placeholder="Nhập số tiền"
               onChange={(value) => handleInputChange("price", value)}
-              value={formData.price}
+              defaultValue={currentData?.price || ""}
             />
             <TextBox
               datatype="string"
               title="Mô tả"
               placeholder="Nhập mô tả dịch vụ"
               onChange={(value) => handleInputChange("serviceDescription", value)}
-              value={formData.serviceDescription}
+              defaultValue={currentData?.serviceDescription || ""}
             />
           </Box>
         </Box>
+      );
+    } else if (formType === "Đặt lịch") {
+      return (
+        <>
+          <TextBox
+            datatype="string"
+            title="Tên khách hàng *"
+            placeholder="Nhập tên khách hàng"
+            onChange={(value) => {}}
+            defaultValue={currentData?.customerName || ""}
+          />
+          <TextBox
+            datatype="string"
+            title="Số điện thoại *"
+            placeholder="Nhập số điện thoại"
+            onChange={(value) => {}}
+            defaultValue={currentData?.phoneNumber || ""}
+          />
+          <TextBox
+            datatype="string"
+            title="Mã dịch vụ *"
+            placeholder="Nhập mã dịch vụ"
+            onChange={(value) => {}}
+            defaultValue={currentData?.serviceCode || ""}
+          />
+          <TextBox
+            datatype="string"
+            title="Giới tính"
+            placeholder="Nhập giới tính"
+            onChange={(value) => {}}
+            defaultValue={currentData?.gender || ""}
+          />
+          <TextBox
+            datatype="date"
+            title="Ngày đăng ký *"
+            placeholder="Chọn ngày đăng ký"
+            onChange={(value) => {}}
+            defaultValue={currentData?.registrationDate ? formatDateToISO(currentData.registrationDate) : ""}
+          />
+          <TextBox
+            datatype="string"
+            title="Tình trạng dịch vụ *"
+            placeholder="Nhập tình trạng dịch vụ"
+            onChange={(value) => {}}
+            defaultValue={currentData?.serviceStatus || ""}
+          />
+        </>
       );
     }
     return null;
@@ -226,7 +328,7 @@ const DynamicAddForm: React.FC<DynamicAddFormProps> = ({
             marginBottom: "20px",
           }}
         >
-          Thêm {formType}
+          Cập nhật {formType}
         </div>
         {renderFormFields()}
         <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2, marginTop: 3 }}>
@@ -237,7 +339,7 @@ const DynamicAddForm: React.FC<DynamicAddFormProps> = ({
           />
           <BtnComponent
             btnColorType="primary"
-            btnText="Thêm"
+            btnText="Cập nhật"
             onClick={handleSubmit}
             disabled={isSubmitting}
           />
@@ -247,4 +349,4 @@ const DynamicAddForm: React.FC<DynamicAddFormProps> = ({
   );
 };
 
-export default DynamicAddForm;
+export default DynamicUpdateForm;
