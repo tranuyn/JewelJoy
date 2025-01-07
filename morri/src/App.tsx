@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import "./App.css";
 import { ROLES } from "./constants/roles";
+import ResetPassword from "./pages/ResetPassword/ResetPassword";
 import Unauthorization from "./pages/Unauthorization/Unauthorization";
 import { AdminRoutes } from "./routes/AdminRoutes";
 import { CustomerRoutes } from "./routes/CustomerRoutes";
@@ -9,7 +10,6 @@ import { InventoryStaffRoutes } from "./routes/InventoryStaffRoutes";
 import { PublicRoutes } from "./routes/PublicRoutes";
 import { SalesStaffRoutes } from "./routes/SalesStaffRoutes";
 import { useAuth } from "./services/useAuth";
-import { validateAuth } from "./redux/slice/authSlice";
 
 function App() {
   const { isAuthenticated, user, validateAuthStatus } = useAuth();
@@ -23,6 +23,8 @@ function App() {
       <BrowserRouter>
         <Routes>
           {PublicRoutes()}
+          <Route path="/reset-password/:token" element={<ResetPassword />} />
+
           <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
       </BrowserRouter>

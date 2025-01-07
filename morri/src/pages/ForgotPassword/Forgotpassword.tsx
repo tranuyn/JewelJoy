@@ -1,106 +1,51 @@
 import { Box, Button, TextField, Typography } from "@mui/material";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import loginImage from "../../assets/constant/login.jpg";
-import { useAuth } from "../../services/useAuth";
+import { authService } from "../../services/authService";
 import "./Forgotpassword.css";
 
-interface LoginFormState {
-  email: string;
-  password: string;
-  showPassword: boolean;
-  rememberMe: boolean;
-  emailError: string;
-  passwordError: string;
-}
-
 const ForgotPassword: React.FC = () => {
-  const { login, isAuthenticated, loading, error } = useAuth();
   const navigate = useNavigate();
-
-  const [formState, setFormState] = useState<LoginFormState>({
-    email: "",
-    password: "",
-    showPassword: false,
-    rememberMe: false,
-    emailError: "",
-    passwordError: "",
-  });
-  useEffect(() => {
-    const remembered = localStorage.getItem("rememberMe") === "true";
-    if (remembered) {
-      setFormState((prev) => ({ ...prev, rememberMe: true }));
-    }
-  }, []);
-  useEffect(() => {
-    if (isAuthenticated) {
-      navigate("/home");
-    }
-  }, [isAuthenticated, navigate]);
+  const [email, setEmail] = useState("");
+  const [emailError, setEmailError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
+  const [error, setError] = useState("");
 
   const validateEmail = (email: string): boolean => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   };
 
-  const validatePassword = (password: string): boolean => {
-    return password.length >= 6;
+  const handleEmailChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value;
+    setEmail(value);
+    if (value && !validateEmail(value)) {
+      setEmailError("Email không hợp lệ");
+    } else {
+      setEmailError("");
+    }
   };
-
-  const validateForm = (): boolean => {
-    const emailError = !validateEmail(formState.email)
-      ? "Email không hợp lệ"
-      : "";
-    const passwordError = !validatePassword(formState.password)
-      ? "Mật khẩu phải có ít nhất 6 ký tự"
-      : "";
-
-    setFormState((prev) => ({
-      ...prev,
-      emailError,
-      passwordError,
-    }));
-
-    return !emailError && !passwordError;
-  };
-
-  const handleChange =
-    (prop: keyof LoginFormState) =>
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      const value = event.target.value;
-      setFormState((prev) => ({
-        ...prev,
-        [prop]: value,
-        ...(prop === "email" && {
-          emailError:
-            value && !validateEmail(value) ? "Email không hợp lệ" : "",
-        }),
-        ...(prop === "password" && {
-          passwordError:
-            value && !validatePassword(value)
-              ? "Mật khẩu phải có ít nhất 6 ký tự"
-              : "",
-        }),
-      }));
-    };
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-
-    if (!validateForm()) {
+    
+    if (!validateEmail(email)) {
+      setEmailError("Email không hợp lệ");
       return;
     }
 
+    setLoading(true);
+    setError("");
+    setSuccessMessage("");
+
     try {
-      await login({
-        email: formState.email,
-        password: formState.password,
-      });
-    } catch (err) {
-      console.error("Login failed:", err);
-      setFormState((prev) => ({
-        ...prev,
-        passwordError: "Invalid email or password",
-      }));
+      const result = await authService.forgotPassword(email);
+    
+    } catch (err: any) {
+      setError(err.message || "Email bạn nhập chưa đúng!");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -116,7 +61,6 @@ const ForgotPassword: React.FC = () => {
             <Typography
               component="h1"
               variant="h4"
-              //className="login-title"
               className="login-title forgot-title"
               style={{ fontWeight: 1700 }}
             >
@@ -136,10 +80,10 @@ const ForgotPassword: React.FC = () => {
                   label="Email"
                   placeholder="Nhập email"
                   variant="outlined"
-                  value={formState.email}
-                  onChange={handleChange("email")}
-                  error={!!formState.emailError.trim()}
-                  helperText={formState.emailError || " "}
+                  value={email}
+                  onChange={handleEmailChange}
+                  error={!!emailError}
+                  helperText={emailError || " "}
                   className="form-field"
                   InputProps={{
                     style: { minHeight: "40px" },
@@ -162,18 +106,27 @@ const ForgotPassword: React.FC = () => {
                 </Typography>
               </Box>
 
+              {successMessage && (
+                <Typography style={{ color: "green", marginBottom: "16px" }}>
+                  {successMessage}
+                </Typography>
+              )}
+
+              {error && (
+                <Typography style={{ color: "red", marginBottom: "16px" }}>
+                  {error}
+                </Typography>
+              )}
+
               <Button
                 type="submit"
                 fullWidth
                 variant="contained"
                 className="login-button"
+                disabled={loading}
               >
-                {loading ? "Đang gửi thông tin" : "Gửi"}
+                {loading ? "Đang gửi thông tin..." : "Gửi"}
               </Button>
-
-              {error && (
-                <p style={{ color: "red" }}>Email bạn nhập chưa đúng!</p>
-              )}
 
               <Typography
                 variant="body2"
@@ -196,4 +149,5 @@ const ForgotPassword: React.FC = () => {
     </Box>
   );
 };
+
 export default ForgotPassword;

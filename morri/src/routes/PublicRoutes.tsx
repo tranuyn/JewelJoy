@@ -3,6 +3,7 @@ import { Route } from "react-router-dom";
 import CartPage from "../pages/CartPage/CartPage";
 import Forgotpassword from "../pages/ForgotPassword/Forgotpassword";
 import Login from "../pages/LoginPage/LoginPage";
+import ResetPassword from "../pages/ResetPassword/ResetPassword";
 import {
   default as Register,
   default as Registration,
@@ -21,6 +22,7 @@ export const PublicRoutes = () => {
     <>
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+      <Route path="/reset-password/*" element={<ResetPassword />} />
 
       <Route path="/registeration" element={<Registration />} />
       <Route path="/forgotpassword" element={<Forgotpassword />} />
