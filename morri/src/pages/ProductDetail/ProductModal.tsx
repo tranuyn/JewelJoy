@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./style.css";
 import InputCpn from "../EnterInventory/inputComponent";
-import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
-import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
-import CachedIcon from "@mui/icons-material/Cached";
+import { uploadImages } from "../../services/cloudinaryService";
 
 interface FormProductData {
   id: string;
@@ -14,22 +12,25 @@ interface FormProductData {
   sellingPrice: number;
   costPrice: number;
   status: string;
-  imageUrl: string[];
+  imageUrl: (string | null)[];
   loaiSanPham: string;
   quantity: number;
   enteredQuantity: number;
   weight: number;
   chiPhiPhatSinh: number;
-  images: File[];
+  images: (File | null)[];
 }
 
 interface ProductFormProps {
-  data: FormProductData; // Nhận dữ liệu từ cha
-  setData: React.Dispatch<React.SetStateAction<FormProductData[]>>;
+  data: FormProductData;
+  setData: React.Dispatch<React.SetStateAction<FormProductData | undefined>>;
 }
 
 const ProductForm: React.FC<ProductFormProps> = ({ data, setData }) => {
   const [isExist, setIsExist] = useState(false);
+  const [previewImages, setPreviewImages] = useState<(string | null)[]>(
+    data.imageUrl || []
+  );
   const [formData, setFormData] = useState<FormProductData>({
     id: data.id || "",
     name: data.name || "",
@@ -48,10 +49,9 @@ const ProductForm: React.FC<ProductFormProps> = ({ data, setData }) => {
     images: data.images || [],
   });
 
-  const [imagestemp, setImagestemp] = useState<string[]>([]);
-
   useEffect(() => {
-    setFormData(data); // Cập nhật khi dữ liệu từ cha thay đổi
+    setFormData(data);
+    setPreviewImages(data.imageUrl || []);
   }, [data]);
 
   const handleInputChange = (
@@ -65,16 +65,8 @@ const ProductForm: React.FC<ProductFormProps> = ({ data, setData }) => {
       ...prevData,
       [name]: value,
     }));
-
-    // setProductFormData((prevData) => {
-    //   const newData = [...prevData];
-    //   newData[index - 1] = {
-    //     ...newData[index - 1],
-    //     [name]: value,
-    //   };
-    //   return newData;
-    // });
   };
+
   const handleImageChange = async (
     e: React.ChangeEvent<HTMLInputElement>,
     imageIndex: number
@@ -82,24 +74,26 @@ const ProductForm: React.FC<ProductFormProps> = ({ data, setData }) => {
     const file = e.target.files?.[0];
     if (file) {
       const dataUrl = await readFileAsDataURL(file);
-      const newImages = [...imagestemp];
-      newImages[imageIndex] = dataUrl;
-      setImagestemp(newImages);
 
-      // Update the form data with new images array
-      // setProductFormData((prevData) => {
-      //   const newData = [...prevData];
-      //   const currentImages = newData[index - 1].images || []; // Lấy mảng hình ảnh hiện tại
+      // Cập nhật preview images
+      const newPreviewImages = [...previewImages];
+      newPreviewImages[imageIndex] = dataUrl;
+      setPreviewImages(newPreviewImages);
 
-      //   // Cập nhật mảng hình ảnh
-      //   newData[index - 1] = {
-      //     ...newData[index - 1],
-      //     images: [...currentImages, file], // Thêm file vào mảng images
-      //   };
-      //   return newData;
-      // });
+      // Cập nhật formData.images để lưu file mới
+      const newImages = [...(formData.images || [])];
+      newImages[imageIndex] = file;
+
+      setFormData((prev) => {
+        return {
+          ...prev!,
+          images: newImages,
+          imageUrl: newPreviewImages,
+        };
+      });
     }
   };
+
   const readFileAsDataURL = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -120,23 +114,97 @@ const ProductForm: React.FC<ProductFormProps> = ({ data, setData }) => {
     imageIndex: number
   ) => {
     e.preventDefault();
-    const newImages = [...imagestemp];
-    newImages.splice(imageIndex, 1); // Remove image at imageIndex
-    setImagestemp(newImages);
 
-    // Update the form data with new images array
-    // setProductFormData((prevData) => {
-    //   const newData = [...prevData];
-    //   const currentImages = newData[index - 1].images || []; // Lấy mảng hình ảnh hiện tại
+    // Xóa ảnh khỏi preview
+    const newPreviewImages = [...previewImages];
+    newPreviewImages.splice(imageIndex, 1);
+    newPreviewImages.push(null); // Thêm null vào cuối để giữ số lượng slot
+    setPreviewImages(newPreviewImages);
 
-    //   // Cập nhật mảng hình ảnh
-    //   newData[index - 1] = {
-    //     ...newData[index - 1],
-    //     images: currentImages.filter((_, idx) => idx !== imageIndex), // Lọc ra hình ảnh không cần thiết
-    //   };
-    //   return newData;
-    // });
+    // Cập nhật formData
+    const newImages = [...(formData.images || [])];
+    newImages.splice(imageIndex, 1);
+    newImages.push(null);
+    setFormData((prev) => ({
+      ...prev,
+      images: newImages,
+      imageUrl: newPreviewImages,
+    }));
   };
+
+  const uploadImageToUpdate1 = async (
+    previewImages: (string | null)[]
+  ): Promise<string[]> => {
+    const uploadedUrls = await Promise.all(
+      previewImages.map(async (image) => {
+        if (!image) return null;
+
+        if (image.startsWith("http://") || image.startsWith("https://")) {
+          return image;
+        }
+        try {
+          const response = await fetch(image);
+          const blob = await response.blob();
+          const file = new File([blob], "image.jpg", { type: "image/jpeg" });
+
+          const uploadedUrl = await uploadImages(file);
+          console.log("Response image" + uploadedUrl);
+          return uploadedUrl;
+        } catch (error) {
+          console.error("Error uploading image:", error);
+          return null;
+        }
+      })
+    );
+
+    // Lọc bỏ các giá trị null và trả về mảng URL
+    return uploadedUrls.filter((url): url is string => url !== null);
+  };
+
+  const updateProduct = async () => {
+    const new_imageUrl = await uploadImageToUpdate1(previewImages);
+    console.log("hehe");
+    const body = {
+      name: formData.name,
+      code: formData.code,
+      description: formData.description,
+      material: formData.material,
+      sellingPrice: formData.sellingPrice,
+      costPrice: formData.costPrice,
+      imageUrl: new_imageUrl,
+      loaiSanPham: formData.loaiSanPham,
+      quantity: formData.enteredQuantity,
+      weight: formData.weight,
+      chiPhiPhatSinh: formData.chiPhiPhatSinh,
+    };
+    console.log(body);
+
+    const response = await fetch(
+      `http://localhost:8081/jewelry/update/${formData.id}`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(body),
+      }
+    );
+
+    const jsonResponse = await response.json();
+    if (response.status === 200) {
+      setData((prevData) => ({
+        ...prevData,
+        imageUrl: jsonResponse.data.imageUrl.filter(
+          (url: string | null) => url !== null
+        ) as string[], // Lọc bỏ null
+        ...jsonResponse.data,
+      }));
+      alert("Cập nhật sản phẩm thành công!");
+      // setFormData(data);
+    } else alert("Cập nhật sản phẩm thất bại : " + response.status);
+    console.log("Response from API:", jsonResponse);
+  };
+
   return (
     <form className="formEnterContainer">
       <InputCpn
@@ -178,7 +246,6 @@ const ProductForm: React.FC<ProductFormProps> = ({ data, setData }) => {
           <label className="input-labelE">Nguyên liệu</label>
           <select
             className="input-fieldE"
-            defaultValue=""
             value={formData.material}
             name="material"
             onChange={handleInputChange}
@@ -257,19 +324,17 @@ const ProductForm: React.FC<ProductFormProps> = ({ data, setData }) => {
               className="img-inputp"
               onChange={(e) => handleImageChange(e, index)}
             />
-            {formData.imageUrl[index] && (
+            {previewImages[index] && (
               <div className="img-container">
                 <img
-                  src={formData.imageUrl[index] || ""}
+                  src={previewImages[index] || ""}
                   alt={`Selected preview ${index}`}
                   className="img-preview"
                 />
                 <div className="delete-overlay">
                   <button
                     className="delete-btn"
-                    onClick={(e) => {
-                      handleDeleteImage(e, index);
-                    }}
+                    onClick={(e) => handleDeleteImage(e, index)}
                   >
                     Xóa
                   </button>
@@ -279,6 +344,16 @@ const ProductForm: React.FC<ProductFormProps> = ({ data, setData }) => {
           </div>
         ))}
       </div>
+
+      <button
+        className="editbutoon"
+        onClick={(e) => {
+          e.preventDefault(); // Prevents the default form submission behavior
+          updateProduct(); // Call your upload function
+        }}
+      >
+        Cập nhật
+      </button>
     </form>
   );
 };

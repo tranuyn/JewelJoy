@@ -27,7 +27,23 @@ interface FormProductData {
 const ProductDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { isAuthenticated, user, validateAuthStatus } = useAuth();
-  const [product, setProduct] = useState<FormProductData | null>(null);
+  const [product, setProduct] = useState<FormProductData | undefined>({
+    id: "",
+    name: "",
+    code: "",
+    description: "",
+    material: "",
+    sellingPrice: 0,
+    costPrice: 0,
+    status: "",
+    imageUrl: [],
+    loaiSanPham: "",
+    quantity: 0,
+    enteredQuantity: 0,
+    weight: 0,
+    chiPhiPhatSinh: 0,
+    images: [],
+  });
   const [activeTab, setActiveTab] = useState("Tất cả");
   const [selectedImgIndex, setSelectedImgIndex] = useState(0);
   const [quantityToBuy, setQuantityToBuy] = useState(1);
@@ -70,18 +86,17 @@ const ProductDetail: React.FC = () => {
     setIsOpen(false);
   };
 
+  const fetchProduct = async () => {
+    try {
+      const response = await fetch(`http://localhost:8081/jewelry/${id}`);
+      const data = await response.json();
+      setProduct(data); // Giả sử data là thông tin sản phẩm
+    } catch (error) {
+      console.error("Error fetching product:", error);
+    }
+  };
   useEffect(() => {
     if (id) {
-      const fetchProduct = async () => {
-        try {
-          const response = await fetch(`http://localhost:8081/jewelry/${id}`);
-          const data = await response.json();
-          setProduct(data); // Giả sử data là thông tin sản phẩm
-        } catch (error) {
-          console.error("Error fetching product:", error);
-        }
-      };
-
       fetchProduct();
     }
   }, [id]);
@@ -250,8 +265,13 @@ const ProductDetail: React.FC = () => {
                 &times;
               </span>
             </div>
-            <ProductForm data={product} setData={() => console.log("hehe")} />
-            <button className="editbutoon">Cập nhật</button>
+            <ProductForm
+              data={product}
+              setData={() => {
+                closeModal();
+                fetchProduct();
+              }}
+            />
           </div>
         </div>
       )}

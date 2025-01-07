@@ -5,6 +5,7 @@ import ProductForm from "./productForm";
 import CachedIcon from "@mui/icons-material/Cached";
 import { useParams } from "react-router-dom";
 import axios from "axios";
+
 interface Staff {
   id: string;
   username: string;
@@ -59,19 +60,11 @@ const ViewOrEdit: React.FC = () => {
   const [canEdit, setCanEdit] = useState(false);
   const [formData, setFormData] = useState<FormData | null>(null);
   const { id } = useParams();
-  useEffect(() => {
-    if (id != undefined) fetchInfo(id);
-  }, []);
 
-  const handleInputChange = (
-    event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    // const { name, value } = event.target;
-    // setFormData((prevData) => ({
-    //   ...prevData,
-    //   [name]: value,
-    // }));
-  };
+  useEffect(() => {
+    if (id !== undefined) fetchInfo(id);
+    getStaff(); // Đảm bảo gọi hàm này để lấy danh sách nhân viên
+  }, [id]);
 
   const getStaff = async (): Promise<void> => {
     try {
@@ -89,25 +82,30 @@ const ViewOrEdit: React.FC = () => {
     }
   };
 
-  const handleSelectChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const staffId = event.target.value;
-    const staff1 = inventoryStaff.find((s) => s.id === staffId) || null;
-
-    // if (staff1) {
-    //    if (formData != null)
-    //   setFormData((prevData) => ({
-    //     ...prevData,
-    //     staffId: staff1.id,
-    //     staffName: staff1.name,
-    //     staffEmail: staff1.email,
-    //     staffPhone: staff1.phoneNumber, // Đảm bảo đúng tên khóa
-    //   }));
-    // }
-  };
-
-  const handleReloadClick = () => {
-    if (formData?.supplierPhone) {
-      fetchInfo(formData?.supplierPhone);
+  const handleReloadClick = async () => {
+    try {
+      const response = await fetch(
+        `http://localhost:8081/supplier/getSupplierByPhone/${formData?.supplierPhone}`
+      );
+      if (!response.ok) {
+        setIsSupplierExist(false);
+        throw new Error("Không thể lấy dữ liệu");
+      }
+      const data = await response.json();
+      setIsSupplierExist(true);
+      if (data) {
+        setFormData((prevData) => {
+          return {
+            ...prevData!,
+            supplierId: data.id,
+            supplierPhone: data.supplierPhone,
+            supplierName: data.supplierName,
+            supplierAddress: data.supplierAddress,
+          };
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching user data:", error);
     }
   };
 
@@ -123,6 +121,7 @@ const ViewOrEdit: React.FC = () => {
         throw new Error("Không thể lấy dữ liệu");
       }
       const data = await response.json();
+      console.log(data);
       setFormData({
         id: data.id,
         name: data.name,
@@ -153,20 +152,170 @@ const ViewOrEdit: React.FC = () => {
         loaiSanPham: item.product.loaiSanPham,
         quantity: item.product.quantity,
         weight: item.product.weight,
-        chiPhiPhatSinh: parseFloat(item.product.chiPhiPhatSinh), // Ensure it's a number
+        chiPhiPhatSinh: parseFloat(item.product.chiPhiPhatSinh),
         enteredQuantity: item.enteredQuantity,
-        images: [] as File[], // Set to an empty array or populate it as needed
+        images: [] as File[],
       }));
 
       setProductFormData(mappedProductData);
+      console.log("Ngay nhap kho", formData?.ngayNhapKho);
     } catch (error) {
       console.error("Error fetching user data:", error);
     }
   };
+
+  const handleSelectChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    if (!formData) return; // Kiểm tra formData để tránh lỗi khi formData là null
+    const selectedStaffId = event.target.value;
+
+    const selectedStaff = inventoryStaff.find(
+      (staff) => staff.id === selectedStaffId
+    );
+
+    if (selectedStaff) {
+      setFormData((prevData) => {
+        return {
+          ...prevData!,
+          staffId: selectedStaff.id, // Lưu ID nhân viên
+          staffName: selectedStaff.name, // Lưu tên nhân viên
+          staffEmail: selectedStaff.email, // Lưu email nhân viên
+          staffPhoneNumber: selectedStaff.phoneNumber, // Lưu số điện thoại nhân viên
+        };
+      });
+    }
+  };
+
+  const handleInputChange = (
+    event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    if (!formData) {
+      return; // Dừng lại, không tiếp tục với update
+    }
+
+    const { name, value } = event.target;
+
+    if (name === "dateEnter") {
+      // Nếu là trường ngày nhập, ta có thể xử lý nó tại đây nếu cần
+      const updatedValue = value ? value + "T00:00:00.000Z" : ""; // Tạo ra chuỗi ngày hợp lệ (thêm thời gian nếu cần)
+      setFormData((prevData) => {
+        if (prevData === null) {
+          return { ...formData, [name]: value };
+        }
+        return {
+          ...prevData, // Giữ lại các giá trị cũ
+          ngayNhapKho: updatedValue, // Cập nhật giá trị của trường cụ thể
+        };
+      });
+    } else {
+      setFormData((prevData) => {
+        if (prevData === null) {
+          return { ...formData, [name]: value };
+        }
+        return {
+          ...prevData, // Giữ lại các giá trị cũ
+          [name]: value, // Cập nhật giá trị của trường cụ thể
+        };
+      });
+    }
+
+    setFormData((prevData) => {
+      // Kiểm tra xem prevData có phải là null không
+      if (prevData === null) {
+        return { ...formData, [name]: value };
+      }
+      return {
+        ...prevData, // Giữ lại các giá trị cũ
+        [name]: value, // Cập nhật giá trị của trường cụ thể
+      };
+    });
+  };
+
+  const handleUpdate = async (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+    await createSupplier();
+    if (!formData?.staffEmail) {
+      alert(
+        "Thông tin nhân viên không hợp lệ. Vui lòng điền thông tin nhân viên."
+      );
+      return;
+    }
+    if (
+      !formData?.supplierAddress ||
+      !formData?.supplierName ||
+      !formData?.supplierPhone
+    ) {
+      alert(
+        "Thông tin Nhà cung cấp không hợp lệ. Vui lòng nhập đầy đủ thông tin Nhà cung cấp."
+      );
+      return;
+    }
+    setError(null);
+    // setOpen(true);
+
+    try {
+      const response = await fetch(
+        `http://localhost:8081/inventory/${formData.id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            supplier: formData.supplierId,
+            user: formData.staffId,
+            ngayNhapKho: formData.ngayNhapKho,
+            name: formData.name,
+            note: formData.note,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        alert("Tạo phiếu nhập kho thất bại: " + errorData.detail);
+        throw new Error("Không thể tạo ncc");
+      } else alert("Cập nhật phiếu nhập kho thành công");
+    } catch (error) {
+      alert(error);
+    }
+    // setOpen(false);
+  };
+
+  const createSupplier = async () => {
+    try {
+      const response = await fetch("http://localhost:8081/supplier/create", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          supplierName: formData?.supplierName,
+          supplierPhone: formData?.supplierPhone,
+          supplierAddress: formData?.supplierAddress,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Không thể tạo ncc");
+      }
+
+      const data = await response.json();
+      setFormData((prevData) => {
+        return {
+          ...prevData!,
+          supplierId: data.id,
+        };
+      });
+      return data;
+    } catch (error) {
+      console.error("Error creating ncc:", error);
+    }
+  };
+
   return (
     <div className="enter-inventory-page">
       <div className="formTitlePP" style={{ color: "#EFB26A" }}>
-        Mã phiếu nhập kho: {formData?.id}
+        Mã phiếu nhập kho: {formData?.id || "Đang tải..."}
       </div>
       <div className="threeForm">
         <form className="formEnterContainer">
@@ -180,10 +329,10 @@ const ViewOrEdit: React.FC = () => {
               }
               name="supplierPhone"
               type="tel"
-              placehoder="số điện thoại"
+              placehoder="Số điện thoại"
               pattern="[0-9]*"
               maxLength={10}
-              value={formData?.supplierPhone}
+              value={formData?.supplierPhone || ""}
               onChange={handleInputChange}
             />
             <div
@@ -197,13 +346,13 @@ const ViewOrEdit: React.FC = () => {
           <InputCpn
             title="Tên nhà cung cấp"
             name="supplierName"
-            value={formData?.supplierName}
+            value={formData?.supplierName || ""}
             onChange={handleInputChange}
           />
           <InputCpn
             title="Địa chỉ nhà cung cấp"
             name="supplierAddress"
-            value={formData?.supplierAddress}
+            value={formData?.supplierAddress || ""}
             onChange={handleInputChange}
           />
         </form>
@@ -213,7 +362,7 @@ const ViewOrEdit: React.FC = () => {
             <label className="input-labelE">Họ tên nhân viên</label>
             <select
               className="input-fieldE"
-              defaultValue=""
+              value={formData?.staffId || ""}
               onChange={handleSelectChange}
             >
               <option value="" disabled>
@@ -230,13 +379,13 @@ const ViewOrEdit: React.FC = () => {
           <InputCpn
             title="Email nhân viên"
             name="emailStaff"
-            value={formData?.staffEmail}
+            value={formData?.staffEmail || ""}
             disabled={true}
           />
           <InputCpn
             title="Số điện thoại"
             name="staffPhone"
-            value={formData?.staffPhoneNumber}
+            value={formData?.staffPhoneNumber || ""}
             disabled={true}
           />
         </form>
@@ -246,7 +395,8 @@ const ViewOrEdit: React.FC = () => {
             title="Mô tả"
             name="name"
             type="text"
-            value={formData?.name}
+            value={formData?.name || ""}
+            onChange={handleInputChange}
           />
           <div
             style={{
@@ -260,24 +410,33 @@ const ViewOrEdit: React.FC = () => {
               title="Ngày nhập"
               name="dateEnter"
               type="date"
-              value={formData?.ngayNhapKho}
+              value={
+                formData?.ngayNhapKho ? formData.ngayNhapKho.split("T")[0] : ""
+              }
+              onChange={handleInputChange}
             />
-
             <InputCpn
               title="Tổng giá trị phiếu"
               type="tel"
               name="ivtrValue"
-              value={formData?.totalPrice.toString()}
+              value={formData?.totalPrice.toString() || ""}
+              onChange={handleInputChange}
+              disabled={true}
             />
           </div>
 
-          <InputCpn title="Ghi chú" name="note" value={formData?.note} />
+          <InputCpn
+            title="Ghi chú"
+            name="note"
+            value={formData?.note || ""}
+            onChange={handleInputChange}
+          />
         </form>
       </div>
 
       <div className="twoForm">
-        {formProductData.map((data, arrayIndex) => (
-          <ProductForm formProductData={data} />
+        {formProductData.map((data, index) => (
+          <ProductForm key={index} formProductData={data} />
         ))}
       </div>
 
@@ -294,7 +453,7 @@ const ViewOrEdit: React.FC = () => {
             fontSize: "16px",
             fontWeight: "bold",
           }}
-          //   onClick={handleSubmit}
+          onClick={handleUpdate}
         >
           Cập nhật
         </button>
@@ -303,4 +462,5 @@ const ViewOrEdit: React.FC = () => {
     </div>
   );
 };
+
 export default ViewOrEdit;
