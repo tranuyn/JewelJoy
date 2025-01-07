@@ -19,12 +19,7 @@ const EnterInventory: React.FC = () => {
         />
       </div>
 
-      {activeTab === "Tạo phiếu nhập kho" ? (
-        <CreateEI />
-      ) : (
-        <HistoryEI
-        />
-      )}
+      {activeTab === "Tạo phiếu nhập kho" ? <CreateEI /> : <HistoryEI />}
     </div>
   );
 };

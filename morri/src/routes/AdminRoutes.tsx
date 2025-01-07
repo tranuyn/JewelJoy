@@ -22,6 +22,7 @@ import Unauthorization from "../pages/Unauthorization/Unauthorization";
 import { ProtectedRoute } from "./ProtectedRoute";
 
 import EnterInventory from "../pages/EnterInventory/EnterInventory";
+import ViewOrEdit from "../pages/EnterInventory/ViewOrEdit/ViewOrEdit";
 
 export const AdminRoutes = () => {
   return (
@@ -46,6 +47,7 @@ export const AdminRoutes = () => {
       <Route path="orders" element={<OrdersPage />} />
       <Route path="inventory" element={<Inventory />} />
       <Route path="/enter-inventory" element={<EnterInventory />} />
+      <Route path="/enter-inventory/:id" element={<ViewOrEdit />} />
       <Route path="/attendance" element={<AttendancePage />} />
       <Route path="/service" element={<ServicePage />} />
       <Route path="/unauthorized" element={<Unauthorization />} />

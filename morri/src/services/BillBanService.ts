@@ -2,11 +2,11 @@
 
 interface Customer {
   name: string;
-  id: string
+  id: string;
 }
 interface Staff {
   username: string;
-  id: string
+  id: string;
 }
 
 interface Product {
@@ -14,7 +14,7 @@ interface Product {
   name: string;
   code: string;
   sellingPrice: number;
-  imageUrl: string[];  
+  imageUrl: string[];
 }
 
 export interface OrderDetail {
@@ -30,8 +30,8 @@ export interface BillBan {
   staff: Staff;
   orderDetails: OrderDetail[];
   createAt: string;
-  totalPrice: number;  
-  status: 'ON_DELIVERY' | 'COMPLETED'  ;
+  totalPrice: number;
+  status: "ON_DELIVERY" | "COMPLETED";
 }
 
 export interface BillBanResponse {
@@ -45,8 +45,8 @@ export interface BillBanResponse {
   dateTime: string;
   options: number;
   orderDetails: OrderDetail[];
-  totalPrice: number;  
-  status: 'ON_DELIVERY' | 'COMPLETED'  ;  
+  totalPrice: number;
+  status: "ON_DELIVERY" | "COMPLETED";
 }
 
 const BASE_URL = "http://localhost:8081/billBan";
@@ -58,7 +58,7 @@ export const getAllBillBans = async (): Promise<BillBanResponse[]> => {
     throw new Error("Không thể tải dữ liệu đơn hàng!");
   }
   const data: BillBan[] = await response.json();
-  
+
   return data.map((bill) => ({
     code: bill.id,
     customer: bill.customer.name,

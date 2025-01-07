@@ -82,7 +82,8 @@ const OrdersPage: React.FC = () => {
       setLoading(true);
       setError(null);
       try {
-        const data = await getAllBillBans(); // Gọi API từ service
+        const data = await getAllBillBans();
+        console.log("data" + data); // Gọi API từ service
         setRows(data); // Cập nhật dữ liệu vào state
       } catch (err) {
         setError("Không thể tải dữ liệu đơn hàng!");

@@ -11,6 +11,7 @@ import "./style.css";
 import SearchAndFilter from "./SearchAndFilter/searchAndFilter";
 import Product from "./ProductAndBill/Product";
 import Bill from "./ProductAndBill/Bill";
+import { useAuth } from "../../services/useAuth";
 
 interface ProductType {
   id: string;
@@ -25,24 +26,30 @@ const ProductsAndService: React.FC = () => {
   const [activeTab, setActiveTab] = useState("Tất cả");
   const [products, setProducts] = useState<ProductType[]>([]);
   const [selectedProducts, setSelectedProducts] = useState<ProductType[]>([]);
-
+  const { isAuthenticated, user, validateAuthStatus } = useAuth();
   const handleSelectProduct = (product: ProductType) => {
-    const existingProduct = selectedProducts.find((p) => p.id === product.id);
+    if (
+      user?.role === "ADMIN" ||
+      user?.role === "INVENTORY_STAFF" ||
+      user?.role === "SALE_STAFF"
+    ) {
+      const existingProduct = selectedProducts.find((p) => p.id === product.id);
 
-    if (existingProduct) {
-      // If the product already exists, increase its quantity
-      setSelectedProducts((prev) =>
-        prev.map((p) =>
-          p.id === product.id
-            ? { ...p, quantityInBill: p.quantityInBill + 1 }
-            : p
-        )
-      );
-    } else {
-      setSelectedProducts((prev) => [
-        ...prev,
-        { ...product, quantityInBill: 1 },
-      ]);
+      if (existingProduct) {
+        // If the product already exists, increase its quantity
+        setSelectedProducts((prev) =>
+          prev.map((p) =>
+            p.id === product.id
+              ? { ...p, quantityInBill: p.quantityInBill + 1 }
+              : p
+          )
+        );
+      } else {
+        setSelectedProducts((prev) => [
+          ...prev,
+          { ...product, quantityInBill: 1 },
+        ]);
+      }
     }
   };
 
@@ -85,9 +92,13 @@ const ProductsAndService: React.FC = () => {
               />
             </div>
 
-            <div className="bill-container">
-              <Bill selectedProducts={selectedProducts} />
-            </div>
+            {(user?.role === "ADMIN" ||
+              user?.role === "INVENTORY_STAFF" ||
+              user?.role === "SALE_STAFF") && (
+              <div className="bill-container">
+                <Bill selectedProducts={selectedProducts} />
+              </div>
+            )}
           </div>
         );
       case "Vòng cổ":
@@ -103,9 +114,13 @@ const ProductsAndService: React.FC = () => {
               />
             </div>
 
-            <div className="bill-container">
-              <Bill selectedProducts={selectedProducts} />
-            </div>
+            {(user?.role === "ADMIN" ||
+              user?.role === "INVENTORY_STAFF" ||
+              user?.role === "SALE_STAFF") && (
+              <div className="bill-container">
+                <Bill selectedProducts={selectedProducts} />
+              </div>
+            )}
           </div>
         );
       case "Nhẫn":
@@ -121,9 +136,13 @@ const ProductsAndService: React.FC = () => {
               />
             </div>
 
-            <div className="bill-container">
-              <Bill selectedProducts={selectedProducts} />
-            </div>
+            {(user?.role === "ADMIN" ||
+              user?.role === "INVENTORY_STAFF" ||
+              user?.role === "SALE_STAFF") && (
+              <div className="bill-container">
+                <Bill selectedProducts={selectedProducts} />
+              </div>
+            )}
           </div>
         );
       case "Hoa tai":
@@ -139,9 +158,13 @@ const ProductsAndService: React.FC = () => {
               />
             </div>
 
-            <div className="bill-container">
-              <Bill selectedProducts={selectedProducts} />
-            </div>
+            {(user?.role === "ADMIN" ||
+              user?.role === "INVENTORY_STAFF" ||
+              user?.role === "SALE_STAFF") && (
+              <div className="bill-container">
+                <Bill selectedProducts={selectedProducts} />
+              </div>
+            )}
           </div>
         );
       case "Vòng tay":
@@ -157,9 +180,13 @@ const ProductsAndService: React.FC = () => {
               />
             </div>
 
-            <div className="bill-container">
-              <Bill selectedProducts={selectedProducts} />
-            </div>
+            {(user?.role === "ADMIN" ||
+              user?.role === "INVENTORY_STAFF" ||
+              user?.role === "SALE_STAFF") && (
+              <div className="bill-container">
+                <Bill selectedProducts={selectedProducts} />
+              </div>
+            )}
           </div>
         );
       case "Dịch vụ":
@@ -174,9 +201,13 @@ const ProductsAndService: React.FC = () => {
               />
             </div>
 
-            <div className="bill-container">
-              <Bill selectedProducts={selectedProducts} />
-            </div>
+            {(user?.role === "ADMIN" ||
+              user?.role === "INVENTORY_STAFF" ||
+              user?.role === "SALE_STAFF") && (
+              <div className="bill-container">
+                <Bill selectedProducts={selectedProducts} />
+              </div>
+            )}
           </div>
         );
     }
@@ -191,7 +222,9 @@ const ProductsAndService: React.FC = () => {
         height: "100vh",
       }}
     >
-      <Header />
+      {(user?.role === "ADMIN" ||
+        user?.role === "INVENTORY_STAFF" ||
+        user?.role === "SALE_STAFF") && <Header />}
       <div className="pbanner">
         <div className="pbannerTextContainer">
           <span className="pmorri">

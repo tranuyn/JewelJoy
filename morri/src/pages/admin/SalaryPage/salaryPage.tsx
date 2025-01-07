@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./salaryPage.css";
 import { Box } from "@mui/material";
 import HourglassBottomIcon from "@mui/icons-material/HourglassBottom";
@@ -10,14 +10,26 @@ import BtnComponent from "../../../component/BtnComponent/BtnComponent";
 import Header from "../../../component/Title_header/Header";
 import ThemLuongThang from "./ThemLuongThang";
 
-interface Column {
-  field: string;
-  headerName: string;
-  width?: number;
-  align?: "left" | "center" | "right";
+interface User {
+  id: string;
+  username: string;
+  email: string;
+  name: string;
+  role: string;
+  avaURL: string | null;
+  luongCoBan: string | null;
 }
 
-const columns: Column[] = [
+interface SalaryData {
+  staffName: string;
+  totalSalary: number;
+  totalThuong: number;
+  totalPhat: number;
+  salaryDate: string;
+  totalFlower: number;
+}
+
+const columns = [
   { field: "staffName", headerName: "Tên nhân viên" },
   { field: "totalSalary", headerName: "Tổng lương" },
   { field: "totalThuong", headerName: "Tiền thưởng" },
@@ -26,32 +38,52 @@ const columns: Column[] = [
   { field: "totalFlower", headerName: "Tiền hoa hồng" },
 ];
 
-const data = [
-  {
-    staffName: "J97",
-    totalSalary: 23939,
-    totalThuong: 23939,
-    totalPhat: 23939,
-    salaryDate: "08/10/2024",
-    totalFlower: 33838,
-  },
-  {
-    staffName: "K98",
-    totalSalary: 30000,
-    totalThuong: 5000,
-    totalPhat: 1000,
-    salaryDate: "08/11/2024",
-    totalFlower: 2000,
-  },
-];
-
 const SalaryPage: React.FC = () => {
-  const [selectedUser, setSelectedUser] = useState(data[0]);
+  const [users, setUsers] = useState<User[]>([]);
+  const [selectedUser, setSelectedUser] = useState<SalaryData | null>(null);
   const [isModalThemLuongOpen, setModalThemLuongOpen] = useState(false);
-  const handleAddSalary = async () => {};
 
-  const handleUserClick = (user: any) => {
-    setSelectedUser(user);
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const fetchUsers = async () => {
+    try {
+      const response = await fetch("http://localhost:8080/user/");
+      const data = await response.json();
+      setUsers(data);
+
+      if (data.length > 0) {
+        const initialSalaryData: SalaryData = {
+          staffName: data[0].name,
+          totalSalary: Number(data[0].luongCoBan) || 0,
+          totalThuong: 0,
+          totalPhat: 0,
+          salaryDate: new Date().toLocaleDateString(),
+          totalFlower: 0,
+        };
+        setSelectedUser(initialSalaryData);
+      }
+    } catch (error) {
+      console.error("Error fetching users:", error);
+    }
+  };
+
+  const handleUserClick = (user: User) => {
+    const salaryData: SalaryData = {
+      staffName: user.name,
+      totalSalary: Number(user.luongCoBan) || 0,
+      totalThuong: 0,
+      totalPhat: 0,
+      salaryDate: new Date().toLocaleDateString(),
+      totalFlower: 0,
+    };
+    setSelectedUser(salaryData);
+  };
+
+  const handleAddSalary = async () => {
+    // Implement salary addition logic here
+    setModalThemLuongOpen(false);
   };
 
   return (
@@ -61,30 +93,27 @@ const SalaryPage: React.FC = () => {
       <div className="salary-container">
         <div className="left-column">
           <ul className="staff-list">
-            {data.map((user, index) => (
+            {users.map((user) => (
               <li
-                key={index}
+                key={user.id}
                 className="staff-item"
                 onClick={() => handleUserClick(user)}
               >
                 <img
-                  src="https://via.placeholder.com/50"
+                  src={user.avaURL || "https://via.placeholder.com/50"}
                   alt="Staff"
                   className="staff-img"
                 />
                 <div className="staff-info">
-                  <p className="staff-name">{user.staffName}</p>
-                  <p className="staff-role">Sale Staff</p>
+                  <p className="staff-name">{user.name}</p>
+                  <p className="staff-role">{user.role}</p>
                 </div>
               </li>
             ))}
           </ul>
         </div>
 
-        {/* Right Side */}
         <div className="right-side">
-          {/* Top Row */}
-
           <div className="top-row">
             <div
               style={{
@@ -97,10 +126,8 @@ const SalaryPage: React.FC = () => {
               <h3>Thống kê theo tháng</h3>
               <BtnComponent
                 btnColorType="primary"
-                btnText={"Thêm Lương Tháng"}
-                onClick={() => {
-                  setModalThemLuongOpen(true);
-                }}
+                btnText="Thêm Lương Tháng"
+                onClick={() => setModalThemLuongOpen(true)}
               />
             </div>
             <div className="stat-box">
@@ -108,7 +135,7 @@ const SalaryPage: React.FC = () => {
                 <TextBox
                   datatype="number"
                   title="Số giờ làm việc thực tế"
-                  placeholder={String(selectedUser.totalSalary)}
+                  placeholder={selectedUser?.totalSalary.toString() || "0"}
                   onChange={(value) => {}}
                   icon={<HourglassBottomIcon style={{ color: "black" }} />}
                 />
@@ -132,16 +159,17 @@ const SalaryPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Bottom Row */}
           <div className="bottom-row">
             <h3>Lương theo tháng</h3>
-            <TableComponent
-              columns={columns}
-              data={[selectedUser]}
-              onRowClick={(row) => console.log("Row clicked:", row)}
-              onEdit={(row) => console.log("Edit:", row)}
-              onDelete={(row) => console.log("Delete:", row)}
-            />
+            {selectedUser && (
+              <TableComponent
+                columns={columns}
+                data={[selectedUser]}
+                onRowClick={(row) => console.log("Row clicked:", row)}
+                onEdit={(row) => console.log("Edit:", row)}
+                onDelete={(row) => console.log("Delete:", row)}
+              />
+            )}
             <ThemLuongThang
               isModalOpen={isModalThemLuongOpen}
               setIsModalOpen={setModalThemLuongOpen}
