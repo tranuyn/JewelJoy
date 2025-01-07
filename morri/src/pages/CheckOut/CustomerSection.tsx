@@ -36,7 +36,12 @@ const CustomerSection: React.FC<CustomerSectionProps> = ({
       }
       const data = await response.json();
 
-      setCustomerInfo(data);
+      if (data.dateOfBirth === null) {
+        setCustomerInfo({
+          ...data, // Spread the properties of data
+          dateOfBirth: selectedBirthday, // Add/override the dateOfBirth property
+        });
+      }
       setCustomerLocalInfo(data);
     } catch (error) {
       console.error("Error fetching user data:", error);
