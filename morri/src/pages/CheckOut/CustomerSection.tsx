@@ -12,7 +12,7 @@ const CustomerSection: React.FC<CustomerSectionProps> = ({
   const [phone, setPhone] = useState<string>("");
   const [customerInfo, setCustomerLocalInfo] = useState<any>({});
   const [selectedGender, setSelectedGender] = useState("MALE");
-  const [selectedBirthday, setSelectedBirthday] = useState<string>("");
+  const [selectedBirthday, setSelectedBirthday] = useState("");
   const [name, setName] = useState("");
 
   const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
@@ -111,9 +111,9 @@ const CustomerSection: React.FC<CustomerSectionProps> = ({
               <p>
                 Ngày sinh:{" "}
                 <input
-                  type="Date"
+                  type="date"
                   value={
-                    customerInfo
+                    customerInfo && customerInfo.dateOfBirth
                       ? formatDate(customerInfo.dateOfBirth)
                       : selectedBirthday
                   }
