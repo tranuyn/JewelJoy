@@ -1,17 +1,16 @@
-import React, { useState, useEffect } from "react";
-import Header from "./header";
+import React, { useEffect, useState } from "react";
 import TabBar from "../../component/Tabbar/TabBar";
-import Charms from "./Charms";
+import Header from "./header";
 // import VongCo from "./VongCo";
 // import Nhan from "./Nhan";
 // import HoaTai from "./HoaTai";
 // import VongTay from "./VongTay";
+import { useAuth } from "../../services/useAuth";
+import Bill from "./ProductAndBill/Bill";
+import Product from "./ProductAndBill/Product";
+import SearchAndFilter from "./SearchAndFilter/searchAndFilter";
 import Services from "./Services";
 import "./style.css";
-import SearchAndFilter from "./SearchAndFilter/searchAndFilter";
-import Product from "./ProductAndBill/Product";
-import Bill from "./ProductAndBill/Bill";
-import { useAuth } from "../../services/useAuth";
 
 interface ProductType {
   id: string;
@@ -35,7 +34,7 @@ const ProductsAndService: React.FC = () => {
       user?.role === "SALE_STAFF"
     ) {
       const existingProduct = selectedProducts.find((p) => p.id === product.id);
-
+    
       if (existingProduct) {
         // If the product already exists, increase its quantity
         setSelectedProducts((prev) =>
@@ -51,6 +50,18 @@ const ProductsAndService: React.FC = () => {
           { ...product, quantityInBill: 1 },
         ]);
       }
+    }
+    if (user?.role == "CUSTOMER"){
+      const handleAddToCart = () => {
+        const existingProduct = selectedProducts.find((p) => p.id === product.id);
+        const itemsToAdd = 
+          { productId: existingProduct?.id, quantity: 1, name : existingProduct?.name, image : existingProduct?.imageUrl[0], price:existingProduct?.sellingPrice, type:existingProduct?.loaiSanPham }
+        
+        // dispatch(addCart({ 
+        //   customerId: "123", 
+        //   items: itemsToAdd 
+        // }));
+      };
     }
   };
 

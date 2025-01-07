@@ -94,8 +94,22 @@ export interface CartItem {
       clearCart: (state) => {
         state.items = [];
         state.error = null;
+      },
+      addToCart:(state, action) => {
+        state.loading = false;
+        
+          // If the response is a single item, find and update or add it
+          const newItem = action.payload;
+          const existingIndex = state.items.findIndex(item => item.id === newItem.id);
+          
+          if (existingIndex !== -1) {
+            state.items[existingIndex] = newItem;
+          } else {
+            state.items.push(newItem);
+          }
+        }
       }
-    },
+    
     // extraReducers: (builder) => {
     //   // Fetch Cart
     //   builder.addCase(fetchCart.pending, (state) => {
