@@ -1,166 +1,193 @@
-import { Button, FormHelperText, IconButton, TextField, Typography } from '@mui/material';
-import { Eye, EyeOff } from 'lucide-react';
-import React, { useState } from 'react';
+import { Box, Button, TextField, Typography } from "@mui/material";
+import axios from "axios";
+import React, { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import loginImage from "../../assets/constant/login.jpg";
-import './ResetPassword.css';
+// import "./Forgotpassword.css";
 
-// Define interfaces
-interface FormState {
-  newPassword: string;
-  confirmPassword: string;
-  showNewPassword: boolean;
-  showConfirmPassword: boolean;
-  newPasswordError: string;
-  confirmPasswordError: string;
-}
+const ResetPassword: React.FC = () => {
+  const navigate = useNavigate();
+  const { token } = useParams();
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [confirmPasswordError, setConfirmPasswordError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
+  const [error, setError] = useState("");
 
-interface ResetPasswordProps {
-  onSubmit?: (newPassword: string) => void;
-}
+  useEffect(() => {
+    if (!token) {
+      navigate('/login');
+    }
+  }, [token, navigate]);
 
-export const ResetPassword: React.FC<ResetPasswordProps> = ({ onSubmit }) => {
-  const [formState, setFormState] = useState<FormState>({
-    newPassword: '',
-    confirmPassword: '',
-    showNewPassword: false,
-    showConfirmPassword: false,
-    newPasswordError: '',
-    confirmPasswordError: ''
-  });
+  const validatePassword = (password: string): boolean => {
+    return password.length >= 6;
+  };
 
   const handlePasswordChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = event.target;
-    setFormState(prev => {
-      const newState = {
-        ...prev,
-        [name]: value,
-        newPasswordError: name === 'newPassword' && value.length > 0 && value.length < 6 
-          ? 'Mật khẩu mới cần có ít nhất 6 ký tự'
-          : '',
-        confirmPasswordError: name === 'confirmPassword' && value !== prev.newPassword
-          ? 'Mật khẩu chưa giống nhau'
-          : ''
-      };
-
-      if (name === 'newPassword' && prev.confirmPassword) {
-        newState.confirmPasswordError = value !== prev.confirmPassword 
-          ? 'Mật khẩu chưa giống nhau' 
-          : '';
-      }
-
-      return newState;
-    });
+    const value = event.target.value;
+    setNewPassword(value);
+    if (value && !validatePassword(value)) {
+      setPasswordError("Mật khẩu phải có ít nhất 6 ký tự");
+    } else {
+      setPasswordError("");
+    }
   };
 
-  const togglePasswordVisibility = (field: 'showNewPassword' | 'showConfirmPassword') => {
-    setFormState(prev => ({
-      ...prev,
-      [field]: !prev[field]
-    }));
+  const handleConfirmPasswordChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value;
+    setConfirmPassword(value);
+    if (value !== newPassword) {
+      setConfirmPasswordError("Mật khẩu không khớp");
+    } else {
+      setConfirmPasswordError("");
+    }
   };
 
-  const handleSubmit = (event: React.FormEvent) => {
+  const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    if (formState.newPassword.length >= 6 && formState.newPassword === formState.confirmPassword) {
-      onSubmit?.(formState.newPassword);
-      console.log('Password reset successful');
+    
+    if (!validatePassword(newPassword)) {
+      setPasswordError("Mật khẩu phải có ít nhất 6 ký tự");
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      setConfirmPasswordError("Mật khẩu không khớp");
+      return;
+    }
+
+    setLoading(true);
+    setError("");
+    setSuccessMessage("");
+
+    try {
+      // const result = await authService.resetPassword(token!, newPassword);
+      const result = await axios.post(`http://localhost:8081/auth/reset-password?token=${token}`, {
+        
+        newPassword
+      });
+      setSuccessMessage("Mật khẩu đã được đặt lại thành công. Đang chuyển hướng đến trang đăng nhập...");
+      setTimeout(() => {
+        navigate('/login');
+      }, 3000);
+    } catch (err: any) {
+      setError(err.message || "Có lỗi xảy ra khi đặt lại mật khẩu!");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="reset-password-container">
-      <div className="reset-password-wrapper">
-        {/* Image Section */}
-        <div className="image-section">
-          <img 
-            src={loginImage}
-            alt="Reset Password"
-            className="reset-image"
-          />
-        </div>
+    <Box className="login-page">
+      <Box className="login-container">
+        <Box className="image-section">
+          <img src={loginImage} alt="Jewelry Model" className="side-image" />
+        </Box>
 
-        {/* Form Section */}
-        <div className="form-section">
-          <div className="form-wrapper">
-            <Typography variant="h4" className="form-title">
-              Đặt mật khẩu mới
-            </Typography>
-            
-            <Typography className="form-subtitle">
-              Mật khẩu mới cần có ít nhất 6 ký tự
+        <Box className="form-section">
+          <Box className="form-container">
+            <Typography
+              component="h1"
+              variant="h4"
+              className="login-title forgot-title"
+              style={{ fontWeight: 1700 }}
+            >
+              <strong>Đặt lại mật khẩu</strong>
             </Typography>
 
-            <form onSubmit={handleSubmit} className="reset-form">
-              <div className="input-wrapper">
+            <Box
+              component="form"
+              onSubmit={handleSubmit}
+              className="login-form"
+            >
+              <Box className="form-field-container">
                 <TextField
+                  required
                   fullWidth
-                  name="newPassword"
+                  type="password"
+                  id="password"
                   label="Mật khẩu mới"
-                  type={formState.showNewPassword ? 'text' : 'password'}
-                  value={formState.newPassword}
+                  placeholder="Nhập mật khẩu mới"
+                  variant="outlined"
+                  value={newPassword}
                   onChange={handlePasswordChange}
-                  //error={!!formState.newPasswordError}
-                  //helperText={formState.newPasswordError}
+                  error={!!passwordError}
+                  helperText={passwordError || " "}
+                  className="form-field"
                   InputProps={{
-                    endAdornment: (
-                      <IconButton
-                        onClick={() => togglePasswordVisibility('showNewPassword')}
-                        edge="end"
-                      >
-                        {formState.showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                      </IconButton>
-                    )
+                    style: { minHeight: "40px" },
+                  }}
+                  FormHelperTextProps={{
+                    style: { minHeight: "20px" },
                   }}
                 />
-                {formState.newPasswordError && (
-                  <FormHelperText error className="error-message">
-                    {formState.newPasswordError}
-                  </FormHelperText>
-                )}
-              </div>
 
-              <div className="input-wrapper">
                 <TextField
+                  required
                   fullWidth
-                  name="confirmPassword"
-                  label="Nhập lại mật khẩu"
-                  type={formState.showConfirmPassword ? 'text' : 'password'}
-                  value={formState.confirmPassword}
-                  onChange={handlePasswordChange}
-                  //error={!!formState.confirmPasswordError}
-                  //helperText={formState.confirmPasswordError}
+                  type="password"
+                  id="confirmPassword"
+                  label="Xác nhận mật khẩu"
+                  placeholder="Nhập lại mật khẩu mới"
+                  variant="outlined"
+                  value={confirmPassword}
+                  onChange={handleConfirmPasswordChange}
+                  error={!!confirmPasswordError}
+                  helperText={confirmPasswordError || " "}
+                  className="form-field"
                   InputProps={{
-                    endAdornment: (
-                      <IconButton
-                        onClick={() => togglePasswordVisibility('showConfirmPassword')}
-                        edge="end"
-                      >
-                        {formState.showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                      </IconButton>
-                    )
+                    style: { minHeight: "40px" },
                   }}
-                />  
-                {formState.confirmPasswordError && (
-                  <FormHelperText error className="error-message">
-                    {formState.confirmPasswordError}
-                  </FormHelperText>
-                )}
-              </div>
+                  FormHelperTextProps={{
+                    style: { minHeight: "20px" },
+                  }}
+                />
+              </Box>
+
+              {successMessage && (
+                <Typography style={{ color: "green", marginBottom: "16px" }}>
+                  {successMessage}
+                </Typography>
+              )}
+
+              {error && (
+                <Typography style={{ color: "red", marginBottom: "16px" }}>
+                  {error}
+                </Typography>
+              )}
 
               <Button
                 type="submit"
                 fullWidth
                 variant="contained"
-                className="submit-button"
-                disabled={!!formState.newPasswordError || !!formState.confirmPasswordError}
+                className="login-button"
+                disabled={loading}
               >
-                Đặt lại
+                {loading ? "Đang xử lý..." : "Đặt lại mật khẩu"}
               </Button>
-            </form>
-          </div>
-        </div>
-      </div>
-    </div>
+
+              <Typography
+                variant="body2"
+                align="center"
+                className="switch-auth"
+                style={{ padding: "10px" }}
+              >
+                Đã nhớ mật khẩu?{" "}
+                <span
+                  className="switch-link login-switch"
+                  onClick={() => navigate("/login")}
+                >
+                  Đăng nhập
+                </span>
+              </Typography>
+            </Box>
+          </Box>
+        </Box>
+      </Box>
+    </Box>
   );
 };
 
