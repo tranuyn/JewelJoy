@@ -5,6 +5,7 @@ import "./style.css";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import Bill from "./Bill";
 import { Console } from "console";
+import { useAuth } from "../../services/useAuth";
 
 interface ProductType {
   id: string;
@@ -34,6 +35,8 @@ const CheckOutSuccess = () => {
     location.state?.staffInfo || {} // Fallback to an empty object if state is undefined
   );
 
+  const { user } = useAuth();
+
   useEffect(() => {
     if (location.state) {
       console.log(location.state);
@@ -52,6 +55,19 @@ const CheckOutSuccess = () => {
     return price
       .toString() // Chuyển thành chuỗi
       .replace(/\B(?=(\d{3})+(?!\d))/g, "."); // Thêm dấu chấm sau mỗi 3 chữ số
+  }
+
+  function formatDate(dateString: string) {
+    // Chuyển đổi chuỗi ngày thành đối tượng Date
+    const date = new Date(dateString);
+
+    // Lấy ngày, tháng và năm
+    const day = String(date.getDate()).padStart(2, "0"); // Đảm bảo ngày có 2 chữ số
+    const month = String(date.getMonth() + 1).padStart(2, "0"); // Tháng bắt đầu từ 0, nên cộng thêm 1
+    const year = date.getFullYear();
+
+    // Trả về chuỗi ngày theo định dạng "dd/mm/yyyy"
+    return `${day}/${month}/${year}`;
   }
 
   return (
@@ -81,35 +97,33 @@ const CheckOutSuccess = () => {
         style={{
           display: "flex",
           flexDirection: "row",
-          justifyContent: "space-between",
+          justifyContent: "space-around",
         }}
       >
-        <div>
+        <div
+          style={{
+            ...(user?.role === "CUSTOMER"
+              ? {
+                  display: "flex",
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  width: "100%",
+                }
+              : {}),
+          }}
+        >
           <p
-            style={{ display: "flex", alignItems: "center", fontWeight: "600" }}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              fontWeight: "600",
+            }}
           >
             <PersonOutlineIcon sx={{ color: "#EFB26A", marginRight: "8px" }} />
             Thông tin khách hàng
           </p>
-          <p
-            style={{ display: "flex", alignItems: "center", fontWeight: "600" }}
-          >
-            <PersonOutlineIcon sx={{ color: "#EFB26A", marginRight: "8px" }} />
-            Thông tin nhân viên
-          </p>
-        </div>
-
-        <div>
           <p>Số điện thoại: {customerInfo.phoneNumber}</p>
-          <p>Email: {staffInfo.email}</p>
-        </div>
-
-        <div>
           <p>Họ và tên: {customerInfo.name}</p>
-          <p>Họ và tên: {staffInfo.name}</p>
-        </div>
-
-        <div>
           <p>
             Giới tính:{" "}
             {customerInfo?.gioiTinh === "MALE"
@@ -118,20 +132,36 @@ const CheckOutSuccess = () => {
               ? "Nữ"
               : "Không có dữ liệu"}
           </p>
-          <p>
-            Giới tính:{" "}
-            {staffInfo?.gender === "MALE"
-              ? "Nam"
-              : staffInfo?.gender === "FEMALE"
-              ? "Nữ"
-              : "Không có dữ liệu"}
-          </p>
+          <p>Ngày sinh: {formatDate(customerInfo.dateOfBirth)}</p>
         </div>
-
-        <div>
-          <p>Ngày sinh: {customerInfo.dateOfBirth}</p>
-          <p>CCCD/CMND: {staffInfo.cccd}</p>
-        </div>
+        {user?.role != "CUSTOMER" && (
+          <div>
+            <p
+              style={{
+                display: "flex",
+                alignItems: "center",
+                fontWeight: "600",
+              }}
+            >
+              <PersonOutlineIcon
+                sx={{ color: "#EFB26A", marginRight: "8px" }}
+              />
+              Thông tin nhân viên
+            </p>
+            <p>Họ và tên: {staffInfo.name}</p>
+            <p>Email: {staffInfo.email}</p>
+            <p>Số điện thoại: {staffInfo.phoneNumber}</p>
+            <p>
+              Giới tính:{" "}
+              {staffInfo?.gender === "MALE"
+                ? "Nam"
+                : staffInfo?.gender === "FEMALE"
+                ? "Nữ"
+                : "Không có dữ liệu"}
+            </p>
+            <p>CCCD/CMND: {staffInfo.cccd}</p>
+          </div>
+        )}
       </div>
 
       {selectedProducts.map((product) => (

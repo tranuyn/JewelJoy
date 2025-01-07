@@ -5,6 +5,8 @@ import Header from "../ProductsAndServices/header";
 import TabBar from "../../component/Tabbar/TabBar";
 import { useAuth } from "../../services/useAuth";
 import ProductForm from "./ProductModal";
+import { useDispatch } from "react-redux";
+import { addToCart } from "../../redux/slice/cartSlice";
 
 interface FormProductData {
   id: string;
@@ -141,15 +143,30 @@ const ProductDetail: React.FC = () => {
       },
     });
   };
-
+  const dispatch = useDispatch();
+  const addToShopCart = () => {
+    const itemsToAdd = {
+      id: product?.id,
+      quantity: 1,
+      name: product?.name,
+      image: product?.imageUrl[0],
+      price: product?.sellingPrice,
+      type: product?.loaiSanPham,
+      selected: false,
+    };
+    dispatch(addToCart(itemsToAdd));
+    alert("Sản phẩm đã được thêm vào giỏ hàng");
+  };
   if (!product) {
     return <div>Loading...</div>;
   }
 
   return (
     <div className="productDetailContainer">
-      <Header />
-      <TabBar tabs={tabs} onTabChange={setActiveTab} styleType="default" />
+      {(user?.role === "ADMIN" ||
+        user?.role === "INVENTORY_STAFF" ||
+        user?.role === "SALE_STAFF") && <Header />}
+      {/* <TabBar tabs={tabs} onTabChange={setActiveTab} styleType="default" /> */}
 
       <div className="detailContainerne">
         <div className="part1">
@@ -220,7 +237,9 @@ const ProductDetail: React.FC = () => {
             </button>
           )}
           {user?.role === "CUSTOMER" && (
-            <button className="EditNe">Thêm vào giỏ hàng</button>
+            <button className="EditNe" onClick={() => addToShopCart()}>
+              Thêm vào giỏ hàng
+            </button>
           )}
         </div>
       </div>

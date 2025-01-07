@@ -11,6 +11,10 @@ import Product from "./ProductAndBill/Product";
 import SearchAndFilter from "./SearchAndFilter/searchAndFilter";
 import Services from "./Services";
 import "./style.css";
+import { useDispatch } from "react-redux";
+import { addToCart } from "../../redux/slice/cartSlice";
+import { useSelector } from "react-redux";
+import { RootState } from "../../redux/store";
 
 interface ProductType {
   id: string;
@@ -27,6 +31,8 @@ const ProductsAndService: React.FC = () => {
   const [products, setProducts] = useState<ProductType[]>([]);
   const [selectedProducts, setSelectedProducts] = useState<ProductType[]>([]);
   const { isAuthenticated, user, validateAuthStatus } = useAuth();
+  const dispatch = useDispatch();
+  const cartItems = useSelector((state: RootState) => state.cart.items);
   const handleSelectProduct = (product: ProductType) => {
     if (
       user?.role === "ADMIN" ||
@@ -34,7 +40,7 @@ const ProductsAndService: React.FC = () => {
       user?.role === "SALE_STAFF"
     ) {
       const existingProduct = selectedProducts.find((p) => p.id === product.id);
-    
+
       if (existingProduct) {
         // If the product already exists, increase its quantity
         setSelectedProducts((prev) =>
@@ -51,17 +57,21 @@ const ProductsAndService: React.FC = () => {
         ]);
       }
     }
-    if (user?.role == "CUSTOMER"){
-      const handleAddToCart = () => {
-        const existingProduct = selectedProducts.find((p) => p.id === product.id);
-        const itemsToAdd = 
-          { productId: existingProduct?.id, quantity: 1, name : existingProduct?.name, image : existingProduct?.imageUrl[0], price:existingProduct?.sellingPrice, type:existingProduct?.loaiSanPham }
-        
-        // dispatch(addCart({ 
-        //   customerId: "123", 
-        //   items: itemsToAdd 
-        // }));
+    if (user?.role == "CUSTOMER") {
+      const existingProduct = selectedProducts.find((p) => p.id === product.id);
+
+      const itemsToAdd = {
+        id: product?.id,
+        quantity: 1,
+        name: product?.name,
+        image: product?.imageUrl[0],
+        price: existingProduct?.sellingPrice,
+        type: existingProduct?.loaiSanPham,
+        selected: false,
       };
+      dispatch(addToCart(itemsToAdd));
+      alert("Sản phẩm đã được thêm vào giỏ hàng");
+      console.log(cartItems, itemsToAdd);
     }
   };
 

@@ -8,13 +8,18 @@ import StaffSection from "./StaffSection";
 import Bill from "./Bill";
 import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
+import { useDispatch } from "react-redux";
+import { addToCart } from "../../redux/slice/cartSlice";
+import { useSelector } from "react-redux";
+import { RootState } from "../../redux/store";
+import { useAuth } from "../../services/useAuth";
 
 interface ProductType {
   id: string;
   name: string;
   material: string;
   sellingPrice: number;
-  imageUrl: string[];
+  imageUrl: string[] | string;
   quantityInBill: number;
   loaiSanPham: string;
 }
@@ -37,19 +42,47 @@ const Checkout = () => {
   const [error, setError] = useState<any>(null);
   const [selectedButton, setSelectedButton] = useState<string | null>(null);
   const [note, setNote] = useState("");
+  const cartItems = useSelector((state: RootState) => state.cart.items);
+  const { user } = useAuth();
+
   const navigate = useNavigate();
   useEffect(() => {
     if (location.state) {
-      setSelectedProducts(location.state.selectedProducts);
+      if (user?.role === "CUSTOMER") {
+        // Lọc các sản phẩm đã được chọn
+        const selectedItems = cartItems.filter((item) => item.selected);
+
+        // Chuyển đổi selectedItems thành mảng các đối tượng giống như bạn muốn
+        const selectedProductsArray: ProductType[] = selectedItems.map(
+          (item) => ({
+            id: item.id.toString(), // Chuyển id từ number sang string
+            name: item.name,
+            material: item.type,
+            sellingPrice: item.price,
+            imageUrl: Array.isArray(item.image) ? item.image : [item.image],
+            quantityInBill: item.quantity,
+            loaiSanPham: item.type,
+          })
+        );
+
+        // Cập nhật trạng thái với mảng selectedProducts
+        setSelectedProducts(selectedProductsArray);
+      } else {
+        // Nếu role không phải CUSTOMER, lấy selectedProducts từ location.state
+        setSelectedProducts(location.state.selectedProducts);
+      }
+
+      // Cập nhật số lượng từ location.state
       setQuantities(location.state.quantities);
     }
-  }, [location.state]);
+  }, [location.state, cartItems, user?.role]);
+
   const handleSetCustomerInfo = (info: any) => {
     setCustomerInfo(info);
   };
 
   const handleBuyNow = async (updatedProducts: ProductType[]) => {
-    if (!staffInfo) {
+    if (!staffInfo && user?.role != "CUSTOMER") {
       setError(
         "Thông tin nhân viên không hợp lệ. Vui lòng tải lại thông tin nhân viên."
       );
@@ -114,7 +147,6 @@ const Checkout = () => {
   const createOrder = async (phone: string) => {
     try {
       const body = {
-        staff: staffInfo.id,
         createAt: new Date().toISOString(),
         customer: customerInfo.id,
         orderDetails: selectedProducts.map((product) => ({
@@ -124,13 +156,16 @@ const Checkout = () => {
           subtotal: product.sellingPrice * product.quantityInBill,
         })),
         paymentMethod: selectedButton,
-        status: "COMPLETED",
         note: note,
         totalPrice: selectedProducts.reduce(
           (total, product) =>
             total + product.sellingPrice * product.quantityInBill,
           0
         ),
+        ...(user?.role !== "CUSTOMER" && { staff: staffInfo.id }),
+        ...(user?.role !== "CUSTOMER"
+          ? { status: "COMPLETED" }
+          : { status: "ON_DELIVERY" }),
       };
 
       console.log(body);
@@ -223,7 +258,10 @@ const Checkout = () => {
       ) : (
         <div>
           <CustomerSection setCustomerInfo={handleSetCustomerInfo} />
-          <StaffSection setStaffInfo={setStaffInfo} />
+          {user?.role != "CUSTOMER" && (
+            <StaffSection setStaffInfo={setStaffInfo} />
+          )}
+
           <Bill
             selectedProducts={selectedProducts}
             onBuyNow={(updatedProducts, selectedButton, note) => {

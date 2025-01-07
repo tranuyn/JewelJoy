@@ -8,6 +8,7 @@ import ProductDetail from "../pages/ProductDetail/ProductDetail";
 import ProductsAndService from "../pages/ProductsAndServices/productsAndServicePage";
 import CheckOut from "../pages/CheckOut/CheckOut";
 import CheckOutSuccess from "../pages/CheckOut/CheckOutSuccess";
+import CartPage from "../pages/CartPage/CartPage";
 
 export const CustomerRoutes = () => {
   return (
@@ -23,6 +24,7 @@ export const CustomerRoutes = () => {
       <Route path="/products/detail/:id" element={<ProductDetail />} />
       <Route path="/products/checkout" element={<CheckOut />} />
       <Route path="/products/checkout/:orderId" element={<CheckOutSuccess />} />
+      <Route path="/cartpage" element={<CartPage />} />
     </Route>
   );
 };
