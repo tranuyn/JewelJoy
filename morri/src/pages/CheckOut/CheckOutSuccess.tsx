@@ -6,6 +6,7 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import Bill from "./Bill";
 import { Console } from "console";
 import { useAuth } from "../../services/useAuth";
+import { useDispatch } from "react-redux";
 
 interface ProductType {
   id: string;
@@ -36,6 +37,7 @@ const CheckOutSuccess = () => {
   );
 
   const { user } = useAuth();
+  const dispatch = useDispatch();
 
   useEffect(() => {
     if (location.state) {
@@ -44,6 +46,7 @@ const CheckOutSuccess = () => {
       setCustomerInfo(location.state.customerInfo);
       setStaffInfo(location.state.staffInfo);
     }
+    
   }, [location.state]);
 
   function formatPrice(price: number): string {
