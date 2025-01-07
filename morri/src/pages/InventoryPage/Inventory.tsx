@@ -5,10 +5,6 @@ import InventoryTab from "./InventoryTab";
 import ReportTab from "./ReportTab";
 
 // Types
-export interface Column {
-  id: "code" | "name" | "quantity" | "unit" | "description" | "price" | "import_date" | "options";
-  label: string;
-}
 
 export interface Data {
   code: string;
@@ -19,6 +15,35 @@ export interface Data {
   price: number;
   import_date: string;
   options: string;
+}
+export interface Product {
+  id: string;
+  name: string;
+  code: string;
+  description: string;
+  material: string;
+  costPrice: number;
+  sellingPrice: number;
+  imageUrl: string[];
+  loaiSanPham: string;
+  quantity: number;
+  weight: number;
+  status: string;
+  chiPhiPhatSinh: string;
+  supplierId: string | null;
+  entryDate: string | null;
+}
+
+export interface InventoryItem {
+  product: Product;
+  soLuongTonDau: number;
+  soLuongNhap: number;
+  soLuongBan: number;
+  soLuongTonCuoi: number;
+}
+export interface Column {
+  id: keyof (Product & { options: string });
+  label: string;
 }
 
 const Inventory: React.FC = () => {
@@ -50,7 +75,7 @@ const Inventory: React.FC = () => {
           defaultTab="Kho"
         />
       </div>
-      
+
       {activeTab === "Kho" ? (
         <InventoryTab
           page={page}

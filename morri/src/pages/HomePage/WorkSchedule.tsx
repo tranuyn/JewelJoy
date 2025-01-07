@@ -76,6 +76,7 @@ const WorkSchedule: React.FC = () => {
     try {
       setLoading(true);
       const schedules = await scheduleService.getScheduleByDate(date);
+      console.log("lịch nè: ",schedules)
 
       // Tìm lịch làm việc cho ngày được chọn
       const daySchedule = schedules.find(

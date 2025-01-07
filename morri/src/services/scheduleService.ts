@@ -47,6 +47,7 @@ export const scheduleService = {
 
   async getScheduleByDate(date: string): Promise<Schedule[]> {
     let schedule = this.mockSchedules.get(date);
+    console.log("tôi gọi đây")
 
     if (!schedule) {
       schedule = {

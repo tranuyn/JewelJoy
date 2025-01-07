@@ -40,7 +40,7 @@ const columns: Column[] = [
   { id: "order", label: "Số lượng sản phẩm" },
   { id: "totalPrice", label: "Tổng giá" },
   { id: "date", label: "Ngày đặt" },
-  { id: "options", label: "Tùy chọn" }, 
+  { id: "options", label: "Tùy chọn" },
 ];
 
 // Thêm biến columns động dựa theo activeTab
@@ -189,6 +189,7 @@ const OrdersPage: React.FC = () => {
     setIsUpdating(true);
     try {
       const billDetails = await getBillBanById(billId);
+      console.log("Original bill:", billDetails);
 
       const updatedBill: BillBan = {
         ...billDetails,
@@ -198,7 +199,7 @@ const OrdersPage: React.FC = () => {
         })),
         totalPrice: calculateNewTotal(editingOrderDetails),
       };
-
+      console.log("Updated bill being sent:", updatedBill);
       await updateBillBan(billId, updatedBill);
 
       // Refresh data
@@ -287,7 +288,9 @@ const OrdersPage: React.FC = () => {
                           ) : column.id === "options" ? ( // Kiểm tra cột "options"
                             <>
                               <StyledIconButton
-                                className={`edit-button ${editingOrderCode === row.code ? "active" : ""}`}
+                                className={`edit-button ${
+                                  editingOrderCode === row.code ? "active" : ""
+                                }`}
                                 size="small"
                                 onClick={(event) => handleEdit(row, event)}
                               >
@@ -320,7 +323,9 @@ const OrdersPage: React.FC = () => {
                                   <th>Số lượng</th>
                                   <th>Đơn giá</th>
                                   <th>Thành tiền</th>
-                                  {editingOrderCode === row.code && <th>Thao tác</th>}
+                                  {editingOrderCode === row.code && (
+                                    <th>Thao tác</th>
+                                  )}
                                 </tr>
                               </thead>
                               <tbody>
@@ -466,7 +471,7 @@ const OrdersPage: React.FC = () => {
             </table>
             <div className="numberOfPageContainer">
               <select onChange={handleChangeRowsPerPage} value={rowsPerPage}>
-                <option value={2}>5</option>
+                <option value={5}>5</option>
                 <option value={10}>10</option>
                 <option value={25}>25</option>
               </select>

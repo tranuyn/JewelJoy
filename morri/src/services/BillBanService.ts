@@ -31,7 +31,7 @@ export interface BillBan {
   orderDetails: OrderDetail[];
   createAt: string;
   totalPrice: number;  
-  status: 'ON_DELIVERY' | 'COMPLETED';
+  status: 'ON_DELIVERY' | 'COMPLETED'  ;
 }
 
 export interface BillBanResponse {
@@ -46,7 +46,7 @@ export interface BillBanResponse {
   options: number;
   orderDetails: OrderDetail[];
   totalPrice: number;  
-  status: 'ON_DELIVERY' | 'COMPLETED';  
+  status: 'ON_DELIVERY' | 'COMPLETED'  ;  
 }
 
 const BASE_URL = "http://localhost:8081/billBan";
@@ -115,6 +115,8 @@ export const updateBillBan = async (
   });
 
   if (!response.ok) {
+    const errorData = await response.text();
+    console.error("Server response:", errorData);
     throw new Error("Không thể cập nhật đơn hàng!");
   }
 
