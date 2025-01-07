@@ -76,4 +76,25 @@
   .staff-table input[type="radio"] {
     cursor: pointer;
   }
+  .snackbar {
+    top: 20px;
+    left: 50%;
+    height: 20px;
+    text-align: center;
+  }
   
+  .snackbar.success {
+    background-color: #4caf50;
+  }
+  
+  .snackbar.error {
+    background-color: #f44336;
+  }
+  
+  .snackbar.info {
+    background-color: #2196f3;
+  }
+  
+  .snackbar.warning {
+    background-color: #ff9800;
+  }
