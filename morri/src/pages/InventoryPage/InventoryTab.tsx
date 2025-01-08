@@ -62,6 +62,7 @@ const InventoryTab: React.FC<InventoryTabProps> = ({
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [updateError, setUpdateError] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState<string>("all"); // "all", "available", "unavailable"
 
   const [isOpen, setIsOpen] = useState(false);
 
@@ -74,9 +75,14 @@ const InventoryTab: React.FC<InventoryTabProps> = ({
   };
 
   // Filter products based on search term
-  const filteredProducts = products.filter((product) =>
-    product.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredProducts = products.filter((product) => {
+    const matchesSearch = product.name
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
+    const matchesStatus =
+      statusFilter === "all" ? true : product.status === statusFilter;
+    return matchesSearch && matchesStatus;
+  });
 
   const startRow = page * rowsPerPage;
   const endRow = startRow + rowsPerPage;
@@ -198,6 +204,44 @@ const InventoryTab: React.FC<InventoryTabProps> = ({
       console.error("Error updating product status:", error);
     }
   };
+  const handleRestore = async (product: Product) => {
+    const confirmRestore = window.confirm(
+      "Bạn có muốn khôi phục kinh doanh sản phẩm này không?"
+    );
+
+    if (!confirmRestore) {
+      return;
+    }
+
+    try {
+      const updatedProduct = {
+        ...product,
+        status: "available",
+      };
+
+      const response = await fetch(
+        `http://localhost:8081/jewelry/update/${product.id}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(updatedProduct),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to update product status");
+      }
+
+      // Refresh the products list
+      const refreshResponse = await fetch("http://localhost:8081/jewelry/");
+      const newProducts = await refreshResponse.json();
+      setProducts(newProducts);
+    } catch (error) {
+      console.error("Error updating product status:", error);
+    }
+  };
 
   if (loading) return <div>Đang tải dữ liệu...</div>;
   if (error) return <div>{error}</div>;
@@ -205,14 +249,28 @@ const InventoryTab: React.FC<InventoryTabProps> = ({
   return (
     <ThemeProvider theme={theme}>
       <div className="page-content">
-        <div className="psearchbar" style={{ marginBottom: 10 }}>
-          <SearchIcon sx={{ color: "#737373" }} />
-          <input
-            type="search"
-            placeholder="Tìm kiếm..."
-            value={searchTerm}
-            onChange={handleSearchChange}
-          />
+        <div
+          className="filters"
+          style={{ display: "flex", gap: "10px", marginBottom: 10 }}
+        >
+          <div className="psearchbar">
+            <SearchIcon sx={{ color: "#737373" }} />
+            <input
+              type="search"
+              placeholder="Tìm kiếm..."
+              value={searchTerm}
+              onChange={handleSearchChange}
+            />
+          </div>
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            style={{ padding: "5px 10px", borderRadius: "4px" }}
+          >
+            <option value="all">Tất cả trạng thái</option>
+            <option value="available">Đang kinh doanh</option>
+            <option value="unavailable">Ngừng kinh doanh</option>
+          </select>
         </div>
         <table className="tableCotainer" style={{ width: "100%" }}>
           <thead className="theadContainer">
@@ -255,13 +313,25 @@ const InventoryTab: React.FC<InventoryTabProps> = ({
                         >
                           <BorderColorIcon fontSize="small" />
                         </StyledIconButton>
-                        <StyledIconButton
-                          className="delete-button"
-                          size="small"
-                          onClick={() => handleDelete(row)}
-                        >
-                          <DeleteIcon fontSize="small" />
-                        </StyledIconButton>
+                        {row.status === "available" ? (
+                          <StyledIconButton
+                            className="delete-button"
+                            size="small"
+                            onClick={() => handleDelete(row)}
+                          >
+                            <DeleteIcon fontSize="small" />
+                          </StyledIconButton>
+                        ) : (
+                          <Button
+                            size="small"
+                            variant="outlined"
+                            color="success"
+                            onClick={() => handleRestore(row)}
+                            style={{ fontSize: "12px", padding: "2px 8px" }}
+                          >
+                            Khôi phục
+                          </Button>
+                        )}
                       </>
                     ) : column.id === "images" ? null : ( // Skip rendering images array
                       row[column.id]?.toString() || ""

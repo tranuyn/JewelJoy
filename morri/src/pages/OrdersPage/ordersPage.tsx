@@ -10,6 +10,8 @@ import {
   getBillBanById,
   BillBan,
   OrderDetail,
+  UpdateOrderDetail,
+  UpdateBillBan,
 } from "../../services/BillBanService";
 
 import KeyboardArrowLeftRoundedIcon from "@mui/icons-material/KeyboardArrowLeftRounded";
@@ -20,6 +22,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import { Button, IconButton } from "@mui/material";
 import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
 import RemoveOutlinedIcon from "@mui/icons-material/RemoveOutlined";
+import SearchIcon from "@mui/icons-material/Search";
 
 interface Column {
   id: "code" | "customer" | "order" | "totalPrice" | "date" | "options";
@@ -75,7 +78,16 @@ const OrdersPage: React.FC = () => {
   );
   const [editingOrderCode, setEditingOrderCode] = useState<string | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
 
+  const searchFiltered = rows.filter((row) =>
+    row.customer.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+  
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(event.target.value);
+    setPage(0); 
+  };
   // Gọi API để lấy danh sách đơn hàng
   useEffect(() => {
     const fetchOrders = async () => {
@@ -96,11 +108,16 @@ const OrdersPage: React.FC = () => {
     fetchOrders();
   }, []);
 
-  const filteredRows = rows.filter((row) => {
-    if (activeTab === "Đơn đang đặt") {
-      return row.status === "ON_DELIVERY";
-    } else {
-      return row.status === "COMPLETED";
+  const filteredRows = searchFiltered.filter((row) => {
+    switch (activeTab) {
+      case "Đơn đang đặt":
+        return row.status === "ON_DELIVERY";
+      case "Đơn đã hoàn thành":
+        return row.status === "COMPLETED";
+      case "Đơn đã hủy":
+        return row.status === "CANCELLED";
+      default:
+        return true;
     }
   });
 
@@ -144,9 +161,10 @@ const OrdersPage: React.FC = () => {
       setRows((currentRows) => {
         return currentRows.map((row) => {
           if (row.code === expandedRow) {
+            const newTotal = calculateNewTotal(updated);
             return {
               ...row,
-              totalPrice: calculateNewTotal(updated),
+              totalPrice: newTotal,
               orderDetails: updated,
             };
           }
@@ -191,19 +209,59 @@ const OrdersPage: React.FC = () => {
     try {
       const billDetails = await getBillBanById(billId);
 
-      const updatedBill: BillBan = {
-        ...billDetails,
-        orderDetails: editingOrderDetails,
-        totalPrice: calculateNewTotal(editingOrderDetails),
+      // Tạo orderDetails với cấu trúc mới
+      const updatedOrderDetails: UpdateOrderDetail[] = editingOrderDetails.map(
+        (detail) => {
+          const originalDetail = billDetails.orderDetails.find(
+            (od) => od.id === detail.id
+          );
+
+          if (!originalDetail) {
+            throw new Error(
+              `Không tìm thấy chi tiết đơn hàng với id: ${detail.id}`
+            );
+          }
+
+          const updatedSubtotal = detail.quantity * detail.unitPrice;
+          return {
+            id: detail.id,
+            product: originalDetail.product.id,
+            quantity: detail.quantity,
+            unitPrice: detail.unitPrice,
+            subtotal: updatedSubtotal,
+          };
+        }
+      );
+
+      const newTotalPrice = updatedOrderDetails.reduce(
+        (sum, detail) => sum + detail.subtotal,
+        0
+      );
+
+      // Tạo object update với interface mới
+      const updateData: UpdateBillBan = {
+        totalPrice: newTotalPrice,
+        status: billDetails.status,
+        paymentMethod: billDetails.paymentMethod,
+        customer: billDetails.customer.id,
+        orderDetails: updatedOrderDetails,
+        staff: billDetails.staff.id,
+        additionalCharge: billDetails.additionalCharge,
+        createAt: billDetails.createAt,
+        note: billDetails.note,
       };
 
-      await updateBillBan(billId, updatedBill);
+      console.log("Sending update request:", updateData);
+      const response = await updateBillBan(billId, updateData);
+      console.log("Update response:", response);
+
       const updatedData = await getAllBillBans();
+      setRows(updatedData);
 
       alert("Cập nhật đơn hàng thành công!");
       setEditingOrderCode(null);
-      setRows(updatedData);
       setEditingOrderDetails([]);
+      setExpandedRow(null);
     } catch (error) {
       console.error("Lỗi khi cập nhật đơn hàng:", error);
       alert("Có lỗi xảy ra khi cập nhật đơn hàng!");
@@ -212,7 +270,22 @@ const OrdersPage: React.FC = () => {
     }
   };
 
-  const handleDelete = () => {};
+  const handleCancelOrder = async (billId: string) => {
+    // try {
+    //   const billDetails = await getBillBanById(billId);
+    //   const updatedBill: BillBan = {
+    //     ...billDetails,
+    //     status: "CANCELLED",
+    //   };
+    //   await updateBillBan(billId, updatedBill);
+    //   const updatedData = await getAllBillBans();
+    //   alert("Đã hủy đơn hàng thành công!");
+    //   setRows(updatedData);
+    // } catch (error) {
+    //   console.error("Lỗi khi hủy đơn hàng:", error);
+    //   alert("Có lỗi xảy ra khi hủy đơn hàng!");
+    // }
+  };
 
   const handleChangePage = (newPage: number) => {
     setPage(newPage);
@@ -229,7 +302,7 @@ const OrdersPage: React.FC = () => {
   const endRow = startRow + rowsPerPage;
   const displayedRows = filteredRows.slice(startRow, endRow);
 
-  const tabs = ["Đơn đang đặt", "Đơn đã hoàn thành"];
+  const tabs = ["Đơn đang đặt", "Đơn đã hoàn thành", "Đơn đã hủy"];
   const StyledIconButton = styled(IconButton)`
     margin: 4px 0px;
   `;
@@ -246,6 +319,15 @@ const OrdersPage: React.FC = () => {
         />
       </div>
       <div className="page-content">
+        <div className="psearchbar" style={{ marginBottom: 10 }}>
+          <SearchIcon sx={{ color: "#737373" }} />
+          <input
+            type="search"
+            placeholder="Tìm kiếm..."
+            value={searchTerm}
+            onChange={handleSearchChange}
+          />
+        </div>
         {loading ? (
           <p>Đang tải dữ liệu...</p>
         ) : error ? (
@@ -295,7 +377,7 @@ const OrdersPage: React.FC = () => {
                               <StyledIconButton
                                 className="delete-button"
                                 size="small"
-                                onClick={(event) => handleDelete()}
+                                onClick={() => handleCancelOrder(row.code)}
                               >
                                 <DeleteIcon fontSize="small" />
                               </StyledIconButton>

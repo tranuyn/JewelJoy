@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Navigate, Route } from "react-router-dom";
 import { ROLES } from "../constants/roles";
 import { ProtectedRoute } from "./ProtectedRoute";
@@ -14,8 +14,15 @@ import CheckOut from "../pages/CheckOut/CheckOut";
 import CheckOutSuccess from "../pages/CheckOut/CheckOutSuccess";
 import ProductDetail from "../pages/ProductDetail/ProductDetail";
 import CustomerManagementPage from "../pages/admin/CustomerMangementPage/CustomerManagementPage";
+import EmployeeHomePage from "../pages/HomePage/EmployeeHomePage";
+import { useAuth } from "../services/useAuth";
 
 export const SalesStaffRoutes = () => {
+  // const { isAuthenticated, user, validateAuthStatus } = useAuth();
+
+  // useEffect(() => {
+  //   validateAuthStatus();
+  // }, [validateAuthStatus]);
   return (
     <Route
       element={
@@ -24,8 +31,13 @@ export const SalesStaffRoutes = () => {
         </ProtectedRoute>
       }
     >
+<<<<<<< HEAD
       {/* <Route path="/home" element={<HomePage />} /> */}
       <Route path="/home" element={<EmployeeHomePage />} />
+=======
+      <Route path="/home" element={<HomePage />} />
+      {/* <Route path="/home" element={<EmployeeHomePage />} /> */}
+>>>>>>> main
       <Route path="/attendance" element={<AttendancePage />} />
       <Route path="/staff" element={<StaffPage />} />
       <Route path="/settings" element={<SettingPage />} />

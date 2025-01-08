@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Navigate, Route } from "react-router-dom";
 import AdminLayout from "../component/Layout/AdminLayout";
 import { ROLES } from "../constants/roles";
@@ -23,6 +23,7 @@ import { ProtectedRoute } from "./ProtectedRoute";
 
 import EnterInventory from "../pages/EnterInventory/EnterInventory";
 import ViewOrEdit from "../pages/EnterInventory/ViewOrEdit/ViewOrEdit";
+import EmployeeHomePage from "../pages/HomePage/EmployeeHomePage";
 
 export const AdminRoutes = () => {
   return (
@@ -33,8 +34,8 @@ export const AdminRoutes = () => {
         </ProtectedRoute>
       }
     >
-      {/* <Route path="/home" element={<HomePage />} /> */}
-      <Route path="/home" element={<EmployeeHomePage />} />
+      <Route path="/home" element={<HomePage />} />
+      {/* <Route path="/home" element={<EmployeeHomePage />} /> */}
       <Route path="/products" element={<ProductsAndService />} />
       <Route path="/products/detail/:id" element={<ProductDetail />} />
       <Route path="/staff" element={<StaffPage />} />

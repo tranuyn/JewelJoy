@@ -36,6 +36,7 @@ interface Transaction {
   id: string;
   paymentMethod: string;
   createAt: string;
+  staff: { name: string };
   orderDetails: Array<{ quantity: number }>;
   customer: { name: string };
   totalPrice: number;
@@ -46,7 +47,7 @@ interface FormattedTransaction {
   transactionId: string;
   paymentType: string;
   date: string;
-  quantity: number;
+  staffName: string;
   customerName: string;
   totalAmount: string;
   status: string;
@@ -66,7 +67,7 @@ const UpdateHistoryPage: React.FC<UpdateHistoryProps> = ({
   onUpdate,
 }) => {
   const [status, setStatus] = useState(transaction?.status || "");
-
+  console.log("trancsaction", transaction);
   useEffect(() => {
     setStatus(transaction?.status || "");
   }, [transaction]);
@@ -107,6 +108,7 @@ const UpdateHistoryPage: React.FC<UpdateHistoryProps> = ({
           title="Trạng thái"
           value={status}
           placeholder="Chọn trạng thái"
+          defaultValue={transaction?.status}
           onChange={(value) => setStatus(value as string)}
           options={[
             { label: "Đang xử lý", value: "PROCESSING" },
@@ -132,7 +134,7 @@ const UpdateHistoryPage: React.FC<UpdateHistoryProps> = ({
             btnColorType="primary"
             btnText="Cập nhật"
             onClick={async () => {
-              if (transaction?.id && status) {
+              if (transaction?.id) {
                 await onUpdate(transaction.id, status);
               }
             }}
@@ -148,8 +150,9 @@ const HistoryPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [transactions, setTransactions] = useState<FormattedTransaction[]>([]);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [selectedTransaction, setSelectedTransaction] =
+    useState<Transaction | null>(null);
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
-  const [rowClicked, setRowClicked] = useState<Transaction | null>(null);
   const [snackbar, setSnackbar] = useState({
     visible: false,
     message: "",
@@ -161,8 +164,8 @@ const HistoryPage: React.FC = () => {
     { field: "paymentType", headerName: "Trả bằng", width: 120 },
     { field: "date", headerName: "Ngày tạo", width: 120 },
     {
-      field: "quantity",
-      headerName: "Số lượng",
+      field: "staffName",
+      headerName: "Nhân viên",
       width: 100,
       align: "center" as const,
     },
@@ -171,25 +174,24 @@ const HistoryPage: React.FC = () => {
       field: "totalAmount",
       headerName: "Tổng tiền",
       width: 150,
-      align: "right" as const,
+      align: "center" as const,
     },
     { field: "status", headerName: "Trạng thái", width: 120 },
   ];
-
   const handleUpdate = async (
     transactionId: string,
     status: string
   ): Promise<void> => {
     try {
       const response = await fetch(
-        `http://localhost:8080/billBan/update/${transactionId}`,
+        `http://localhost:8081/billBan/update/${transactionId}`,
         {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ status }),
         }
       );
-      console.log("réponse ," + response);
+      console.log("response update: ", response);
 
       if (!response.ok) throw new Error();
 
@@ -208,8 +210,9 @@ const HistoryPage: React.FC = () => {
       });
     }
   };
+
   const handleDelete = async (): Promise<void> => {
-    if (!rowClicked?.id) {
+    if (!selectedTransaction?.id) {
       setSnackbar({
         visible: true,
         message: "Vui lòng chọn giao dịch để xóa!",
@@ -220,7 +223,7 @@ const HistoryPage: React.FC = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:8080/billBan/${rowClicked.id}`,
+        `http://localhost:8081/billBan/${selectedTransaction.id}`,
         {
           method: "DELETE",
         }
@@ -247,27 +250,27 @@ const HistoryPage: React.FC = () => {
   const fetchTransactions = async (period: string): Promise<void> => {
     setLoading(true);
     try {
-      const response = await fetch(`http://localhost:8080/billBan/${period}`);
+      const periodFormat = period.toLowerCase().split(/[\s-]/).join("");
+      const response = await fetch(
+        `http://localhost:8081/billBan/${periodFormat}`
+      );
       if (!response.ok) throw new Error();
 
       const data: Transaction[] = await response.json();
       const formattedData = data.map((bill) => ({
+        ...bill,
         transactionId: bill.id || "N/A",
         paymentType: bill.paymentMethod || "N/A",
         date: bill.createAt
           ? format(new Date(bill.createAt), "dd/MM/yyyy")
           : "N/A",
-        quantity:
-          bill.orderDetails?.reduce(
-            (sum, detail) => sum + (detail?.quantity || 0),
-            0
-          ) || 0,
+
+        staffName: bill.staff?.name || "Not Assigned",
         customerName: bill.customer?.name || "N/A",
         totalAmount: new Intl.NumberFormat("vi-VN", {
           style: "currency",
           currency: "VND",
         }).format(bill.totalPrice || 0),
-        status: bill.status || "N/A",
       }));
 
       setTransactions(formattedData);
@@ -281,6 +284,11 @@ const HistoryPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleRowClick = (row: any) => {
+    console.log("row: ", row);
+    setSelectedTransaction(row);
   };
 
   useEffect(() => {
@@ -308,7 +316,7 @@ const HistoryPage: React.FC = () => {
           <TableComponent
             columns={columns}
             data={transactions}
-            onRowClick={(row) => setRowClicked(row as unknown as Transaction)}
+            onRowClick={handleRowClick}
             onEdit={() => setIsUpdateModalOpen(true)}
             onDelete={() => setIsDeleteModalOpen(true)}
           />
@@ -317,14 +325,14 @@ const HistoryPage: React.FC = () => {
         <DeleteComponent
           isModalOpen={isDeleteModalOpen}
           setIsModalOpen={setIsDeleteModalOpen}
-          deleteName={rowClicked?.id || ""}
+          deleteName={selectedTransaction?.id || ""}
           handleDelete={handleDelete}
         />
 
         <UpdateHistoryPage
           isModalOpen={isUpdateModalOpen}
           setIsModalOpen={setIsUpdateModalOpen}
-          transaction={rowClicked}
+          transaction={selectedTransaction}
           onUpdate={handleUpdate}
         />
 

@@ -33,7 +33,7 @@ interface Staff {
 
 interface Product {
   id: string;
-  name: string;
+  name: string; 
   code: string;
   description: string;
   material: string;
@@ -60,7 +60,7 @@ export interface OrderDetail {
 export interface BillBan {
   id: string;
   totalPrice: number;
-  status: "ON_DELIVERY" | "COMPLETED";
+  status: "ON_DELIVERY" | "COMPLETED" | "CANCELLED";
   paymentMethod: string;
   customer: Customer;
   orderDetails: OrderDetail[];
@@ -82,9 +82,26 @@ export interface BillBanResponse {
   options: number;
   orderDetails: OrderDetail[];
   totalPrice: number;
-  status: "ON_DELIVERY" | "COMPLETED";
+  status: "ON_DELIVERY" | "COMPLETED"| "CANCELLED";
 }
-
+export interface UpdateOrderDetail {
+  id: string;
+  product: string; // Chỉ cần ID của product
+  quantity: number;
+  unitPrice: number;
+  subtotal: number;
+}
+export interface UpdateBillBan {
+  totalPrice: number;
+  status: "ON_DELIVERY" | "COMPLETED" | "CANCELLED";
+  paymentMethod: string;
+  customer: string; // Chỉ cần ID của customer
+  orderDetails: UpdateOrderDetail[];
+  staff: string; // Chỉ cần ID của staff
+  additionalCharge: number;
+  createAt: string;
+  note: string;
+}
 const BASE_URL = "http://localhost:8081/billBan";
 
 // Hàm lấy tất cả đơn hàng
@@ -142,7 +159,7 @@ export const createBillBan = async (
 // Hàm cập nhật đơn hàng
 export const updateBillBan = async (
   billBanId: string,
-  updatedBillBan: BillBan
+  updatedBillBan: UpdateBillBan // Sử dụng interface mới
 ): Promise<BillBan> => {
   const response = await fetch(`${BASE_URL}/update/${billBanId}`, {
     method: "PATCH",

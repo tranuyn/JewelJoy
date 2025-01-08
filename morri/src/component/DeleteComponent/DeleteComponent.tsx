@@ -5,7 +5,7 @@ import BtnComponent from "../../component/BtnComponent/BtnComponent";
 interface DeleteComponentProps {
   isModalOpen: boolean;
   setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  deleteName: string;
+  deleteName: string | undefined;
   handleDelete: () => Promise<void> | void;
 }
 
