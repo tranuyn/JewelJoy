@@ -83,6 +83,10 @@ const HistoryEI: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const { token } = useAuth();
   const navigate = useNavigate();
+  const [sortedRows, setSortedRows] = useState<Data[]>([]);
+  const [selectedSort, setSelectedSort] = useState<string>("default");
+  const [originalRows, setOriginalRows] = useState<Data[]>([]); // Lưu trữ data gốc
+  const [displayRows, setDisplayRows] = useState<Data[]>([]); // Data đã được sort
 
   const handleConfirmDelete = async () => {
     setLoading(true);
@@ -211,15 +215,61 @@ const HistoryEI: React.FC = () => {
         );
       });
 
-      setRows(transformedRows);
+      setOriginalRows(transformedRows);
+      sortRows(transformedRows, selectedSort);
     } catch (error) {
       console.error("Error fetching data: ", error);
     }
   };
 
+  const sortRows = (rows: Data[], sortType: string) => {
+    let sorted = [...rows];
+
+    switch (sortType) {
+      case "newest":
+        sorted = sorted.sort((a, b) => {
+          const dateA = new Date(
+            a.date.split("\n")[0].split("/").reverse().join("/")
+          );
+          const dateB = new Date(
+            b.date.split("\n")[0].split("/").reverse().join("/")
+          );
+          return dateB.getTime() - dateA.getTime();
+        });
+        break;
+      case "oldest":
+        sorted = sorted.sort((a, b) => {
+          const dateA = new Date(
+            a.date.split("\n")[0].split("/").reverse().join("/")
+          );
+          const dateB = new Date(
+            b.date.split("\n")[0].split("/").reverse().join("/")
+          );
+          return dateA.getTime() - dateB.getTime();
+        });
+        break;
+      default:
+        // Trả về thứ tự gốc
+        sorted = [...rows];
+    }
+
+    setDisplayRows(sorted);
+  };
+
+  const handleSortChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const sortType = event.target.value;
+    setSelectedSort(sortType);
+    sortRows(originalRows, sortType);
+    setPage(0); // Reset về trang đầu khi sort
+  };
+
   useEffect(() => {
     fetchData();
   }, []);
+
+  useEffect(() => {
+    setSortedRows(rows);
+  }, [rows]);
 
   const handleChangePage = (newPage: number) => {
     setPage(newPage);
@@ -234,10 +284,18 @@ const HistoryEI: React.FC = () => {
 
   const startRow = page * rowsPerPage;
   const endRow = startRow + rowsPerPage;
-  const displayedRows = rows.slice(startRow, endRow);
-
+  const paginatedRows = displayRows.slice(startRow, endRow);
   return (
     <div className="page-content">
+      <select
+        className="SapXep1"
+        value={selectedSort}
+        onChange={handleSortChange}
+      >
+        <option value="newest">Mới nhất</option>
+        <option value="oldest">Cũ nhất</option>
+        <option value="default">Mặc định</option>
+      </select>
       <table className="tableCotainer" style={{ width: "100%" }}>
         <thead className="theadContainer">
           <tr>
@@ -256,7 +314,7 @@ const HistoryEI: React.FC = () => {
           </tr>
         </thead>
         <tbody style={{ backgroundColor: "white" }}>
-          {displayedRows.map((row) => (
+          {paginatedRows.map((row) => (
             <tr key={row.id} className="EIrow">
               {columns.map((column) => (
                 <td

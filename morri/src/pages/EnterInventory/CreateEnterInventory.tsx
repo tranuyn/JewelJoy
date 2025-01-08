@@ -508,10 +508,12 @@ const CreateEI: React.FC = () => {
             onChange={handleInputChange}
           />
           <InputCpn
-            title="Ghi chú"
+            title="Tổng giá trị"
             name="note"
+            placehoder="Tự động"
             value={formData.note}
             onChange={handleInputChange}
+            disabled={true}
           />
         </form>
       </div>
