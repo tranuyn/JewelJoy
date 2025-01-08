@@ -270,21 +270,21 @@ export const createBill = async (formValues: FormValues, productId: string, user
             staffId: userId,  // Now user is passed in as an argument
         };
         console.log(billData);
-        // const response = await fetch('http://localhost:8081/billMua/create', {
-        //     method: 'POST',
-        //     headers: {
-        //         'Content-Type': 'application/json',
-        //     },
-        //     body: JSON.stringify(billData)
-        // });
+        const response = await fetch('http://localhost:8081/billMua/create', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(billData)
+        });
 
-        // if (!response.ok) {
-        //     throw new Error(`HTTP error! status: ${response.status}`);
-        // }
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
 
-        //const data = await response.json();
-        // console.log("response bill mua: ", JSON.stringify(data));
-        // return data;        
+        const data = await response.json();
+        console.log("response bill mua: ", JSON.stringify(data));
+        return data;        
     } catch (error) {
         console.error('Error creating bill:', error);
         throw error;
