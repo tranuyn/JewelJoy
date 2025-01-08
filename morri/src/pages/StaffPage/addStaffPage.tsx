@@ -12,6 +12,7 @@ import PhoneIcon from '@mui/icons-material/Phone';
 import PersonIcon from '@mui/icons-material/Person';
 import TransgenderIcon from "@mui/icons-material/Transgender";
 import KeyIcon  from "@mui/icons-material/Key";
+import { uploadImages } from "../../services/cloudinaryService";
 
 interface Staff {
   isModalOpen: boolean;
@@ -56,6 +57,17 @@ const AddStaffForm: React.FC<Staff> = ({
   const [role, setRole] = useState<string | number>(""); // Vai trò
   const [luongCoBan, setLuongCoBan] = useState<string | number>("");; // Lương cơ bản
   const [isLoading, setLoading] = useState(false);
+  
+  const handleImageChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const uploadedUrl = await uploadImages(file);
+      if (uploadedUrl) {
+        setSelectedImage(uploadedUrl);
+        setAvaURL(uploadedUrl);
+      }
+    }
+  };
 
   const handleAddModal = async () => {
     const formData: FormData = {
@@ -141,13 +153,13 @@ const AddStaffForm: React.FC<Staff> = ({
               )}
             </Box>
             <label htmlFor="upload-photo">
-              {/* <input
+              <input
                 style={{ display: "none" }}
                 id="upload-photo"
                 type="file"
                 onChange={handleImageChange}
                 accept="image/*"
-              /> */}
+              />
               <button
                 style={{
                   display: "flex",

@@ -1,5 +1,5 @@
 import React from "react";
-import { Route } from "react-router-dom";
+import { Route, Navigate } from "react-router-dom";
 import CustomerLayout from "../component/Layout/CustomerLayout";
 import { ROLES } from "../constants/roles";
 import { ProtectedRoute } from "./ProtectedRoute";
@@ -8,7 +8,9 @@ import ProductDetail from "../pages/ProductDetail/ProductDetail";
 import ProductsAndService from "../pages/ProductsAndServices/productsAndServicePage";
 import CheckOut from "../pages/CheckOut/CheckOut";
 import CheckOutSuccess from "../pages/CheckOut/CheckOutSuccess";
-import CartPage from "../pages/CartPage/CartPage";
+import CartPage from "../pages/CartPage/CartPage"; 
+import ProfileCustomer from "../pages/ProfileCustomer/ProfileCustomer";
+import OrderHistory from "../pages/OrderHistory/OrderHistory";
 
 export const CustomerRoutes = () => {
   return (
@@ -25,6 +27,8 @@ export const CustomerRoutes = () => {
       <Route path="/products/checkout" element={<CheckOut />} />
       <Route path="/products/checkout/:orderId" element={<CheckOutSuccess />} />
       <Route path="/cartpage" element={<CartPage />} />
+      <Route path="/profile" element={<ProfileCustomer />} />
+      <Route path="/orderhistory" element={<OrderHistory/>} />
     </Route>
   );
 };
