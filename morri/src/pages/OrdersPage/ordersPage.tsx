@@ -190,21 +190,16 @@ const OrdersPage: React.FC = () => {
     setIsUpdating(true);
     try {
       const billDetails = await getBillBanById(billId);
-      console.log("Original bill:", billDetails);
 
       const updatedBill: BillBan = {
         ...billDetails,
-        orderDetails: editingOrderDetails.map((detail) => ({
-          ...detail,
-          subtotal: detail.quantity * detail.unitPrice,
-        })),
+        orderDetails: editingOrderDetails,
         totalPrice: calculateNewTotal(editingOrderDetails),
       };
-      console.log("Updated bill being sent:", updatedBill);
-      await updateBillBan(billId, updatedBill);
 
-      // Refresh data
+      await updateBillBan(billId, updatedBill);
       const updatedData = await getAllBillBans();
+
       alert("Cập nhật đơn hàng thành công!");
       setEditingOrderCode(null);
       setRows(updatedData);

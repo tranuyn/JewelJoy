@@ -1,12 +1,18 @@
-import React from "react";
-import { InventoryItem } from "./Inventory";
+import React, { useEffect, useState } from "react";
 import SearchIcon from "@mui/icons-material/Search";
+import { InventoryItem } from "./Inventory";
 
 interface ReportTabProps {
   date: string;
 }
 
 const ReportTab: React.FC<ReportTabProps> = ({ date }) => {
+  const [reportData, setReportData] = useState<InventoryItem[]>([]);
+  const [filteredData, setFilteredData] = useState<InventoryItem[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
   const reportColumns = [
     { id: "code", label: "Mã sản phẩm" },
     { id: "name", label: "Tên sản phẩm" },
@@ -16,99 +22,136 @@ const ReportTab: React.FC<ReportTabProps> = ({ date }) => {
     { id: "endQuantity", label: "Tồn cuối" },
     { id: "material", label: "Chất liệu" },
   ];
-  const reportData: InventoryItem[] = [ 
-    {
-      product: {
-        id: "674fc0f59631a835e84c5737",
-        name: "PNJ Jasmine ZTMXY000005",
-        code: "ZTMXY000005",
-        description:
-          "Sở hữu thiết kế thời thượng cùng các sắc đá kiêu sa, Disney|Morri tự hào mang đến đôi bông tai với vẻ đẹp dịu dàng nhưng không kém phần cá tính được lấy cảm hứng từ nàng công chúa Jasmine. Bên cạnh đó, sản phẩm còn được chế tác từ chất liệu bạc cao cấp nên đôi bông tai luôn sở hữu độ bền đẹp theo thời gian. Cùng Disney|Morri làm mới phong cách với đôi bông tai bạc tinh tế này nhé nàng ơi! Bởi sự tinh tế trong nó chính là điểm nhấn đặc biệt giúp nàng trở nên nổi bần bật và lan tỏa sức hút từ thần thái của mình.",
-        material: "Vàng",
-        costPrice: 500.0,
-        sellingPrice: 799999.0,
-        quantity: 9,
-        status: "available",
-        imageUrl: [],
-        loaiSanPham: "BONGTAI",
-        weight: 4.30783,
-        chiPhiPhatSinh: "100000.0",
-        supplierId: null,
-        entryDate: null,
-      },
-      soLuongTonDau: 4,
-      soLuongNhap: 5,
-      soLuongBan: 0,
-      soLuongTonCuoi: 9,
-    },
-    {
-      product: {
-        id: "67619bdb78486b3eae061a6a",
-        name: "PNJ Jasmin ZTMXY000006",
-        code: "ZTMXY000006",
-        description:
-          "Sở hữu thiết kế thời thượng cùng các sắc đá kiêu sa, Disney|Morri tự hào mang đến đôi bông tai với vẻ đẹp dịu dàng nhưng không kém phần cá tính được lấy cảm hứng từ nàng công chúa Jasmine. Bên cạnh đó, sản phẩm còn được chế tác từ chất liệu bạc cao cấp nên đôi bông tai luôn sở hữu độ bền đẹp theo thời gian. Cùng Disney|Morri làm mới phong cách với đôi bông tai bạc tinh tế này nhé nàng ơi! Bởi sự tinh tế trong nó chính là điểm nhấn đặc biệt giúp nàng trở nên nổi bần bật và lan tỏa sức hút từ thần thái của mình.",
-        material: "Vàng",
-        costPrice: 500.0,
-        sellingPrice: 799999.0,
-        imageUrl: [
-          "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSV5YkHk6_kgsAM5zgHvVk5wkXiopA1HxgU6g&s",
-          "https://res.cloudinary.com/dzdso60ms/image/upload/v1733045511/ec434feb-26f3-4021-8a5e-38580e97f04e_bku9y4.jpg",
-          "https://res.cloudinary.com/dzdso60ms/image/upload/v1733045512/0ab0091c-479c-492e-aa9e-65d6a2c0e2ba_bjbznb.png",
-          "https://res.cloudinary.com/dzdso60ms/image/upload/v1733045512/23089cce-b222-4989-b7bd-4b42b573f14e_mhltgj.png",
-          "https://res.cloudinary.com/dzdso60ms/image/upload/v1733045511/63c83f25-6ac9-48a3-a0c1-98685e357366_o6b8of.jpg",
-        ],
-        loaiSanPham: "BONGTAI",
-        quantity: 10,
-        weight: 4.30783,
-        status: "available",
-        chiPhiPhatSinh: "100000.0",
-        supplierId: null,
-        entryDate: null,
-      },
-      soLuongTonDau: 8,
-      soLuongNhap: 2,
-      soLuongBan: 0,
-      soLuongTonCuoi: 10,
-    },
-    {
-      product: {
-        id: "6762955afa7d306ec93c0f49",
-        name: "PNJ Jasmin ZTMXY00007",
-        code: "ZTMXY000007",
-        description:
-          "Sở hữu thiết kế thời thượng cùng các sắc đá kiêu sa, Disney|Morri tự hào mang đến đôi bông tai với vẻ đẹp dịu dàng nhưng không kém phần cá tính được lấy cảm hứng từ nàng công chúa Jasmine. Bên cạnh đó, sản phẩm còn được chế tác từ chất liệu bạc cao cấp nên đôi bông tai luôn sở hữu độ bền đẹp theo thời gian. Cùng Disney|Morri làm mới phong cách với đôi bông tai bạc tinh tế này nhé nàng ơi! Bởi sự tinh tế trong nó chính là điểm nhấn đặc biệt giúp nàng trở nên nổi bần bật và lan tỏa sức hút từ thần thái của mình.",
-        material: "Vàng",
-        costPrice: 500.0,
-        sellingPrice: 799999.0,
-        imageUrl: [
-          "https://genmaz.com/pictures/product/01/22/bong-tai-iconic-swan-thien-nga-mau-bac-5647545_1.jpg",
-          "https://res.cloudinary.com/dzdso60ms/image/upload/v1733045511/ec434feb-26f3-4021-8a5e-38580e97f04e_bku9y4.jpg",
-          "https://res.cloudinary.com/dzdso60ms/image/upload/v1733045512/0ab0091c-479c-492e-aa9e-65d6a2c0e2ba_bjbznb.png",
-          "https://res.cloudinary.com/dzdso60ms/image/upload/v1733045512/23089cce-b222-4989-b7bd-4b42b573f14e_mhltgj.png",
-          "https://res.cloudinary.com/dzdso60ms/image/upload/v1733045511/63c83f25-6ac9-48a3-a0c1-98685e357366_o6b8of.jpg",
-        ],
-        loaiSanPham: "BONGTAI",
-        quantity: 9,
-        weight: 4.30783,
-        status: "available",
-        chiPhiPhatSinh: "100000.0",
-        supplierId: null,
-        entryDate: null,
-      },
-      soLuongTonDau: 9,
-      soLuongNhap: 0,
-      soLuongBan: 0,
-      soLuongTonCuoi: 9,
-    },
-    // ... other items
-  ];
+
+  useEffect(() => {
+    const fetchInventoryReport = async () => {
+      setLoading(true);
+      try {
+        const today = new Date().toISOString().split('T')[0] + 'T15:30:00';
+        
+        const response = await fetch('http://localhost:8081/inventory/getInventoryByDay', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(today)
+        });
+
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+
+        const data = await response.json();
+        setReportData(data);
+        setFilteredData(data);
+      } catch (error) {
+        console.error('Error fetching inventory report:', error);
+        setError('Không thể tải dữ liệu báo cáo!');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchInventoryReport();
+  }, []);
+
+  // Search functionality
+  const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const searchTerm = event.target.value.toLowerCase();
+    setSearchTerm(searchTerm);
+
+    const filtered = reportData.filter(item =>
+      item.product.name.toLowerCase().includes(searchTerm)
+    );
+    setFilteredData(filtered);
+  };
+
+  // Export functionality
+  const handleExportReport = () => {
+    // Create table headers
+    let printContent = `
+      <html>
+        <head>
+          <title>Báo cáo tồn kho ngày ${date}</title>
+          <style>
+            table {
+              width: 100%;
+              border-collapse: collapse;
+              margin-bottom: 20px;
+            }
+            th, td {
+              border: 1px solid black;
+              padding: 8px;
+              text-align: left;
+            }
+            th {
+              background-color: #f2f2f2;
+            }
+            .report-title {
+              text-align: center;
+              margin-bottom: 20px;
+            }
+          </style>
+        </head>
+        <body>
+          <h2 class="report-title">Báo cáo tồn kho ngày ${date}</h2>
+          <table>
+            <thead>
+              <tr>
+                ${reportColumns.map(column => `<th>${column.label}</th>`).join('')}
+              </tr>
+            </thead>
+            <tbody>
+    `;
+
+    // Add table data
+    filteredData.forEach(item => {
+      printContent += `
+        <tr>
+          <td>${item.product.code}</td>
+          <td>${item.product.name}</td>
+          <td>${item.soLuongTonDau}</td>
+          <td>${item.soLuongNhap}</td>
+          <td>${item.soLuongBan}</td>
+          <td>${item.soLuongTonCuoi}</td>
+          <td>${item.product.material}</td>
+        </tr>
+      `;
+    });
+
+    printContent += `
+            </tbody>
+          </table>
+        </body>
+      </html>
+    `;
+
+    // Create a new window and print
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      printWindow.document.write(printContent);
+      printWindow.document.close();
+      printWindow.focus();
+      setTimeout(() => {
+        printWindow.print();
+      }, 250);
+    }
+  };
+
+  if (loading) {
+    return <div>Đang tải dữ liệu...</div>;
+  }
+
+  if (error) {
+    return <div>Lỗi: {error}</div>;
+  }
 
   return (
     <div className="page-content">
       <div
         className="report-header"
-        style={{display: 'flex',
+        style={{
+          display: "flex",
           flexDirection: "row",
           justifyContent: "space-between",
           alignItems: "center",
@@ -116,23 +159,30 @@ const ReportTab: React.FC<ReportTabProps> = ({ date }) => {
       >
         <h3>Báo cáo tồn kho ngày {date}</h3>
 
-        <div className="psearchbar" style={{ width:'30%',}}>
+        <div className="psearchbar" style={{ width: "30%" }}>
           <SearchIcon sx={{ color: "#737373" }} />
-          <input type="search" placeholder="Tìm kiếm..." />
+          <input 
+            type="search" 
+            placeholder="Tìm kiếm..." 
+            value={searchTerm}
+            onChange={handleSearch}
+          />
         </div>
-          <button
-            style={{
-              backgroundColor: "#D7A05F",
-              borderRadius: 5,
-              border: 0,
-              marginBottom: 10,
-              justifySelf: "flex-end",
-            }}
-            // onClick={handleExportReport}
-            className="hover:bg-blue-700 text-white font-bold"
-          >
-            Xuất file báo cáo
-          </button>
+        <button
+          style={{
+            backgroundColor: "#D7A05F",
+            borderRadius: 5,
+            border: 0,
+            marginBottom: 10,
+            justifySelf: "flex-end",
+            padding: "8px 16px",
+            cursor: "pointer"
+          }}
+          onClick={handleExportReport}
+          className="exportFileText"
+        >
+          Xuất file báo cáo
+        </button>
       </div>
       <table className="tableCotainer" style={{ width: "100%" }}>
         <thead className="theadContainer">
@@ -148,7 +198,7 @@ const ReportTab: React.FC<ReportTabProps> = ({ date }) => {
           </tr>
         </thead>
         <tbody>
-          {reportData.map((item) => (
+          {filteredData.map((item) => (
             <tr key={item.product.code}>
               <td>{item.product.code}</td>
               <td>{item.product.name}</td>

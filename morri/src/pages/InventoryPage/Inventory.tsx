@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Header from "../../component/Title_header/Header";
 import TabBar from "../../component/Tabbar/TabBar";
 import InventoryTab from "./InventoryTab";
@@ -48,8 +48,29 @@ export interface Column {
 
 const Inventory: React.FC = () => {
   const [activeTab, setActiveTab] = useState("Kho");
-  const [page, setPage] = useState<number>(0);
-  const [rowsPerPage, setRowsPerPage] = useState<number>(5);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      setLoading(true);
+      try {
+        const response = await fetch("http://localhost:8081/jewelry/");
+        const data = await response.json();
+        setProducts(data);
+      } catch (error) {
+        console.error("Error fetching products:", error);
+        setError("Không thể tải dữ liệu sản phẩm!");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
 
   const handleChangePage = (newPage: number) => {
     setPage(newPage);
@@ -78,10 +99,14 @@ const Inventory: React.FC = () => {
 
       {activeTab === "Kho" ? (
         <InventoryTab
+          products={products}
+          loading={loading}
+          error={error}
           page={page}
           rowsPerPage={rowsPerPage}
           onPageChange={handleChangePage}
           onRowsPerPageChange={handleChangeRowsPerPage}
+          setProducts={setProducts}
         />
       ) : (
         <ReportTab date={new Date().toLocaleDateString()} />
