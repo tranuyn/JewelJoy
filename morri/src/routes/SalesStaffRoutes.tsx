@@ -18,11 +18,11 @@ import EmployeeHomePage from "../pages/HomePage/EmployeeHomePage";
 import { useAuth } from "../services/useAuth";
 
 export const SalesStaffRoutes = () => {
-  const { isAuthenticated, user, validateAuthStatus } = useAuth();
+  // const { isAuthenticated, user, validateAuthStatus } = useAuth();
 
-  useEffect(() => {
-    validateAuthStatus();
-  }, [validateAuthStatus]);
+  // useEffect(() => {
+  //   validateAuthStatus();
+  // }, [validateAuthStatus]);
   return (
     <Route
       element={
@@ -32,10 +32,7 @@ export const SalesStaffRoutes = () => {
       }
     >
       <Route path="/home" element={<HomePage />} />
-      {/* <Route
-        path="/home"
-        element={user?.role === "ADMIN" ? <HomePage /> : <EmployeeHomePage />}
-      /> */}
+      {/* <Route path="/home" element={<EmployeeHomePage />} /> */}
       <Route path="/attendance" element={<AttendancePage />} />
       <Route path="/staff" element={<StaffPage />} />
       <Route path="/settings" element={<SettingPage />} />

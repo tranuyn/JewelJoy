@@ -23,15 +23,9 @@ import { ProtectedRoute } from "./ProtectedRoute";
 
 import EnterInventory from "../pages/EnterInventory/EnterInventory";
 import ViewOrEdit from "../pages/EnterInventory/ViewOrEdit/ViewOrEdit";
-import { useAuth } from "../services/useAuth";
 import EmployeeHomePage from "../pages/HomePage/EmployeeHomePage";
 
 export const AdminRoutes = () => {
-  const { isAuthenticated, user, validateAuthStatus } = useAuth();
-
-  useEffect(() => {
-    validateAuthStatus();
-  }, [validateAuthStatus]);
 
   return (
     <Route
@@ -42,7 +36,7 @@ export const AdminRoutes = () => {
       }
     >
       <Route path="/home" element={<HomePage />} />
-      {/* <Route path="/home" element={user?.role === "ADMIN" ? <HomePage /> : <EmployeeHomePage />}  /> */}
+      {/* <Route path="/home" element={<EmployeeHomePage />} /> */}
       <Route path="/products" element={<ProductsAndService />} />
       <Route path="/products/detail/:id" element={<ProductDetail />} />
       <Route path="/staff" element={<StaffPage />} />

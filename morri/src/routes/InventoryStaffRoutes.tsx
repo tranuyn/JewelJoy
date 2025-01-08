@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { Navigate, Route } from "react-router-dom";
 import AdminLayout from "../component/Layout/AdminLayout";
 import { ROLES } from "../constants/roles";
@@ -17,13 +17,7 @@ import OrdersPage from "../pages/OrdersPage/ordersPage";
 import ViewOrEdit from "../pages/EnterInventory/ViewOrEdit/ViewOrEdit";
 import Inventory from "../pages/InventoryPage/Inventory";
 import EmployeeHomePage from "../pages/HomePage/EmployeeHomePage";
-import { useAuth } from "../services/useAuth";
 export const InventoryStaffRoutes = () => {
-  const { isAuthenticated, user, validateAuthStatus } = useAuth();
-
-  useEffect(() => {
-    validateAuthStatus();
-  }, [validateAuthStatus]);
   return (
     <Route
       element={
@@ -33,7 +27,7 @@ export const InventoryStaffRoutes = () => {
       }
     >
       <Route path="/home" element={<HomePage />} />
-      {/* <Route path="/home" element={user?.role === "ADMIN" ? <HomePage /> : <EmployeeHomePage />} /> */}
+      {/* <Route path="/home" element={<EmployeeHomePage />} /> */}
       <Route path="/attendance" element={<AttendancePage />} />
       <Route path="/staff" element={<StaffPage />} />
       <Route path="/settings" element={<SettingPage />} />
