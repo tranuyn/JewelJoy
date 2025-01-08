@@ -3,7 +3,6 @@ import TableComponent from "../../component/TableComponent/TableComponent";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import "./CalendarStyles.css";
-import axios from "axios";
 import DeleteComponent from "../../component/DeleteComponent/DeleteComponent";
 
 interface Employee {
@@ -12,88 +11,236 @@ interface Employee {
   email: string;
   name: string;
   dateOfBirth: string;
-  faceId: string;
+  faceId: string | null;
   gender: string;
   phoneNumber: string;
-  cccd: string;
+  cccd: string | null;
   avaURL: string | null;
-  address: string;
+  address: string | null;
   ngayVaoLam: string | null;
   role: string;
-  luongCoBan: number | null;
+  luongCoBan: string | null;
 }
 
-interface AbsenceData {
+interface AttendanceRecord {
   id: string;
   date: string;
-  employeeId: Employee;
+  checkIn: string | null;
+  checkOut: string | null;
+  status: string;
+  workingHours: number | null;
+  notes: string;
+  checkType: "IN" | "OUT";
+  employee: Employee;
+}
+
+interface AbsenceRecord {
+  id: string;
+  date: string;
+  employee: Employee;
   reason: string;
   status: string;
 }
 
-interface Column {
-  field: string;
-  headerName: string;
+interface AttendanceData {
+  id: string;
+  employeeId: Employee;
+  year: number;
+  month: number;
+  attendanceRecords: AttendanceRecord[];
+  workingDays: number;
+  absences: AbsenceRecord[];
+  totalWorkingHours: number;
+  totalAbsences: number;
+  totalLateArrivals: number;
 }
 
-const columns: Column[] = [
+interface TableRow {
+  id: string;
+  employeeId: string;
+  employeeName: string;
+  date: string;
+  reason: string;
+  checkInTime: string;
+  checkOutTime: string;
+  workingHours: string;
+  status: string;
+}
+
+const columns = [
   { field: "employeeId", headerName: "Mã nhân viên" },
   { field: "employeeName", headerName: "Tên nhân viên" },
-  { field: "date", headerName: "Ngày nghỉ" },
+  { field: "date", headerName: "Ngày" },
   { field: "reason", headerName: "Lý do" },
+  { field: "checkInTime", headerName: "Giờ check-in" },
+  { field: "checkOutTime", headerName: "Giờ check-out" },
+  { field: "workingHours", headerName: "Số giờ làm việc" },
   { field: "status", headerName: "Trạng thái" },
 ];
 
-const TongHop = () => {
+const TongHop: React.FC = () => {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [absenceData, setAbsenceData] = useState<AbsenceData[]>([]);
+  const [users, setUsers] = useState<Employee[]>([]);
+  const [allAttendanceData, setAllAttendanceData] = useState<
+    Map<string, AttendanceData>
+  >(new Map());
   const [isModalUpdateOpen, setIsModalUpdateOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [selectedRow, setSelectedRow] = useState<AbsenceData | null>(null);
-
+  const [selectedRow, setSelectedRow] = useState<TableRow | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchAbsenceData = async () => {
-      try {
-        setLoading(true);
-        const response = await axios.get("http://localhost:8080/absence", {
-          headers: {
-            Authorization: `Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIyMjUyMDk1N0BjaHQuZWR1LnZuIiwiaWF0IjoxNzM1OTEwNzA5LCJyb2xlIjoiQURNSU4iLCJleHAiOjE3MzU5NDY3MDl9.pipHtJxuHc-IE65zSBbMmN3hLMfHWCGUjg_om_lnJls`,
-          },
-        });
-        setAbsenceData(response.data);
-        setError(null);
-      } catch (err) {
-        setError("Failed to fetch absence data");
-        console.error("Error fetching absence data:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchAbsenceData();
-  }, []);
-
-  const formatTableData = (data: AbsenceData[]) => {
-    return data.map((item) => ({
-      id: item.id,
-      employeeId: item.employeeId.id,
-      employeeName: item.employeeId.name,
-      date: new Date(item.date).toLocaleDateString("vi-VN"),
-      reason: item.reason,
-      status: item.status,
-    }));
+  const fetchUsers = async () => {
+    try {
+      const response = await fetch("http://localhost:8081/user/");
+      const data: Employee[] = await response.json();
+      const filteredUsers = data.filter((user) => user.role !== "ADMIN");
+      setUsers(filteredUsers);
+      return filteredUsers;
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      setError("Failed to fetch users");
+      return [];
+    }
   };
 
-  const filteredData = selectedDate
-    ? absenceData.filter(
-        (item) =>
-          new Date(item.date).toLocaleDateString() ===
-          selectedDate.toLocaleDateString()
-      )
-    : absenceData;
+  const fetchAttendanceData = async (
+    employeeId: string,
+    year: number,
+    month: number
+  ) => {
+    try {
+      const response = await fetch(
+        `http://localhost:8081/attendance/employee/${employeeId}/${year}/${month}`
+      );
+      const data: AttendanceData = await response.json();
+      return data;
+    } catch (error) {
+      console.error(
+        `Error fetching attendance data for employee ${employeeId}:`,
+        error
+      );
+      return null;
+    }
+  };
+
+  const fetchAllAttendanceData = async () => {
+    setLoading(true);
+    try {
+      const allUsers = await fetchUsers();
+      const currentDate = new Date();
+      const year = currentDate.getFullYear();
+      const month = currentDate.getMonth() + 1;
+
+      const attendanceMap = new Map<string, AttendanceData>();
+
+      // Fetch attendance data for all users
+      await Promise.all(
+        allUsers.map(async (user) => {
+          const attendanceData = await fetchAttendanceData(
+            user.id,
+            year,
+            month
+          );
+          if (attendanceData) {
+            attendanceMap.set(user.id, attendanceData);
+          }
+        })
+      );
+
+      setAllAttendanceData(attendanceMap);
+      setError(null);
+    } catch (err) {
+      setError("Failed to fetch attendance data");
+      console.error("Error fetching all attendance data:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchAllAttendanceData();
+  }, []);
+
+  const formatTableData = (): TableRow[] => {
+    const allRows: TableRow[] = [];
+
+    allAttendanceData.forEach((data) => {
+      if (!data) return;
+
+      const hasAttendanceRecords =
+        data.attendanceRecords && data.attendanceRecords.length > 0;
+      const hasAbsences = data.absences && data.absences.length > 0;
+
+      if (!hasAttendanceRecords && !hasAbsences) return;
+
+      if (hasAttendanceRecords) {
+        const attendanceRows = data.attendanceRecords.map(
+          (record): TableRow => ({
+            id: record.id,
+            employeeId: record.employee?.id || "",
+            employeeName: record.employee?.name || "",
+            date: record.date
+              ? new Date(record.date).toLocaleDateString()
+              : "-",
+            reason: record.notes || "",
+            checkInTime: record.checkIn
+              ? new Date(record.checkIn).toLocaleTimeString()
+              : "-",
+            checkOutTime: record.checkOut
+              ? new Date(record.checkOut).toLocaleTimeString()
+              : "-",
+            workingHours: record.workingHours?.toString() || "-",
+            status: record.status || "",
+          })
+        );
+        allRows.push(...attendanceRows);
+      }
+      if (hasAbsences) {
+        const absenceRows = data.absences.map(
+          (absence): TableRow => ({
+            id: absence.id,
+            employeeId: absence.employee?.id || "",
+            employeeName: absence.employee?.name || "",
+            date: absence.date
+              ? new Date(absence.date).toLocaleDateString()
+              : "-",
+            reason: absence.reason || "",
+            checkInTime: "-",
+            checkOutTime: "-",
+            workingHours: "0",
+            status: "ABSENT",
+          })
+        );
+        allRows.push(...absenceRows);
+      }
+    });
+
+    return allRows;
+  };
+
+  const handleEdit = (row: TableRow) => {
+    setSelectedRow(row);
+    setIsModalUpdateOpen(true);
+  };
+
+  const handleDelete = async () => {
+    if (!selectedRow) return;
+    try {
+      // Implement delete logic here
+      console.log("Deleting row:", selectedRow);
+      setIsDeleteModalOpen(false);
+      // Refresh data after deletion
+      await fetchAllAttendanceData();
+    } catch (error) {
+      console.error("Error deleting record:", error);
+    }
+  };
+
+  const handleDeleteOpen = (row: TableRow) => {
+    setSelectedRow(row);
+    setIsDeleteModalOpen(true);
+  };
 
   const getCurrentDate = () => {
     return new Date().toLocaleDateString("vi-VN", {
@@ -104,75 +251,16 @@ const TongHop = () => {
     });
   };
 
-  const handleRowClick = (row: any) => {
-    console.log("Row clicked:", row);
-  };
-
-  const handleEdit = (row: any) => {
-    setIsModalUpdateOpen(true);
-  };
-  const handleUpdate = async (updatedData: AbsenceData) => {
-    try {
-      setLoading(true);
-      const response = await axios.put(
-        `http://localhost:8080/absence/${updatedData.id}`,
-        updatedData,
-        {
-          headers: {
-            Authorization: `Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIyMjUyMDk1N0BjaHQuZWR1LnZuIiwiaWF0IjoxNzM1OTEwNzA5LCJyb2xlIjoiQURNSU4iLCJleHAiOjE3MzU5NDY3MDl9.pipHtJxuHc-IE65zSBbMmN3hLMfHWCGUjg_om_lnJls`,
-          },
-        }
-      );
-      const updatedIndex = absenceData.findIndex(
-        (item) => item.id === updatedData.id
-      );
-      const newAbsenceData = [...absenceData];
-      newAbsenceData[updatedIndex] = response.data;
-      setAbsenceData(newAbsenceData);
-      setIsModalUpdateOpen(false);
-      setError(null);
-    } catch (err) {
-      setError("Failed to update absence data");
-      console.error("Error updating absence data:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-  const handleDeleteOpen = async () => {
-    setIsDeleteModalOpen(true);
-  };
-  const handleDelete = async () => {
-    if (!selectedRow?.id) {
-      // Add null check
-      setError("No row selected for deletion");
-      return;
-    }
-
-    try {
-      setLoading(true);
-      await axios.delete(`http://localhost:8080/absence/${selectedRow.id}`, {
-        headers: {
-          Authorization: `Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIyMjUyMDk1N0BjaHQuZWR1LnZuIiwiaWF0IjoxNzM1OTEwNzA5LCJyb2xlIjoiQURNSU4iLCJleHAiOjE3MzU5NDY3MDl9.pipHtJxuHc-IE65zSBbMmN3hLMfHWCGUjg_om_lnJls`,
-        },
-      });
-
-      const newAbsenceData = absenceData.filter(
-        (item) => item.id !== selectedRow.id
-      );
-      setAbsenceData(newAbsenceData);
-      setIsDeleteModalOpen(false);
-      setSelectedRow(null);
-      setError(null);
-    } catch (err) {
-      setError("Failed to delete absence data");
-      console.error("Error deleting absence data:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   if (loading) return <div className="loading">Đang tải dữ liệu...</div>;
   if (error) return <div className="error">Error: {error}</div>;
+
+  const tableData = formatTableData();
+  const filteredData = selectedDate
+    ? tableData.filter(
+        (row) =>
+          new Date(row.date).toDateString() === selectedDate.toDateString()
+      )
+    : tableData;
 
   return (
     <>
@@ -185,7 +273,7 @@ const TongHop = () => {
               value={selectedDate}
               tileClassName={({ date, view }) =>
                 view === "month" &&
-                absenceData.some(
+                tableData.some(
                   (item) =>
                     new Date(item.date).toDateString() === date.toDateString()
                 )
@@ -196,16 +284,15 @@ const TongHop = () => {
           </div>
           <TableComponent
             columns={columns}
-            data={formatTableData(filteredData)}
-            onRowClick={(row) => setSelectedRow(row as unknown as AbsenceData)}
-            // onRowClick={handleRowClick}
-            onEdit={handleEdit}
-            onDelete={handleDeleteOpen}
+            data={filteredData}
+            onRowClick={(row) => setSelectedRow(row as TableRow)}
+            onEdit={() => handleEdit}
+            onDelete={() => handleDeleteOpen}
           />
           <DeleteComponent
             isModalOpen={isDeleteModalOpen}
             setIsModalOpen={setIsDeleteModalOpen}
-            deleteName={selectedRow?.employeeId?.name || ""} // Show employee name instead of ID
+            deleteName={selectedRow?.employeeName || ""}
             handleDelete={handleDelete}
           />
         </div>

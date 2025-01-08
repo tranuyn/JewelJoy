@@ -4,6 +4,7 @@ import BtnComponent from "../../component/BtnComponent/BtnComponent";
 import TextBox from "../../component/TextBox/TextBox";
 import axios from "axios";
 import { useAuth } from "../../services/useAuth";
+import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 
 interface XinVang {
   isModalOpen: boolean;
@@ -12,9 +13,8 @@ interface XinVang {
 }
 
 interface FormData {
-  employeeId: string | number;
   reason: string | number;
-  // date: string;
+  date: string | number;
   status: "PENDING";
 }
 
@@ -27,10 +27,11 @@ const XinVangModal: React.FC<XinVang> = ({
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
 
+  const initialDate = new Date().toISOString().split(".")[0];
+
   const [formData, setFormData] = useState<FormData>({
-    employeeId: "",
     reason: "",
-    // date: new Date().toISOString(),
+    date: initialDate,
     status: "PENDING",
   });
 
@@ -46,18 +47,29 @@ const XinVangModal: React.FC<XinVang> = ({
     setError(null);
 
     try {
-      if (!formData.employeeId || !formData.reason) {
+      if (!formData.reason || !formData.date) {
         throw new Error("Please fill in all required fields");
       }
-      console.log("Formdata:", formData);
-
-      await axios.post("http://localhost:8080/absence/create", formData, {
+      console.log("huhu ,date :" + formData.date);
+      const response = await fetch(`http://localhost:8081/attendance/absence`, {
+        method: "POST",
         headers: {
-          Authorization: `Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIyMjUyMDk1N0BjaHQuZWR1LnZuIiwiaWF0IjoxNzM1OTEwNzA5LCJyb2xlIjoiQURNSU4iLCJleHAiOjE3MzU5NDY3MDl9.pipHtJxuHc-IE65zSBbMmN3hLMfHWCGUjg_om_lnJls`,
+          "Content-Type": "application/json",
         },
+        body: JSON.stringify({
+          employee: user?.id,
+          reason: formData.reason,
+          date: formData.date,
+          status: formData.status,
+        }),
       });
 
-      await handleXinVang();
+      if (!response.ok) {
+        throw new Error("Failed to submit request");
+      }
+
+      const data = await response.json();
+      console.log("Response:", data);
       setIsModalOpen(false);
     } catch (error) {
       console.error("Error submitting absence request:", error);
@@ -108,14 +120,14 @@ const XinVangModal: React.FC<XinVang> = ({
           </Alert>
         )}
 
-        <TextBox
+        {/* <TextBox
           datatype="string"
           title="Mã NV"
           placeholder="Nhập mã nhân viên"
           value={formData.employeeId}
           onChange={handleChange("employeeId")}
           defaultValue={user?.id}
-        />
+        /> */}
 
         <TextBox
           datatype="string"
@@ -123,6 +135,15 @@ const XinVangModal: React.FC<XinVang> = ({
           placeholder="Nhập lí do vắng"
           value={formData.reason}
           onChange={handleChange("reason")}
+        />
+
+        <TextBox
+          datatype="date"
+          title="Ngày ghi nhan"
+          value={formData.date}
+          placeholder="Nhập ngày sinh"
+          onChange={handleChange("date")}
+          icon={<CalendarMonthIcon style={{ color: "black" }} />}
         />
 
         <Box
