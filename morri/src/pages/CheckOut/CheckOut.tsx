@@ -8,13 +8,18 @@ import StaffSection from "./StaffSection";
 import Bill from "./Bill";
 import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
+import { useDispatch } from "react-redux";
+import { addToCart } from "../../redux/slice/cartSlice";
+import { useSelector } from "react-redux";
+import { RootState } from "../../redux/store";
+import { useAuth } from "../../services/useAuth";
 
 interface ProductType {
   id: string;
   name: string;
   material: string;
   sellingPrice: number;
-  imageUrl: string[];
+  imageUrl: string[] | string;
   quantityInBill: number;
   loaiSanPham: string;
 }
@@ -37,16 +42,47 @@ const Checkout = () => {
   const [error, setError] = useState<any>(null);
   const [selectedButton, setSelectedButton] = useState<string | null>(null);
   const [note, setNote] = useState("");
+  const cartItems = useSelector((state: RootState) => state.cart.items);
+  const { user } = useAuth();
+
   const navigate = useNavigate();
   useEffect(() => {
     if (location.state) {
-      setSelectedProducts(location.state.selectedProducts);
+      if (user?.role === "CUSTOMER") {
+        // Lọc các sản phẩm đã được chọn
+        const selectedItems = cartItems.filter((item) => item.selected);
+
+        // Chuyển đổi selectedItems thành mảng các đối tượng giống như bạn muốn
+        const selectedProductsArray: ProductType[] = selectedItems.map(
+          (item) => ({
+            id: item.id.toString(), // Chuyển id từ number sang string
+            name: item.name,
+            material: item.type,
+            sellingPrice: item.price,
+            imageUrl: Array.isArray(item.image) ? item.image : [item.image],
+            quantityInBill: item.quantity,
+            loaiSanPham: item.type,
+          })
+        );
+
+        // Cập nhật trạng thái với mảng selectedProducts
+        setSelectedProducts(selectedProductsArray);
+      } else {
+        // Nếu role không phải CUSTOMER, lấy selectedProducts từ location.state
+        setSelectedProducts(location.state.selectedProducts);
+      }
+
+      // Cập nhật số lượng từ location.state
       setQuantities(location.state.quantities);
     }
-  }, [location.state]);
+  }, [location.state, cartItems, user?.role]);
+
+  const handleSetCustomerInfo = (info: any) => {
+    setCustomerInfo(info);
+  };
 
   const handleBuyNow = async (updatedProducts: ProductType[]) => {
-    if (!staffInfo) {
+    if (!staffInfo && user?.role != "CUSTOMER") {
       setError(
         "Thông tin nhân viên không hợp lệ. Vui lòng tải lại thông tin nhân viên."
       );
@@ -61,12 +97,13 @@ const Checkout = () => {
       setError(
         "Thông tin khách hàng không hợp lệ. Vui lòng nhập đầy đủ thông tin khách hàng."
       );
+      console.log("indfo", customerInfo);
       return;
     }
     setError(null);
     setSelectedProducts(updatedProducts);
     await createCustomer();
-    createOrder(customerInfo.phoneNumber);
+    createOrder(customerInfo.id);
   };
 
   const createCustomer = async () => {
@@ -74,7 +111,7 @@ const Checkout = () => {
       const dateOfBirth = customerInfo.dateOfBirth
         ? new Date(customerInfo.dateOfBirth).toISOString().split("T")[0]
         : "";
-      const response = await fetch("http://localhost:8081/customer/", {
+      const response = await fetch("http://localhost:8081/customer/create", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -88,10 +125,19 @@ const Checkout = () => {
       });
 
       if (!response.ok) {
+        console.log("tạo customer thất bại");
         throw new Error("Không thể tạo khách hàng");
       }
 
       const data = await response.json();
+      console.log(JSON.stringify(data));
+      setCustomerInfo({
+        phoneNumber: data.phoneNumber,
+        name: data.name,
+        gioiTinh: data.gioiTinh,
+        dateOfBirth: customerInfo.dateOfBirth,
+        id: data.id,
+      });
       return data;
     } catch (error) {
       console.error("Error creating customer:", error);
@@ -100,30 +146,36 @@ const Checkout = () => {
 
   const createOrder = async (phone: string) => {
     try {
+      const body = {
+        createAt: new Date().toISOString(),
+        customer: customerInfo.id,
+        orderDetails: selectedProducts.map((product) => ({
+          product: product.id,
+          quantity: product.quantityInBill,
+          unitPrice: product.sellingPrice,
+          subtotal: product.sellingPrice * product.quantityInBill,
+        })),
+        paymentMethod: selectedButton,
+        note: note,
+        totalPrice: selectedProducts.reduce(
+          (total, product) =>
+            total + product.sellingPrice * product.quantityInBill,
+          0
+        ),
+        ...(user?.role !== "CUSTOMER" && { staff: staffInfo.id }),
+        ...(user?.role !== "CUSTOMER"
+          ? { status: "COMPLETED" }
+          : { status: "ON_DELIVERY" }),
+      };
+
+      console.log(body);
+
       const response = await fetch("http://localhost:8081/billBan/create", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          staff: { email: staffInfo.email },
-          createAt: new Date().toISOString(),
-          customer: { phoneNumber: phone },
-          orderDetails: selectedProducts.map((product) => ({
-            product: { id: product.id },
-            quantity: product.quantityInBill,
-            unitPrice: product.sellingPrice,
-            subtotal: product.sellingPrice * product.quantityInBill,
-          })),
-          paymentMethod: selectedButton,
-          status: "COMPLETED",
-          note: note,
-          totalPrice: selectedProducts.reduce(
-            (total, product) =>
-              total + product.sellingPrice * product.quantityInBill,
-            0
-          ),
-        }),
+        body: JSON.stringify(body),
       });
 
       if (!response.ok) {
@@ -133,7 +185,7 @@ const Checkout = () => {
       }
 
       const data = await response.json();
-      console.log(data);
+
       navigate(`/products/checkout/${data.id}`, {
         state: {
           selectedProducts,
@@ -205,8 +257,11 @@ const Checkout = () => {
         </div>
       ) : (
         <div>
-          <CustomerSection setCustomerInfo={setCustomerInfo} />
-          <StaffSection setStaffInfo={setStaffInfo} />
+          <CustomerSection setCustomerInfo={handleSetCustomerInfo} />
+          {user?.role != "CUSTOMER" && (
+            <StaffSection setStaffInfo={setStaffInfo} />
+          )}
+
           <Bill
             selectedProducts={selectedProducts}
             onBuyNow={(updatedProducts, selectedButton, note) => {

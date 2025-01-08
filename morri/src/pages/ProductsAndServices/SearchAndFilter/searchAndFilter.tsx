@@ -4,12 +4,55 @@ import "./style.css";
 import Checkbox from "@mui/material/Checkbox";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 
-const SearchAndFilter: React.FC = () => {
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [selectedAge, setSelectedAge] = useState("Ten");
+interface SearchAndFilterProps {
+  onSearch: (query: string) => void;
+  onMaterialFilter: (materials: string[]) => void;
+  onSort: (sortType: string) => void;
+}
 
-  const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedAge(event.target.value);
+const SearchAndFilter: React.FC<SearchAndFilterProps> = ({
+  onSearch,
+  onMaterialFilter,
+  onSort,
+}) => {
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [selectedSort, setSelectedSort] = useState("Default");
+
+  const [searchValue, setSearchValue] = useState("");
+  const [selectedMaterials, setSelectedMaterials] = useState<{
+    [key: string]: boolean;
+  }>({
+    "Kim cương": false,
+    "Bạch kim": false,
+    Bạc: false,
+    Vàng: false,
+  });
+
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value;
+    setSearchValue(value);
+    onSearch(value);
+  };
+
+  const handleMaterialChange = (material: string) => {
+    const newSelectedMaterials = {
+      ...selectedMaterials,
+      [material]: !selectedMaterials[material],
+    };
+    setSelectedMaterials(newSelectedMaterials);
+
+    // Convert to array of selected materials
+    const selectedMaterialArray = Object.entries(newSelectedMaterials)
+      .filter(([_, isSelected]) => isSelected)
+      .map(([material]) => material);
+
+    onMaterialFilter(selectedMaterialArray);
+  };
+
+  const handleSortChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = event.target.value;
+    setSelectedSort(value);
+    onSort(value);
   };
 
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -39,7 +82,12 @@ const SearchAndFilter: React.FC = () => {
     <div className="psearch-container">
       <div className="psearchbar">
         <SearchIcon sx={{ color: "#737373" }} />
-        <input type="search" placeholder="Tìm kiếm..." />
+        <input
+          type="search"
+          placeholder="Tìm kiếm..."
+          value={searchValue}
+          onChange={handleSearchChange}
+        />
       </div>
       <div className="dropdown" ref={dropdownRef}>
         <button className="dropbtn" onClick={toggleDropdown}>
@@ -48,22 +96,15 @@ const SearchAndFilter: React.FC = () => {
         </button>
         {dropdownOpen && (
           <div className="dropdown-content">
-            <div>
-              <Checkbox />
-              <span>Kim cương</span>
-            </div>
-            <div>
-              <Checkbox />
-              <span>Bạch kim</span>
-            </div>
-            <div>
-              <Checkbox />
-              <span>Bạc</span>
-            </div>
-            <div>
-              <Checkbox />
-              <span>Vàng</span>
-            </div>
+            {Object.keys(selectedMaterials).map((material) => (
+              <div key={material}>
+                <Checkbox
+                  checked={selectedMaterials[material]}
+                  onChange={() => handleMaterialChange(material)}
+                />
+                <span>{material}</span>
+              </div>
+            ))}
           </div>
         )}
       </div>
@@ -71,8 +112,8 @@ const SearchAndFilter: React.FC = () => {
       <select
         className="SapXep"
         id="age"
-        value={selectedAge}
-        onChange={handleChange}
+        value={selectedSort}
+        onChange={handleSortChange}
       >
         <option value="Increase">Giá tăng dần</option>
         <option value="Decrease">Giá giảm dần</option>

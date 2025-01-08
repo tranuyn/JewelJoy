@@ -11,8 +11,7 @@ import DynamicUpdateForm from "./dynamicUpdateForm";
 import ServiceComponent from "../../component/ServiceComponent/ServiceComponent";
 import TableComponent from "../../component/TableComponent/TableComponent";
 
-// Types
-interface Service {
+export interface Service {
   id: string;
   serviceName: string;
   serviceDescription: string;
@@ -28,21 +27,20 @@ interface Staff {
 }
 
 interface ServiceBooking {
-  id: string;
   nameService: string;
-  services: Service[];
+  customerName: string;
+  customerPhone: string;
+  services: { serviceName: string; quantity: number }[];
   description: string;
   staffLapHoaDon: Staff | null;
-  staffLamDichVu: Staff | null;
-  quantity: number;
   totalPrice: number;
   createdAt: string;
-  deliveryDate: string;
   deliverystatus: string;
+  deliveryDate: string;
 }
 
 const bookingColumns = [
-  { field: "nameService", headerName: "Mã đặt lịch" },
+  { field: "customerName", headerName: "Tên khách hàng" },
   { field: "createdAt", headerName: "Ngày tạo" },
   { field: "deliveryDate", headerName: "Ngày giao" },
   { field: "deliverystatus", headerName: "Trạng thái" },
@@ -62,6 +60,7 @@ const ServicePage: React.FC = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isModalUpdateOpen, setIsModalUpdateOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState<any>(null);
+  const [selectedService, setSelectedService] = useState<Service | null>(null); 
 
   const tabs = ["Dịch vụ", "Đặt lịch"];
 
@@ -91,17 +90,38 @@ const ServicePage: React.FC = () => {
   };
 
   const handleSearch = (value: string) => {
-    setSearchKeyword(value);
+    setSearchKeyword(value.trim().toLowerCase());
+  };
+  
+  const handleDelete = async (): Promise<void> => {
+    if (!selectedService) {
+      alert('Vui lòng chọn dịch vụ để xóa');
+      return;
+    }
+  console.log("selected", selectedService);
+    try {
+      const response = await fetch(`http://localhost:8081/service/${selectedService.id}`, {
+        method: 'DELETE',
+      }); 
+      if (response.status==200) {
+        setServices((prevServices) =>
+          prevServices.filter((service) => service.id !== selectedService.id)
+        );
+        setSelectedService(null);
+        setIsDeleteModalOpen(false);
+        // alert(result.message || 'Xóa dịch vụ thành công!');
+      } else {
+        // alert(result.message || 'Không thể xóa dịch vụ');
+      }
+    } catch (error) {
+      console.error('Error deleting service:', error);
+      alert('Đã xảy ra lỗi khi xóa dịch vụ');
+    }
   };
 
-  const handleDelete = async (): Promise<void> => {
-    try {
-      // Implement delete logic here
-      console.log("Deleting row:", selectedRow);
-      setIsDeleteModalOpen(false);
-    } catch (error) {
-      console.error("Error deleting:", error);
-    }
+  const handleServiceDelete = (service: Service) => {
+    setSelectedService(service);
+    setIsDeleteModalOpen(true);
   };
 
   const handleUpdate = async (): Promise<void> => {
@@ -150,6 +170,9 @@ const ServicePage: React.FC = () => {
           isModalOpen={isModalOpen}
           setIsModalOpen={setIsModalOpen}
           formType={activeTab}
+          updateServices={(newService: Service) =>
+            setServices((prev) => [...prev, newService])
+          }
         />
         <Box sx={{ marginRight: "300px" }}>
           <TabBar
@@ -188,6 +211,7 @@ const ServicePage: React.FC = () => {
                     price={service.price?.toString() || "0"}
                     imageUrl={service.serviceUrl || undefined}
                     onEdit={() => handleEdit(service)}
+                    onDelete={() => handleServiceDelete(service)} 
                   />
                 ))}
             </div>

@@ -1,34 +1,34 @@
-import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import AddIcon from '@mui/icons-material/Add';
-import DeleteIcon from '@mui/icons-material/Delete';
-import ListAltIcon from '@mui/icons-material/ListAlt';
-import LocationOnIcon from '@mui/icons-material/LocationOn';
-import LogoutIcon from '@mui/icons-material/Logout';
-import PersonIcon from '@mui/icons-material/Person';
-import PhoneIcon from '@mui/icons-material/Phone';
-import RemoveIcon from '@mui/icons-material/Remove';
-import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import AddIcon from "@mui/icons-material/Add";
+import DeleteIcon from "@mui/icons-material/Delete";
+import ListAltIcon from "@mui/icons-material/ListAlt";
+import LocationOnIcon from "@mui/icons-material/LocationOn";
+import LogoutIcon from "@mui/icons-material/Logout";
+import PersonIcon from "@mui/icons-material/Person";
+import PhoneIcon from "@mui/icons-material/Phone";
+import RemoveIcon from "@mui/icons-material/Remove";
+import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import {
-    AppBar,
-    Box,
-    Button,
-    Checkbox,
-    Grid,
-    IconButton,
-    Menu,
-    MenuItem,
-    Paper,
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableRow,
-    TextField,
-    Toolbar,
-    Tooltip,
-    Typography,
-} from '@mui/material';
-import React, { useState } from 'react';
+  AppBar,
+  Box,
+  Button,
+  Checkbox,
+  Grid,
+  IconButton,
+  Menu,
+  MenuItem,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  TextField,
+  Toolbar,
+  Tooltip,
+  Typography,
+} from "@mui/material";
+import React, { useState } from "react";
 
 // Import images
 import diamondEarring from "../../assets/constant/diamond-earring.jpg";
@@ -37,52 +37,19 @@ import goldEarring from "../../assets/constant/gold-earring.jpg";
 import goldNecklace from "../../assets/constant/gold-necklace.jpg";
 import morriLogo from "../../assets/constant/morri-logo.png";
 
-import { CartItem, OrderSummary } from '../CartPage/cartTypes';
-import './CartPage.css';
-
-const initialItems: CartItem[] = [
-  {
-    id: 1,
-    name: 'Gold Earring',
-    type: 'Earring',
-    price: 320.00,
-    quantity: 4,
-    image: goldEarring,
-    selected: true
-  },
-  {
-    id: 2,
-    name: 'Diamond Green E',
-    type: 'Earring',
-    price: 315.00,
-    quantity: 2,
-    image: diamondEarring,
-    selected: true
-  },
-  {
-    id: 3,
-    name: 'Gold Necklace',
-    type: 'Necklace',
-    price: 960.00,
-    quantity: 1,
-    image: goldNecklace,
-    selected: true
-  },
-  {
-    id: 4,
-    name: 'Gold Bracelet',
-    type: 'Bracelet',
-    price: 400.00,
-    quantity: 2,
-    image: goldBracelet,
-    selected: false
-  }
-];
+import { CartItem, OrderSummary } from "../CartPage/cartTypes";
+import "./CartPage.css";
+import { useDispatch } from "react-redux";
+import { addToCart, setSelectedItems } from "../../redux/slice/cartSlice";
+import { useSelector } from "react-redux";
+import { RootState } from "../../redux/store";
+import { useNavigate } from "react-router-dom";
 
 const CartPage: React.FC = () => {
-  const [cartItems, setCartItems] = useState<CartItem[]>(initialItems);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const [voucher, setVoucher] = useState('');
+  const [voucher, setVoucher] = useState("");
+  const dispatch = useDispatch();
+  const cartItems = useSelector((state: RootState) => state.cart.items);
 
   const handleProfileClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -92,45 +59,67 @@ const CartPage: React.FC = () => {
     setAnchorEl(null);
   };
 
+  const navigate = useNavigate();
+
   const handleQuantityChange = (id: number, increment: boolean) => {
-    setCartItems(items =>
-      items.map(item =>
-        item.id === id
-          ? { ...item, quantity: increment ? item.quantity + 1 : Math.max(1, item.quantity - 1) }
-          : item
-      )
-    );
+    // setCartItems(items =>
+    //   items.map(item =>
+    //     item.id === id
+    //       ? { ...item, quantity: increment ? item.quantity + 1 : Math.max(1, item.quantity - 1) }
+    //       : item
+    //   )
+    // );
   };
 
   const handleSelectItem = (id: number) => {
-    setCartItems(items =>
-      items.map(item =>
-        item.id === id
-          ? { ...item, selected: !item.selected }
-          : item
-      )
-    );
+    const item = cartItems.find((item) => item.id === id);
+    if (!item) return;
+    if (item.selected) dispatch(setSelectedItems({ id, selected: false }));
+    else dispatch(setSelectedItems({ id, selected: true }));
   };
 
-  const handleDeleteItem = (id: number) => {
-    setCartItems(items => items.filter(item => item.id !== id));
-  };
+  const handleDeleteItem = (id: number) => {};
 
   const calculateOrderSummary = (): OrderSummary => {
-    const selectedItems = cartItems.filter(item => item.selected);
-    const subtotal = selectedItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    
+    const selectedItems = cartItems.filter((item) => item.selected);
+    const subtotal = selectedItems.reduce(
+      (sum, item) => sum + item.price * item.quantity,
+      0
+    );
+
     return {
       items: selectedItems.length,
       subtotal,
       shipping: 0,
       tax: 0,
       discount: 20,
-      total: subtotal - 20
+      total: subtotal - 20,
     };
   };
 
   const summary = calculateOrderSummary();
+
+  const handleBuyNow = () => {
+    const selectedItems = cartItems.filter((item) => item.selected);
+    if (selectedItems?.length === 0) {
+      alert("Please select at least one item to proceed.");
+      return;
+    }
+    const quantities = selectedItems.reduce<{ [key: number]: number }>(
+      (obj, item) => {
+        obj[item.id] = item.quantity;
+        return obj;
+      },
+      {}
+    );
+    console.log(selectedItems, quantities);
+    navigate("/products/checkout", {
+      state: {
+        selectedProducts: selectedItems,
+        quantities: quantities,
+      },
+    });
+  };
 
   return (
     <Box className="root">
@@ -180,10 +169,10 @@ const CartPage: React.FC = () => {
 
       <Box className="cart-container">
         <Box className="title-section">
-        <Box className="background-decoration" />
-        <Typography variant="h3" className="cart-title">
-          Giỏ hàng
-        </Typography>
+          <Box className="background-decoration" />
+          <Typography variant="h3" className="cart-title">
+            Giỏ hàng
+          </Typography>
         </Box>
 
         <Grid container spacing={3}>
@@ -207,15 +196,21 @@ const CartPage: React.FC = () => {
                           onChange={() => handleSelectItem(item.id)}
                           className="cart-checkbox"
                         />
-                        <img src={item.image} alt={item.name} className="product-image" />
+                        <img
+                          src={item.image}
+                          alt={item.name}
+                          className="product-image"
+                        />
                         <Box>
-                          <Typography variant="subtitle1">{item.name}</Typography>
+                          <Typography variant="subtitle1">
+                            {item.name}
+                          </Typography>
                           <Typography variant="body2" color="textSecondary">
                             {item.type}
                           </Typography>
                           <Tooltip title="Xóa khỏi giỏ hàng">
-                            <IconButton 
-                              size="small" 
+                            <IconButton
+                              size="small"
                               onClick={() => handleDeleteItem(item.id)}
                               className="delete-button"
                             >
@@ -225,7 +220,9 @@ const CartPage: React.FC = () => {
                         </Box>
                       </Box>
                     </TableCell>
-                    <TableCell align="right">${item.price.toFixed(2)}</TableCell>
+                    <TableCell align="right">
+                      {/* ${item.price.toFixed(2)} */}
+                    </TableCell>
                     <TableCell align="center">
                       <Box className="quantity-controls">
                         <IconButton
@@ -272,32 +269,33 @@ const CartPage: React.FC = () => {
               </Typography>
               <Box className="summary-row">
                 <Typography>Mặt hàng</Typography>
-                <Typography>{summary.items}</Typography>
+                <Typography>{summary?.items}</Typography>
               </Box>
               <Box className="summary-row">
                 <Typography>Tổng tiền</Typography>
-                <Typography>${summary.subtotal.toFixed(2)}</Typography>
+                <Typography>${summary?.subtotal.toFixed(2)}</Typography>
               </Box>
               <Box className="summary-row">
                 <Typography>Phí vận chuyển</Typography>
-                <Typography>${summary.shipping.toFixed(2)}</Typography>
+                <Typography>${summary?.shipping.toFixed(2)}</Typography>
               </Box>
               <Box className="summary-row">
                 <Typography>Thuế</Typography>
-                <Typography>${summary.tax.toFixed(2)}</Typography>
+                <Typography>${summary?.tax.toFixed(2)}</Typography>
               </Box>
               <Box className="summary-row">
                 <Typography>Giảm giá</Typography>
-                <Typography>-${summary.discount.toFixed(2)}</Typography>
+                <Typography>-${summary?.discount.toFixed(2)}</Typography>
               </Box>
               <Box className="summary-row total">
                 <Typography>Tổng</Typography>
-                <Typography>${summary.total.toFixed(2)}</Typography>
+                <Typography>${summary?.total.toFixed(2)}</Typography>
               </Box>
               <Button
                 variant="contained"
                 fullWidth
                 className="checkout-button"
+                onClick={handleBuyNow}
               >
                 Thanh toán
               </Button>

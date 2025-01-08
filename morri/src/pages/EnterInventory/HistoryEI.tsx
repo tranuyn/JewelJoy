@@ -9,6 +9,8 @@ import BorderColorIcon from "@mui/icons-material/BorderColor";
 import DeleteIcon from "@mui/icons-material/Delete";
 import FeedIcon from "@mui/icons-material/Feed";
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { useAuth } from "../../services/useAuth";
 export interface Column {
   id:
     | "id"
@@ -77,15 +79,29 @@ const HistoryEI: React.FC = () => {
   const [rows, setRows] = useState<Data[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [deleteName, setDeleteName] = useState("");
+  const [deleteId, setDeleteId] = useState("");
   const [loading, setLoading] = useState(false);
+  const { token } = useAuth();
   const navigate = useNavigate();
 
   const handleConfirmDelete = async () => {
     setLoading(true);
     try {
       // await handleDelete();
+      const response = await fetch(
+        `http://localhost:8081/inventory/${deleteId}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
       setIsModalOpen(false);
+      if (!response.ok) {
+        alert("Xóa phiếu nhập kho thất bại");
+      } else
+        setRows((prevRows) => prevRows.filter((row) => row.id !== deleteId));
     } catch (error) {
       console.error("Error deleting:", error);
     } finally {
@@ -107,19 +123,26 @@ const HistoryEI: React.FC = () => {
     return `${formattedDate}\n${formattedTime}`; // Kết hợp ngày và giờ với xuống dòng
   };
 
+  const { logout } = useAuth();
+
+  const handleLogout = () => {
+    logout();
+    // navigate("/login");
+  };
   const fetchData = async () => {
     try {
       const response = await fetch("http://localhost:8081/inventory", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          Authorization:
-            "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIyMjUyMDk1N0BjaHQuZWR1LnZuIiwiaWF0IjoxNzM2MTA4MjQzLCJyb2xlIjoiQURNSU4iLCJleHAiOjE3MzYxNDQyNDN9.PIPD7WdlZbGCC2bvnk_5KKjGsjDlT51FfPfu0HJ-GUk",
         },
       });
 
       if (!response.ok) {
-        console.log(await response.json());
+        if (response.status === 403) {
+          handleLogout();
+        }
+        console.log("hehe" + (await response.json()));
         throw new Error("Không thể tải dữ liệu đơn hàng!");
       }
 
@@ -171,8 +194,19 @@ const HistoryEI: React.FC = () => {
               className="editbtn"
               onClick={() => navigate(`/enter-inventory/${item.id}`)}
             />
-            <BorderColorIcon fontSize="small" className="editbtn" />
-            <DeleteIcon fontSize="small" className="editbtn" />
+            <BorderColorIcon
+              fontSize="small"
+              className="editbtn"
+              onClick={() => navigate(`/enter-inventory/${item.id}`)}
+            />
+            <DeleteIcon
+              fontSize="small"
+              className="editbtn"
+              onClick={() => {
+                setIsModalOpen(true);
+                setDeleteId(item.id);
+              }}
+            />
           </div>
         );
       });
@@ -293,7 +327,7 @@ const HistoryEI: React.FC = () => {
             }}
           >
             Bạn có chắc chắn muốn xoá{" "}
-            <span style={{ color: "#d32f2f" }}>{deleteName}</span> không?
+            <span style={{ color: "#d32f2f" }}>{deleteId}</span> không?
           </div>
           <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2 }}>
             <BtnComponent

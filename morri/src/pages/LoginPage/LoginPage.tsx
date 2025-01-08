@@ -244,7 +244,7 @@ const Login: React.FC = () => {
                   }
                   label="Ghi nhớ tài khoản"
                 />
-                <Button variant="text" className="forgot-password">
+                <Button variant="text" className="forgot-password" onClick={() => navigate("/forgotpassword")}> 
                   Quên mật khẩu?
                 </Button>
               </Box>

@@ -254,6 +254,7 @@
   padding: 5;
   margin-top: 20px;
   border-radius: 10px;
+  width: 100%;
 }
 .editbutoon:hover {
   cursor: pointer;

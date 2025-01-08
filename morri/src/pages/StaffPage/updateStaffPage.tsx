@@ -11,111 +11,89 @@ import CardIcon from '@mui/icons-material/CardMembership';
 import EmailIcon from '@mui/icons-material/Email';
 import PhoneIcon from '@mui/icons-material/Phone';
 import PersonIcon from '@mui/icons-material/Person';
+import { Staff} from "./StaffPage";
 
-// interface Staff {
-//   isModalOpen: boolean;
-//   setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
-//   handleUpdate: () => Promise<void>;
-//   staffData?: {
-//     name: string;
-//     dateOfBirth: string;
-//     phoneNumber: string;
-//     position: string;
-//     gender: string;
-//     startDate: string;
-//     email: string;
-//     address: string;
-//     cccd: string;
-//     avatar?: string;
-//   };
-// }
-interface UpdateStaffFormProps {
+interface StaffProps {
   isModalOpen: boolean;
   setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  handleUpdate: (formData: UpdateStaffData) => Promise<void>;
-  staffData?: {
-    id: string;
-    name: string;
-    username: string;
-    email: string;
-    dateOfBirth: string;
-    gender: string;
-    phoneNumber: string;
-    cccd: string;
-    address: string;
-    ngayVaoLam: string | null;
-    role: string;
-    luongCoBan: string | null;
-    avaURL: string | null;
-  };
+  handleUpdate: (formData: FormData) => Promise<void>;
+  initialData: Staff | null;
 }
 
-export interface UpdateStaffData {
-  name: string;
-  username: string;
-  email: string;
-  dateOfBirth: string;
-  gender: string;
-  phoneNumber: string;
-  cccd: string;
-  address: string;
-  ngayVaoLam: string | null;
-  role: string;
-  luongCoBan: string | null;
+interface FormData {
+  name: string | number;
+  username: string | number;
+  email: string | number;
+  dateOfBirth: string | number;
+  gender: string | number;
+  phoneNumber: string | number;
+  cccd: string | number;
+  address: string | number;
+  ngayVaoLam?: string | number;
+  role: string | number;
+  luongCoBan: string | number;
 }
 
 
-const UpdateStaffForm: React.FC<UpdateStaffFormProps> = ({ 
+const UpdateStaffForm: React.FC<StaffProps> = ({ 
   isModalOpen,
   setIsModalOpen,
-  staffData,
+  initialData,
   handleUpdate,
 }) => {
-  // const [selectedImage, setSelectedImage] = useState<string | null>(staffData?.avatar || null);
-
-  // const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-  //   const file = event.target.files?.[0];
-  //   if (file) {
-  //     const reader = new FileReader();
-  //     reader.onloadend = () => {
-  //       setSelectedImage(reader.result as string);
-  //     };
-  //     reader.readAsDataURL(file);
-  //   }
-  // };
-  const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState<UpdateStaffData>({
-    name: staffData?.name || '',
-    username: staffData?.username || '',
-    email: staffData?.email || '',
-    dateOfBirth: staffData?.dateOfBirth || '',
-    gender: staffData?.gender || '',
-    phoneNumber: staffData?.phoneNumber || '',
-    cccd: staffData?.cccd || '',
-    address: staffData?.address || '',
-    ngayVaoLam: staffData?.ngayVaoLam || null,
-    role: staffData?.role || '',
-    luongCoBan: staffData?.luongCoBan || null,
-  });
-
-  const handleInputChange = (field: keyof UpdateStaffData) => (value: string) => {
-    setFormData((prevData) => ({
-      ...prevData,
-      [field]: value,
-    }));
-  };
+  console.log("Initial data: " + JSON.stringify(initialData));
+   const [name, setName] = useState<string | number>(initialData?.name || "");
+   const [username, setUserName] = useState<string | number>(initialData?.username || "");
+    const [phoneNumber, setPhoneNumber] = useState<string | number>(
+      initialData?.phoneNumber || ""
+    );
+    const [gender, setGender] = useState<string | number>(
+      initialData?.gender || ""
+    );
+    const [dateOfBirth, setDateOfBirth] = useState<string | number>(
+      initialData?.dateOfBirth || ""
+    );
+    const [email, setEmail] = useState<string | number>(initialData?.email || "");
+    const [ngayVaoLam, setNgayVaoLam] = useState<string | number>(
+      initialData?.ngayVaoLam || new Date().toISOString().split("T")[0]
+    );
+    const [luongCoBan, setLuongCoBan] = useState<string | number>(
+      initialData?.luongCoBan || ""
+    );
+    const [address, setAddress] = useState<string | number>(
+      initialData?.address || ""
+    );
+    const [role, setRole] = useState<string | number>(
+      initialData?.role || ""
+    );
+    const [cccd, setCccd] = useState<string | number>(
+      initialData?.cccd || ""
+    );
+    const [isLoading, setLoading] = useState(false);
   
-  const handleUpdateModal = async () => {
-    setLoading(true);
-    try {
-      await handleUpdate(formData);
-      setIsModalOpen(false);
-    } catch (error) {
-      console.error("Error updating:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+    const handleUpdateModal = async () => {
+      const formData: FormData = {
+        name,
+        username,
+        email,
+        cccd,
+        phoneNumber,
+        gender,
+        dateOfBirth,
+        address,
+        ngayVaoLam,
+        role,
+        luongCoBan,
+      };
+  
+      setLoading(true);
+      try {
+        await handleUpdate(formData);
+      } finally {
+        setLoading(false);
+      }
+    };
+  
 
   return (
     <Modal
@@ -211,7 +189,8 @@ const UpdateStaffForm: React.FC<UpdateStaffFormProps> = ({
                 datatype="date"
                 title="Ngày sinh"
                 placeholder="Nhập ngày sinh"
-                onChange={(value) => {}}
+                // onChange={(value) => {}}
+                value={dateOfBirth}
                 icon={<CakeIcon style={{ color: "black" }} />}
                 // defaultValue={staffData?.dateOfBirth}
               />
@@ -221,7 +200,9 @@ const UpdateStaffForm: React.FC<UpdateStaffFormProps> = ({
                 datatype="date"
                 title="Ngày vào làm"
                 placeholder="Nhập ngày vào làm"
-                onChange={(value) => {}}
+                value={ngayVaoLam}
+                // onChange={setPhoneNumber}
+                // defaultValue={initialData?.ngayVaoLam}  
                 icon={<WorkIcon style={{ color: "black" }} />}
                 // defaultValue={staffData?.startDate}
               />
@@ -240,14 +221,18 @@ const UpdateStaffForm: React.FC<UpdateStaffFormProps> = ({
                 datatype="string"
                 title="Tên"
                 placeholder="Nhập tên nhân viên"
-                onChange={(value) => {}}
+                value={name}
+                onChange={setName}
+                defaultValue={initialData?.name}  
                 // defaultValue={staffData?.name}
               />
               <TextBox
                 datatype="string"
                 title="CCCD"
                 placeholder="Nhập CCCD"
-                onChange={(value) => {}}
+                value={cccd}
+                onChange={setCccd}
+                defaultValue={initialData?.cccd}  
                 icon={<CardIcon style={{ color: "black" }} />}
                 // defaultValue={staffData?.cccd}
               />
@@ -263,7 +248,9 @@ const UpdateStaffForm: React.FC<UpdateStaffFormProps> = ({
                 datatype="string"
                 title="Email"
                 placeholder="Nhập Email"
-                onChange={(value) => {}}
+                value={email}
+                onChange={setEmail}
+                defaultValue={initialData?.email}  
                 icon={<EmailIcon style={{ color: "black" }} />}
                 // defaultValue={staffData?.email}
               />
@@ -271,7 +258,9 @@ const UpdateStaffForm: React.FC<UpdateStaffFormProps> = ({
                 datatype="string"
                 title="SDT"
                 placeholder="Nhập SDT"
-                onChange={(value) => {}}
+                value={phoneNumber}
+                onChange={setPhoneNumber}
+                defaultValue={initialData?.phoneNumber}      
                 icon={<PhoneIcon style={{ color: "black" }} />}
                 // defaultValue={staffData?.phoneNumber}
               />
@@ -287,18 +276,21 @@ const UpdateStaffForm: React.FC<UpdateStaffFormProps> = ({
                 datatype="select"
                 title="Chức vụ"
                 placeholder="Chọn chức vụ"
-                onChange={(value) => {}}
+                value={role}
+                onChange={setRole}
+                defaultValue={initialData?.role === "MALE" ? "Nam" : "Nữ"}
                 options={[
                   { label: "Nhân viên", value: "staff" },
                   { label: "Quản lý", value: "manager" },
                 ]}
-                // defaultValue={staffData?.position}
               />
               <TextBox
                 datatype="select"
                 title="Giới tính"
                 placeholder="Chọn giới tính"
-                onChange={(value) => {}}
+                value={gender}
+                onChange={setGender}
+                defaultValue={initialData?.gender === "MALE" ? "Nam" : "Nữ"}             
                 options={[
                   { label: "Nam", value: "male" },
                   { label: "Nữ", value: "female" },
@@ -312,7 +304,9 @@ const UpdateStaffForm: React.FC<UpdateStaffFormProps> = ({
               datatype="string"
               title="Địa chỉ"
               placeholder="Nhập địa chỉ"
-              onChange={(value) => {}}
+              value={address}
+              onChange={setAddress}
+              defaultValue={initialData?.address}         
               icon={<LocationOnIcon style={{ color: "black" }} />}
               // defaultValue={staffData?.address}
             />

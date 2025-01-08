@@ -5,17 +5,20 @@ import { useNavigate } from "react-router-dom";
 import LocalAtmIcon from "@mui/icons-material/LocalAtm";
 import CreditCardIcon from "@mui/icons-material/CreditCard";
 import QrCodeScannerIcon from "@mui/icons-material/QrCodeScanner";
+import { useDispatch } from "react-redux";
+import { addToCart } from "../../redux/slice/cartSlice";
+import { useSelector } from "react-redux";
+import { RootState } from "../../redux/store";
 
 interface ProductType {
   id: string;
   name: string;
   material: string;
   sellingPrice: number;
-  imageUrl: string[];
+  imageUrl: string[] | string;
   quantityInBill: number;
   loaiSanPham: string;
 }
-
 interface BillProps {
   selectedProducts: ProductType[]; // Array of selected products
   onBuyNow: (
@@ -26,6 +29,7 @@ interface BillProps {
 }
 
 const Bill: React.FC<BillProps> = ({ selectedProducts, onBuyNow }) => {
+  const cartItems = useSelector((state: RootState) => state.cart.items);
   const [quantities, setQuantities] = useState<Record<string, number>>({});
   const [selectedProductInBill, setSelectedProducts] =
     useState<ProductType[]>(selectedProducts);
@@ -43,7 +47,8 @@ const Bill: React.FC<BillProps> = ({ selectedProducts, onBuyNow }) => {
 
   useEffect(() => {
     setSelectedProducts(selectedProducts);
-  }, [selectedProducts]);
+    console.log(selectedProductInBill);
+  }, [selectedProducts, cartItems]);
 
   const [dropdownOpen, setDropdownOpen] = useState<string | null>(null);
 
@@ -141,7 +146,11 @@ const Bill: React.FC<BillProps> = ({ selectedProducts, onBuyNow }) => {
                   )}
                 </div>
                 <img
-                  src={product.imageUrl[0]}
+                  src={
+                    Array.isArray(product.imageUrl)
+                      ? product.imageUrl[0]
+                      : product.imageUrl
+                  }
                   style={{ width: 150, height: 150, margin: "0px 20px" }}
                 />
                 <div

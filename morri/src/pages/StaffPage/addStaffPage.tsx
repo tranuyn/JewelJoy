@@ -11,6 +11,7 @@ import EmailIcon from '@mui/icons-material/Email';
 import PhoneIcon from '@mui/icons-material/Phone';
 import PersonIcon from '@mui/icons-material/Person';
 import TransgenderIcon from "@mui/icons-material/Transgender";
+import KeyIcon  from "@mui/icons-material/Key";
 
 interface Staff {
   isModalOpen: boolean;
@@ -32,7 +33,9 @@ interface FormData {
   address: string | number;
   role: string | number;
 }
-
+const formatDateWithTime = (date: string): string => {
+  return `${date}T00:00:00`;
+};
 const AddStaffForm: React.FC<Staff> = ({ 
   isModalOpen, 
   setIsModalOpen, 
@@ -61,9 +64,9 @@ const AddStaffForm: React.FC<Staff> = ({
       password,
       phoneNumber,
       gender,
-      dateOfBirth,
+      dateOfBirth: formatDateWithTime(dateOfBirth.toString()), 
       email,
-      ngayVaoLam,
+      ngayVaoLam: formatDateWithTime(ngayVaoLam.toString()),
       luongCoBan,
       cccd,
       address,
@@ -91,10 +94,12 @@ const AddStaffForm: React.FC<Staff> = ({
       <Box
         sx={{
           backgroundColor: "white",
-          padding: 6,
+          padding: 4,
           borderRadius: 2,
           width: "90%",
           maxWidth: "800px",
+          maxHeight: "600px", 
+          overflowY: "auto",  
         }}
       >
         <div
@@ -121,7 +126,7 @@ const AddStaffForm: React.FC<Staff> = ({
               height: "150px",
               borderRadius: "50%",
               backgroundColor: "#f0f0f0",
-              marginBottom: "12px",
+              marginBottom: "10px",
               marginLeft: "20px",
               overflow: "hidden"
             }}>
@@ -155,7 +160,7 @@ const AddStaffForm: React.FC<Staff> = ({
                   padding: "8px 16px",
                   cursor: "pointer",
                   fontSize: "14px",
-                  marginBottom: "30px",
+                  marginBottom: "10px",
                   marginTop: "10px",
                   width: "130px",
                   marginLeft: "30px",
@@ -166,7 +171,7 @@ const AddStaffForm: React.FC<Staff> = ({
                 Chọn ảnh
               </button>
             </label>
-            <Box sx={{ width: "100%", marginBottom: "10px" }}>
+            <Box sx={{ width: "100%", marginBottom: "0px" }}>
               <TextBox
                 datatype="date"
                 title="Ngày sinh"
@@ -191,7 +196,7 @@ const AddStaffForm: React.FC<Staff> = ({
               display: "grid", 
               gridTemplateColumns: "1fr 1fr",
               gap: "24px",
-              marginBottom: "8px"
+              marginBottom: "0px"
             }}>
               <TextBox
                 datatype="string"
@@ -205,19 +210,25 @@ const AddStaffForm: React.FC<Staff> = ({
                 placeholder="Nhập tên đăng nhập"
                 onChange={setUsername}
               />
-               <TextBox
+               {/* <TextBox
                 datatype="string"
                 title="Mật khẩu"
                 placeholder="Nhập mật khẩu"
                 onChange={setPassword}
-              />
+              /> */}
             </Box>
-
+            <TextBox
+                datatype="string"
+                title="Mật khẩu"
+                placeholder="Nhập mật khẩu"
+                onChange={setPassword}
+                icon={<KeyIcon style={{ color: "black" }} />}
+              />
             <Box sx={{ 
               display: "grid", 
               gridTemplateColumns: "1fr 1fr",
               gap: "24px",
-              marginBottom: "8px"
+              marginBottom: "0px"
             }}>
               <TextBox
                 datatype="string"
@@ -239,7 +250,7 @@ const AddStaffForm: React.FC<Staff> = ({
               display: "grid", 
               gridTemplateColumns: "1fr 1fr",
               gap: "24px",
-              marginBottom: "8px"
+              marginBottom: "0px"
             }}>
               <TextBox
                 datatype="string"
@@ -248,7 +259,7 @@ const AddStaffForm: React.FC<Staff> = ({
                 onChange={setPhoneNumber}
                 icon={<PhoneIcon style={{ color: "black" }} />}
               />
-              <TextBox
+              {/* <TextBox
                 datatype="select"
                 title="Giới tính"
                 placeholder="Chọn giới tính"
@@ -258,6 +269,12 @@ const AddStaffForm: React.FC<Staff> = ({
                   { label: "Nam", value: "MALE" },
                   { label: "Nữ", value: "FEMALE" },
                 ]}
+              /> */}
+              <TextBox
+                datatype="string"
+                title="Lương cơ bản"
+                placeholder="Nhập lương cơ bản"
+                onChange={setLuongCoBan}
               />
             </Box>
 
@@ -265,7 +282,7 @@ const AddStaffForm: React.FC<Staff> = ({
               display: "grid", 
               gridTemplateColumns: "1fr 1fr",
               gap: "24px",
-              marginBottom: "8px"
+              marginBottom: "0px"
             }}>
               <TextBox
                 datatype="select"
@@ -278,11 +295,22 @@ const AddStaffForm: React.FC<Staff> = ({
                   { label: "Quản trị viên", value: "ADMIN" },
                 ]}
               />
-              <TextBox
+              {/* <TextBox
                 datatype="string"
                 title="Lương cơ bản"
                 placeholder="Nhập lương cơ bản"
                 onChange={setLuongCoBan}
+              /> */}
+               <TextBox
+                datatype="select"
+                title="Giới tính"
+                placeholder="Chọn giới tính"
+                onChange={setGender}
+                icon={<TransgenderIcon style={{ color: "black" }} />}
+                options={[
+                  { label: "Nam", value: "MALE" },
+                  { label: "Nữ", value: "FEMALE" },
+                ]}
               />
             </Box>
 
@@ -300,17 +328,22 @@ const AddStaffForm: React.FC<Staff> = ({
           display: "flex", 
           justifyContent: "flex-end", 
           gap: "16px", 
-          marginTop: "24px"
+          marginTop: "0px"
         }}>
-          <BtnComponent
+          {/* <BtnComponent
             btnColorType="primary"
             btnText="Lưu"
             onClick={handleAddModal}
-          />
+          /> */}
           <BtnComponent
             btnColorType="close"
             btnText="Đóng"
             onClick={() => setIsModalOpen(false)}
+          />
+          <BtnComponent
+            btnColorType="primary"
+            btnText="Lưu"
+            onClick={handleAddModal}
           />
         </Box>
       </Box>

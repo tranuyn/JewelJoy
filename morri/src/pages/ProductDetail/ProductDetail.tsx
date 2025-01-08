@@ -5,6 +5,8 @@ import Header from "../ProductsAndServices/header";
 import TabBar from "../../component/Tabbar/TabBar";
 import { useAuth } from "../../services/useAuth";
 import ProductForm from "./ProductModal";
+import { useDispatch } from "react-redux";
+import { addToCart } from "../../redux/slice/cartSlice";
 
 interface FormProductData {
   id: string;
@@ -27,7 +29,23 @@ interface FormProductData {
 const ProductDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { isAuthenticated, user, validateAuthStatus } = useAuth();
-  const [product, setProduct] = useState<FormProductData | null>(null);
+  const [product, setProduct] = useState<FormProductData | undefined>({
+    id: "",
+    name: "",
+    code: "",
+    description: "",
+    material: "",
+    sellingPrice: 0,
+    costPrice: 0,
+    status: "",
+    imageUrl: [],
+    loaiSanPham: "",
+    quantity: 0,
+    enteredQuantity: 0,
+    weight: 0,
+    chiPhiPhatSinh: 0,
+    images: [],
+  });
   const [activeTab, setActiveTab] = useState("Tất cả");
   const [selectedImgIndex, setSelectedImgIndex] = useState(0);
   const [quantityToBuy, setQuantityToBuy] = useState(1);
@@ -70,18 +88,17 @@ const ProductDetail: React.FC = () => {
     setIsOpen(false);
   };
 
+  const fetchProduct = async () => {
+    try {
+      const response = await fetch(`http://localhost:8081/jewelry/${id}`);
+      const data = await response.json();
+      setProduct(data); // Giả sử data là thông tin sản phẩm
+    } catch (error) {
+      console.error("Error fetching product:", error);
+    }
+  };
   useEffect(() => {
     if (id) {
-      const fetchProduct = async () => {
-        try {
-          const response = await fetch(`http://localhost:8081/jewelry/${id}`);
-          const data = await response.json();
-          setProduct(data); // Giả sử data là thông tin sản phẩm
-        } catch (error) {
-          console.error("Error fetching product:", error);
-        }
-      };
-
       fetchProduct();
     }
   }, [id]);
@@ -126,15 +143,30 @@ const ProductDetail: React.FC = () => {
       },
     });
   };
-
+  const dispatch = useDispatch();
+  const addToShopCart = () => {
+    const itemsToAdd = {
+      id: product?.id,
+      quantity: 1,
+      name: product?.name,
+      image: product?.imageUrl[0],
+      price: product?.sellingPrice,
+      type: product?.loaiSanPham,
+      selected: false,
+    };
+    dispatch(addToCart(itemsToAdd));
+    alert("Sản phẩm đã được thêm vào giỏ hàng");
+  };
   if (!product) {
     return <div>Loading...</div>;
   }
 
   return (
     <div className="productDetailContainer">
-      <Header />
-      <TabBar tabs={tabs} onTabChange={setActiveTab} styleType="default" />
+      {(user?.role === "ADMIN" ||
+        user?.role === "INVENTORY_STAFF" ||
+        user?.role === "SALE_STAFF") && <Header />}
+      {/* <TabBar tabs={tabs} onTabChange={setActiveTab} styleType="default" /> */}
 
       <div className="detailContainerne">
         <div className="part1">
@@ -205,7 +237,9 @@ const ProductDetail: React.FC = () => {
             </button>
           )}
           {user?.role === "CUSTOMER" && (
-            <button className="EditNe">Thêm vào giỏ hàng</button>
+            <button className="EditNe" onClick={() => addToShopCart()}>
+              Thêm vào giỏ hàng
+            </button>
           )}
         </div>
       </div>
@@ -250,8 +284,13 @@ const ProductDetail: React.FC = () => {
                 &times;
               </span>
             </div>
-            <ProductForm data={product} setData={() => console.log("hehe")} />
-            <button className="editbutoon">Cập nhật</button>
+            <ProductForm
+              data={product}
+              setData={() => {
+                closeModal();
+                fetchProduct();
+              }}
+            />
           </div>
         </div>
       )}

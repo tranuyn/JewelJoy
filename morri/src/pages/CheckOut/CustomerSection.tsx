@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
 import "./style.css";
 import CachedIcon from "@mui/icons-material/Cached";
+import { DataObject, DataObjectOutlined } from "@mui/icons-material";
 interface CustomerSectionProps {
   setCustomerInfo: React.Dispatch<React.SetStateAction<any>>;
 }
@@ -11,7 +12,7 @@ const CustomerSection: React.FC<CustomerSectionProps> = ({
   const [phone, setPhone] = useState<string>("");
   const [customerInfo, setCustomerLocalInfo] = useState<any>({});
   const [selectedGender, setSelectedGender] = useState("MALE");
-  const [selectedBirthday, setSelectedBirthday] = useState<string>("");
+  const [selectedBirthday, setSelectedBirthday] = useState("");
   const [name, setName] = useState("");
 
   const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
@@ -32,17 +33,16 @@ const CustomerSection: React.FC<CustomerSectionProps> = ({
       if (!response.ok) {
         setCustomerInfo(null);
         setCustomerLocalInfo(null);
-        throw new Error("Không thể lấy dữ liệu");
       }
       const data = await response.json();
 
-      setCustomerInfo({
-        phoneNumber: data.phoneNumber,
-        name: data.name,
-        gioiTinh: data.gioiTinh,
-        dateOfBirth: formatDate(data.dateOfBirth),
-      });
-      setCustomerLocalInfo(data); // Cập nhật thông tin nhân viên
+      if (data.dateOfBirth === null) {
+        setCustomerInfo({
+          ...data, // Spread the properties of data
+          dateOfBirth: selectedBirthday, // Add/override the dateOfBirth property
+        });
+      }
+      setCustomerLocalInfo(data);
     } catch (error) {
       console.error("Error fetching user data:", error);
     }
@@ -59,12 +59,13 @@ const CustomerSection: React.FC<CustomerSectionProps> = ({
   useEffect(() => {
     // Khi thông tin thay đổi, cập nhật thông tin khách hàng
     setCustomerInfo({
+      id: customerInfo?.id,
       phoneNumber: phone,
       name,
       gioiTinh: selectedGender,
       dateOfBirth: selectedBirthday,
     });
-  }, [phone, name, selectedGender, selectedBirthday, setCustomerInfo]);
+  }, [phone, name, selectedGender, selectedBirthday]);
 
   return (
     <div className="customerContainerBig">
@@ -80,7 +81,7 @@ const CustomerSection: React.FC<CustomerSectionProps> = ({
                 <div>Số điện thoại:</div>
                 <input
                   className="inputCheckout"
-                  value={phone}
+                  value={phone || ""}
                   onChange={(e) => setPhone(e.target.value)}
                 />
                 <div
@@ -115,9 +116,9 @@ const CustomerSection: React.FC<CustomerSectionProps> = ({
               <p>
                 Ngày sinh:{" "}
                 <input
-                  type="Date"
+                  type="date"
                   value={
-                    customerInfo
+                    customerInfo && customerInfo.dateOfBirth
                       ? formatDate(customerInfo.dateOfBirth)
                       : selectedBirthday
                   }
@@ -129,7 +130,6 @@ const CustomerSection: React.FC<CustomerSectionProps> = ({
           </div>
         </div>
       </div>
-      <button className="viewButton">Xem hồ sơ khách hàng</button>
     </div>
   );
 };
