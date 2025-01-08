@@ -24,7 +24,8 @@ export const SalesStaffRoutes = () => {
         </ProtectedRoute>
       }
     >
-      <Route path="/home" element={<HomePage />} />
+      {/* <Route path="/home" element={<HomePage />} /> */}
+      <Route path="/home" element={<EmployeeHomePage />} />
       <Route path="/attendance" element={<AttendancePage />} />
       <Route path="/staff" element={<StaffPage />} />
       <Route path="/settings" element={<SettingPage />} />

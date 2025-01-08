@@ -10,6 +10,7 @@ import { Product } from "./Inventory";
 import "./Inventory.css";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import EditProductModal from "../../component/EditProductModal";
+import ProductForm from "./productForm";
 const theme = createTheme({
   typography: {
     fontFamily: "Baloo 2, sans-serif",
@@ -61,6 +62,16 @@ const InventoryTab: React.FC<InventoryTabProps> = ({
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [updateError, setUpdateError] = useState<string | null>(null);
+
+  const [isOpen, setIsOpen] = useState(false);
+
+  const openModal = () => {
+    setIsOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsOpen(false);
+  };
 
   // Filter products based on search term
   const filteredProducts = products.filter((product) =>
@@ -140,6 +151,15 @@ const InventoryTab: React.FC<InventoryTabProps> = ({
     }
   };
 
+  const fetchProduct = async () => {
+    try {
+      const response = await fetch("http://localhost:8081/jewelry/"); // Replace with your API URL
+      const data = await response.json();
+      setProducts(data);
+    } catch (error) {
+      console.error("Error fetching products:", error);
+    }
+  };
   const handleDelete = async (product: Product) => {
     const confirmDelete = window.confirm(
       "Bạn có thật sự muốn ngừng kinh doanh sản phẩm này không?"
@@ -227,7 +247,11 @@ const InventoryTab: React.FC<InventoryTabProps> = ({
                         <StyledIconButton
                           className="edit-button"
                           size="small"
-                          onClick={() => handleEditClick(row)}
+                          // onClick={() => handleEditClick(row)}
+                          onClick={() => {
+                            setEditingProduct(row);
+                            setIsOpen(true);
+                          }}
                         >
                           <BorderColorIcon fontSize="small" />
                         </StyledIconButton>
@@ -239,8 +263,8 @@ const InventoryTab: React.FC<InventoryTabProps> = ({
                           <DeleteIcon fontSize="small" />
                         </StyledIconButton>
                       </>
-                    ) : (
-                      row[column.id]
+                    ) : column.id === "images" ? null : ( // Skip rendering images array
+                      row[column.id]?.toString() || ""
                     )}
                   </td>
                 ))}
@@ -283,6 +307,25 @@ const InventoryTab: React.FC<InventoryTabProps> = ({
           </button>
         </div>
       </div>
+      {isOpen && (
+        <div id="myModal" className="modalEditProduct">
+          <div className="modalEditProduct-content">
+            <div className="hii">
+              <div className="namene">Cập nhật thông tin sản phẩm</div>
+              <span className="close" onClick={closeModal}>
+                &times;
+              </span>
+            </div>
+            <ProductForm
+              data={editingProduct}
+              setData={() => {
+                closeModal();
+                fetchProduct();
+              }}
+            />
+          </div>
+        </div>
+      )}
     </ThemeProvider>
   );
 };

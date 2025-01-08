@@ -29,9 +29,10 @@ export interface Product {
   quantity: number;
   weight: number;
   status: string;
-  chiPhiPhatSinh: string;
+  chiPhiPhatSinh: number;
   supplierId: string | null;
   entryDate: string | null;
+  images: (File | null)[];
 }
 
 export interface InventoryItem {

@@ -33,7 +33,8 @@ export const AdminRoutes = () => {
         </ProtectedRoute>
       }
     >
-      <Route path="/home" element={<HomePage />} />
+      {/* <Route path="/home" element={<HomePage />} /> */}
+      <Route path="/home" element={<EmployeeHomePage />} />
       <Route path="/products" element={<ProductsAndService />} />
       <Route path="/products/detail/:id" element={<ProductDetail />} />
       <Route path="/staff" element={<StaffPage />} />

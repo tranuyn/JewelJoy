@@ -179,7 +179,7 @@ const ProductsAndService: React.FC = () => {
   const renderContent = () => {
     switch (activeTab) {
       case "Đá quý":
-        const charmsProducts = products.filter((product) =>
+        const charmsProducts = filteredProducts.filter((product) =>
           ["DAQUY", "KIMCUONG", "THACH", "NGOC"].includes(product.loaiSanPham)
         );
         return (
@@ -206,7 +206,7 @@ const ProductsAndService: React.FC = () => {
           </div>
         );
       case "Vòng cổ":
-        const VongCoProducts = products.filter(
+        const VongCoProducts = filteredProducts.filter(
           (product) => product.loaiSanPham === "DAYCHUYEN" // So sánh trực tiếp giá trị chuỗi
         );
         return (
@@ -233,7 +233,7 @@ const ProductsAndService: React.FC = () => {
           </div>
         );
       case "Nhẫn":
-        const nhanProducts = products.filter(
+        const nhanProducts = filteredProducts.filter(
           (product) => product.loaiSanPham === "NHAN" // So sánh trực tiếp giá trị chuỗi
         );
         return (
@@ -260,7 +260,7 @@ const ProductsAndService: React.FC = () => {
           </div>
         );
       case "Hoa tai":
-        const bongTaiProducts = products.filter(
+        const bongTaiProducts = filteredProducts.filter(
           (product) => product.loaiSanPham === "BONGTAI" // So sánh trực tiếp giá trị chuỗi
         );
         return (
@@ -287,7 +287,7 @@ const ProductsAndService: React.FC = () => {
           </div>
         );
       case "Vòng tay":
-        const vongTayProducts = products.filter(
+        const vongTayProducts = filteredProducts.filter(
           (product) => product.loaiSanPham === "VONGTAY" // So sánh trực tiếp giá trị chuỗi
         );
         return (
