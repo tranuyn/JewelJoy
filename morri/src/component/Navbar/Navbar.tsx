@@ -10,10 +10,17 @@ import logoImage from "./logo.png";
 import "./Navbar.css";
 import { useDispatch } from "react-redux";
 import { loadCartFromLocalStorage } from "../../redux/slice/cartSlice";
+import { useAuth } from "../../services/useAuth";
 
 export const Navbar = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const { logout } = useAuth();
+  const handleLogout = () => {
+    if (window.confirm("Bạn có chắc chắn muốn đăng xuất?")) {
+      logout();
+    }
+  };
   useEffect(() => {
     loadCartFromLocalStorage();
   });
@@ -38,7 +45,7 @@ export const Navbar = () => {
 
       {/* User Actions Section */}
       <div className="nav-section user-actions">
-        <div className="nav-item">
+        <div className="nav-item" onClick={() => navigate("/orderhistory")}>
           <ReceiptIcon className="icon" />
           <span>Đơn hàng</span>
         </div>
@@ -46,11 +53,11 @@ export const Navbar = () => {
           <ShoppingCartIcon className="icon" />
           <span>Giỏ hàng</span>
         </div>
-        <div className="nav-item">
+        <div className="nav-item" onClick={() => navigate("/profile")}>
           <PersonIcon className="icon" />
           <span>Peter</span>
         </div>
-        <div className="nav-item">
+        <div className="nav-item" onClick={handleLogout}>
           <LogoutIcon className="icon" />
         </div>
       </div>

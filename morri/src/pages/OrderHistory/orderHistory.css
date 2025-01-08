@@ -1,0 +1,106 @@
+.order-history-root {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 24px;
+  }
+  .order-header {
+    width: 100%; /* Full width */
+    height: 250px; /* Fixed height */
+    background-color: rgba(0, 0, 0, 0.5); /* Optional: a semi-transparent background for better text visibility */
+    color: white; /* Adjust text color */
+    text-align: center;
+    display: flex;
+    align-items: center; /* Center vertically */
+    justify-content: center; /* Center horizontally */
+    font-size: 24px; /* Font size */
+    font-weight: bold; /* Bold text */
+  }
+  
+  .order-title {
+    font-size: 2.5rem;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+  
+  .tab-section {
+    margin-bottom: 2rem;
+  }
+  
+  .orderhistory-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .orderhistory-card {
+    background-color: white;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+  
+  .orderhistory-details {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+  
+  .orderhistory-info {
+    flex: 1;
+  }
+  
+  .product-name {
+    font-size: 1.25rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+  }
+  
+  .product-type {
+    color: #666;
+    margin-bottom: 0.25rem;
+  }
+  
+  .quantity {
+    color: #666;
+  }
+  
+  .price-info {
+    text-align: right;
+  }
+  
+  .price {
+    font-size: 1.25rem;
+    font-weight: bold;
+  }
+  
+  .orderhistory-summary {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid #eee;
+  }
+  
+  .total {
+    font-size: 1.125rem;
+  }
+  
+  .total span {
+    font-weight: bold;
+  }
+  
+  .cancel-button {
+    background-color: #f97316;
+    color: white;
+    padding: 0.5rem 1.5rem;
+    border-radius: 0.375rem;
+    border: none;
+    cursor: pointer;
+    font-weight: 500;
+  }
+  
+  .cancel-button:hover {
+    background-color: #ea580c;
+  }

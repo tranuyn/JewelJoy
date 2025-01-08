@@ -55,7 +55,7 @@ const StaffPage: React.FC = () => {
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState<SnackbarSeverity>("info");
-  const [rowClicked, setRowClicked] = useState<Staff | null>(null);
+  const [rowClicked, setRowClicked] = useState<Staff | undefined>();
 
   useEffect(() => {
     fetchStaffs();
@@ -173,7 +173,7 @@ const StaffPage: React.FC = () => {
         setSnackbarVisible(true);
         setIsDeleteModalOpen(false);
         await fetchStaffs();
-        setRowClicked(null); // Reset selected row after successful deletion
+        // setRowClicked(null);
       } else {
         throw new Error("Failed to delete staff");
       }
@@ -236,13 +236,15 @@ const StaffPage: React.FC = () => {
         }
     };
 
-    const response = await axios.post(
-        'http://localhost:8081/user/create',
-        requestData,
-        axiosConfig
-    );
-
-    console.log("Response:", response.data);
+    const response = await fetch("http://localhost:8081/user/create", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestData),
+    });
+    const responseData = await response.json(); // Extract the JSON data
+    console.log("response product: ", responseData);
 
     if (response.status === 200 || response.status === 201) {
         setSnackbarSeverity("success");
@@ -259,35 +261,6 @@ const StaffPage: React.FC = () => {
       setIsModalOpen(false);
     }
   }; 
-
-  // const handleUpdate = async (formData: UpdateStaffData ): Promise<void> => {
-  //   try {
-  //     if (selectedStaff) {
-  //       const response = await fetch(`http://localhost:8081/user/${selectedStaff.id}`, {
-  //         method: "PATCH",
-  //         headers: {
-  //           "Content-Type": "application/json",
-  //         },
-  //         body: JSON.stringify(formData),
-  //       });
-  
-  //       if (response.ok) {
-  //         setSnackbarSeverity("success");
-  //         setSnackbarMessage("Cập nhật nhân viên thành công!");
-  //         setSnackbarVisible(true);
-  //         setIsModalUpdateOpen(false);
-  //         await fetchStaffs();
-  //       } else {
-  //         throw new Error("Failed to update staff");
-  //       }
-  //     }
-  //   } catch (error) {
-  //     setSnackbarSeverity("error");
-  //     setSnackbarMessage("Lỗi khi cập nhật nhân viên!");
-  //     setSnackbarVisible(true);
-  //     setIsModalUpdateOpen(false);
-  //   }
-  // };
 
   const handleUpdate = async (): Promise<void> => {
     try {
@@ -379,7 +352,7 @@ const StaffPage: React.FC = () => {
           <UpdateStaffForm
             isModalOpen={isModalUpdateOpen}
             setIsModalOpen={setIsModalUpdateOpen}
-            initialData={rowClicked}
+            currentData={rowClicked}
             handleUpdate={handleUpdate}
           />
           <DeleteComponent

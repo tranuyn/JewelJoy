@@ -44,11 +44,6 @@ const DynamicUpdateForm: React.FC<DynamicUpdateFormProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    // Set the initial image if currentData has a serviceUrl
-  //   if (currentData?.serviceUrl) {
-  //     setSelectedImage(currentData.serviceUrl);
-  //   }
-  // }, [currentData]);
   if (currentData) {
     setFormData({
       serviceName: currentData.serviceName || "",
@@ -106,18 +101,6 @@ const DynamicUpdateForm: React.FC<DynamicUpdateFormProps> = ({
         updates.price = parseFloat(formData.price);
       }
 
-      // const response = await fetch("http://localhost:8081/service/create", {
-      //   method: "POST",
-      //   headers: {
-      //     "Content-Type": "application/json",
-      //   },
-      //   body: JSON.stringify({
-      //     serviceName: formData.serviceName,
-      //     serviceDescription: formData.serviceDescription,
-      //     serviceUrl: uploadedImageUrl,
-      //     price: parseFloat(formData.price),
-      //   }),
-      // });
       const response = await fetch(`http://localhost:8081/service/${currentData.id}`, {
         method: "PUT",
         headers: {
@@ -135,20 +118,8 @@ const DynamicUpdateForm: React.FC<DynamicUpdateFormProps> = ({
 
       const updatedService = await response.json();
       
-      // Call the handleUpdate prop with the updated service
-      await handleUpdate(updatedService);
-      
+      await handleUpdate(updatedService);    
       setIsModalOpen(false);
-      
-      // Reset form and close modal
-      // setFormData({
-      //   serviceName: "",
-      //   serviceDescription: "",
-      //   serviceUrl: null,
-      //   price: "",
-      // });
-      // setSelectedImage("https://via.placeholder.com/50");
-      // setImageFile(null);
     } catch (error) {
       console.error("Error creating service:", error);
       alert("Failed to create service. Please try again.");

@@ -11,6 +11,7 @@ import DynamicUpdateForm from "./dynamicUpdateForm";
 import ServiceComponent from "../../component/ServiceComponent/ServiceComponent";
 import TableComponent from "../../component/TableComponent/TableComponent";
 
+// Types
 export interface Service {
   id: string;
   serviceName: string;
@@ -29,27 +30,58 @@ interface Staff {
 interface ServiceBooking {
   nameService: string;
   customerName: string;
-  customerPhone: string;
-  services: { serviceName: string; quantity: number }[];
+  customerPhoneNumber: string;
+  services: { serviceName: string }[];
   description: string;
   staffLapHoaDon: Staff | null;
   totalPrice: number;
   createdAt: string;
   deliverystatus: string;
-  deliveryDate: string;
+  quantity: number;
 }
+
+// Service API layer
+const serviceAPI = {
+  fetchServices: async (): Promise<Service[]> => {
+    const response = await fetch("http://localhost:8081/service");
+    if (!response.ok) throw new Error("Failed to fetch services");
+    return response.json();
+  },
+
+  deleteService: async (serviceId: string): Promise<void> => {
+    const response = await fetch(`http://localhost:8081/service/${serviceId}`, {
+      method: 'DELETE',
+    });
+    if (!response.ok) throw new Error("Failed to delete service");
+  },
+
+  fetchBookings: async (): Promise<ServiceBooking[]> => {
+    const response = await fetch("http://localhost:8081/phieuDichVu");
+    if (!response.ok) throw new Error("Failed to fetch bookings");
+    return response.json();
+  },
+
+  deleteBooking: async (bookingId: string): Promise<void> => {
+    const response = await fetch(`http://localhost:8081/phieuDichVu/${bookingId}`, {
+      method: 'DELETE',
+    });
+    if (!response.ok) throw new Error("Failed to delete booking");
+  }
+};
 
 const bookingColumns = [
   { field: "customerName", headerName: "Tên khách hàng" },
+  { field: "customerPhoneNumber", headerName: "SDT khách hàng" },
   { field: "createdAt", headerName: "Ngày tạo" },
-  { field: "deliveryDate", headerName: "Ngày giao" },
   { field: "deliverystatus", headerName: "Trạng thái" },
+  { field: "services", headerName: "Các dịch vụ" },
   { field: "quantity", headerName: "Số lượng" },
   { field: "totalPrice", headerName: "Tổng tiền" },
   { field: "staffName", headerName: "Nhân viên lập" },
 ];
 
 const ServicePage: React.FC = () => {
+  // State
   const [activeTab, setActiveTab] = useState<string>("Dịch vụ");
   const [searchKeyword, setSearchKeyword] = useState("");
   const [services, setServices] = useState<Service[]>([]);
@@ -60,77 +92,92 @@ const ServicePage: React.FC = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isModalUpdateOpen, setIsModalUpdateOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState<any>(null);
-  const [selectedService, setSelectedService] = useState<Service | null>(null); 
+  const [selectedService, setSelectedService] = useState<Service | null>(null);
+  const [selectedBooking, setSelectedBooking] = useState<ServiceBooking | null>(null);
 
   const tabs = ["Dịch vụ", "Đặt lịch"];
 
-  useEffect(() => {
-    fetchData();
-  }, [activeTab]);
-
-  const fetchData = async () => {
-    setLoading(true);
-    setError("");
+  // Service handlers
+  const handleFetchServices = async () => {
     try {
-      if (activeTab === "Dịch vụ") {
-        const response = await fetch("http://localhost:8081/service");
-        const data = await response.json();
-        setServices(data);
-      } else {
-        const response = await fetch("http://localhost:8081/phieuDichVu");
-        const data = await response.json();
-        setBookings(data);
-      }
+      setLoading(true);
+      const data = await serviceAPI.fetchServices();
+      setServices(data);
+      setError("");
     } catch (err) {
-      setError("Failed to fetch data. Please try again later.");
-      console.error("Fetch error:", err);
+      setError("Failed to fetch services. Please try again later.");
+      console.error("Service fetch error:", err);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSearch = (value: string) => {
-    setSearchKeyword(value.trim().toLowerCase());
-  };
-  
-  const handleDelete = async (): Promise<void> => {
+  const handleDeleteService = async () => {
     if (!selectedService) {
       alert('Vui lòng chọn dịch vụ để xóa');
       return;
     }
-  console.log("selected", selectedService);
+
     try {
-      const response = await fetch(`http://localhost:8081/service/${selectedService.id}`, {
-        method: 'DELETE',
-      }); 
-      if (response.status==200) {
-        setServices((prevServices) =>
-          prevServices.filter((service) => service.id !== selectedService.id)
-        );
-        setSelectedService(null);
-        setIsDeleteModalOpen(false);
-        // alert(result.message || 'Xóa dịch vụ thành công!');
-      } else {
-        // alert(result.message || 'Không thể xóa dịch vụ');
-      }
+      await serviceAPI.deleteService(selectedService.id);
+      setServices(prevServices => 
+        prevServices.filter(service => service.id !== selectedService.id)
+      );
+      setSelectedService(null);
+      setIsDeleteModalOpen(false);
     } catch (error) {
       console.error('Error deleting service:', error);
       alert('Đã xảy ra lỗi khi xóa dịch vụ');
     }
   };
 
-  const handleServiceDelete = (service: Service) => {
-    setSelectedService(service);
-    setIsDeleteModalOpen(true);
+  // Booking handlers
+  const handleFetchBookings = async () => {
+    try {
+      setLoading(true);
+      const data = await serviceAPI.fetchBookings();
+      setBookings(data);
+      setError("");
+    } catch (err) {
+      setError("Failed to fetch bookings. Please try again later.");
+      console.error("Booking fetch error:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+  const handleDeleteClick =async (row:any)=>{
+    setSelectedBooking(row)
+    if (selectedBooking) {
+      
+      console.log("Deleting booking:", selectedBooking);
+      setIsDeleteModalOpen(true);
+      await handleDeleteBooking();
+    }  
+
+  }
+  const handleDeleteBooking = async () => { 
+
+      if (!selectedBooking?.nameService) {
+      alert('HEHHEHEH');
+      return;
+    }
+
+    try {
+      await serviceAPI.deleteBooking(selectedBooking.nameService);
+      setBookings(prevBookings => 
+        prevBookings.filter(booking => booking.nameService !== selectedBooking.nameService)
+      );
+      setSelectedBooking(null);
+      setIsDeleteModalOpen(false);
+    } catch (error) {
+      console.error('Error deleting booking:', error);
+      alert('Đã xảy ra lỗi khi xóa đặt lịch');
+    }
   };
 
-  const handleUpdate = async (): Promise<void> => {
-    try {
-      console.log("Updating row:", selectedRow);
-      setIsModalUpdateOpen(false);
-    } catch (error) {
-      console.error("Error updating:", error);
-    }
+  // Shared handlers
+  const handleSearch = (value: string) => {
+    setSearchKeyword(value.trim().toLowerCase());
   };
 
   const handleEdit = (row: any) => {
@@ -138,29 +185,52 @@ const ServicePage: React.FC = () => {
     setIsModalUpdateOpen(true);
   };
 
+  const handleUpdate = async () => {
+    try {
+      console.log("Updating row:", selectedRow);
+      setIsModalUpdateOpen(false);
+      // Refresh data after update
+      if (activeTab === "Dịch vụ") {
+        await handleFetchServices();
+      } else {
+        await handleFetchBookings();
+      }
+    } catch (error) {
+      console.error("Error updating:", error);
+    }
+  };
+
+  // Format booking data for display
   const formatBookingData = (bookings: ServiceBooking[]) => {
     return bookings.map(booking => ({
       ...booking,
       createdAt: new Date(booking.createdAt).toLocaleDateString("vi-VN"),
-      deliveryDate: new Date(booking.deliveryDate).toLocaleDateString("vi-VN"),
       totalPrice: `${booking.totalPrice.toLocaleString("vi-VN")} VND`,
-      staffName: booking.staffLapHoaDon?.name || "Chưa phân công"
+      staffName: booking.staffLapHoaDon?.name || "Chưa phân công",
+      services: booking.services.map(s => s.serviceName).join(", ")
     }));
   };
+
+  // Effects
+  useEffect(() => {
+    if (activeTab === "Dịch vụ") {
+      handleFetchServices();
+    } else {
+      handleFetchBookings();
+    }
+  }, [activeTab]);
 
   return (
     <div className="service-page">
       <Header title="Quản lý dịch vụ" />
       <div style={{ padding: "10px" }}></div>
 
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "flex-start",
-          gap: 3,
-          marginLeft: "20px",
-        }}
-      >
+      <Box sx={{
+        display: "flex",
+        justifyContent: "flex-start",
+        gap: 3,
+        marginLeft: "20px",
+      }}>
         <BtnComponent
           btnColorType="primary"
           btnText={`Thêm ${activeTab.toLowerCase()}`}
@@ -170,8 +240,10 @@ const ServicePage: React.FC = () => {
           isModalOpen={isModalOpen}
           setIsModalOpen={setIsModalOpen}
           formType={activeTab}
-          updateServices={(newService: Service) =>
-            setServices((prev) => [...prev, newService])
+          updateServices={(newData: any) => 
+            activeTab === "Dịch vụ" 
+              ? setServices(prev => [...prev, newData])
+              : setBookings(prev => [...prev, newData])
           }
         />
         <Box sx={{ marginRight: "300px" }}>
@@ -197,12 +269,10 @@ const ServicePage: React.FC = () => {
           {activeTab === "Dịch vụ" ? (
             <div className="services-grid">
               {services
-                .filter((service) =>
-                  service.serviceName
-                    .toLowerCase()
-                    .includes(searchKeyword.toLowerCase())
+                .filter(service => 
+                  service.serviceName.toLowerCase().includes(searchKeyword)
                 )
-                .map((service) => (
+                .map(service => (
                   <ServiceComponent
                     key={service.id}
                     serviceName={service.serviceName}
@@ -211,7 +281,10 @@ const ServicePage: React.FC = () => {
                     price={service.price?.toString() || "0"}
                     imageUrl={service.serviceUrl || undefined}
                     onEdit={() => handleEdit(service)}
-                    onDelete={() => handleServiceDelete(service)} 
+                    onDelete={() => {
+                      setSelectedService(service);
+                      setIsDeleteModalOpen(true);
+                    }}
                   />
                 ))}
             </div>
@@ -219,18 +292,14 @@ const ServicePage: React.FC = () => {
             <TableComponent
               columns={bookingColumns}
               data={formatBookingData(
-                bookings.filter((booking) =>
-                  booking.nameService
-                    .toLowerCase()
-                    .includes(searchKeyword.toLowerCase())
+                bookings.filter(booking =>
+                  booking.customerName.toLowerCase().includes(searchKeyword) ||
+                  booking.customerPhoneNumber.includes(searchKeyword)
                 )
               )}
-              onRowClick={(row) => console.log("Row clicked:", row)}
+              onRowClick={(row) => {handleDeleteClick(row);  console.log("rơ click: ", row)}}
               onEdit={handleEdit}
-              onDelete={(row) => {
-                setSelectedRow(row);
-                setIsDeleteModalOpen(true);
-              }}
+              onDelete={handleDeleteClick}
             />
           )}
         </div>
@@ -247,7 +316,7 @@ const ServicePage: React.FC = () => {
         isModalOpen={isDeleteModalOpen}
         setIsModalOpen={setIsDeleteModalOpen}
         deleteName={activeTab}
-        handleDelete={handleDelete}
+        handleDelete={activeTab === "Dịch vụ" ? handleDeleteService : handleDeleteBooking}
       />
     </div>
   );

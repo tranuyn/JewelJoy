@@ -10,17 +10,12 @@ import CardIcon from '@mui/icons-material/CardMembership';
 import EmailIcon from '@mui/icons-material/Email';
 import PhoneIcon from '@mui/icons-material/Phone';
 import PersonIcon from '@mui/icons-material/Person';
-import KeyIcon from '@mui/icons-material/Key';
-import Header from "../../component/Title_header/Header";
-import "./setting.css";
-import { useParams } from "react-router-dom";
 import { useAuth } from "../../services/useAuth";
 import { uploadImages } from "../../services/cloudinaryService";
 
-
 interface UserData {
-  id: string | number ;
-  username: string | number ;
+  id: string | number;
+  username: string | number;
   email: string | number;
   name: string | number;
   dateOfBirth: string | number;
@@ -33,105 +28,70 @@ interface UserData {
   role: string | number;
 }
 
-interface PasswordUpdate {
-  // oldPassword: string;
-  newPassword: string;
-  confirmPassword: string;
-}
-
-const SettingPage: React.FC = () => {
+const ProfileCustomer: React.FC = () => {
   const [userData, setUserData] = useState<UserData | null>(null);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
-  const [oldPassword, setOldPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [passwordData, setPasswordData] = useState<PasswordUpdate>({
-    // oldPassword: '',
-    newPassword: '',
-    confirmPassword: ''
-  });
-  const [passwordErrors, setPasswordErrors] = useState({
-    // oldPassword: '',
-    newPassword: '',
-    confirmPassword: ''
-  });
-  const [confirmPassword, setConfirmPassword] = useState("");
-  // const { userId } = useParams<{ userId: string }>();
-  const {user}=useAuth();
   const [isLoading, setIsLoading] = useState(false);
+  const {user} = useAuth();
 
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-      const loggedInUserId = user?.id;
-      const response = await fetch(`http://localhost:8081/user/${loggedInUserId}`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch user data');
-      }
-      const data = await response.json();
-      setUserData(data);
-      setSelectedImage(data.avaURL);
-    } catch (error) {
-      console.error("Error fetching user data:", error);
+        const loggedInUserId = user?.id;
+        const response = await fetch(`http://localhost:8081/customer/${loggedInUserId}`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch user data');
+        }
+        const data = await response.json();
+        setUserData(data);
+        setSelectedImage(data.avaURL);
+      } catch (error) {
+        console.error("Error fetching user data:", error);
       }
     };
-  
     fetchUserData();
-  }, []);
-  console.log("user", userData);
+  }, [user?.id]);
 
   const handleImageChange = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file) {
-      try {
-        // Show preview
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          setSelectedImage(reader.result as string);
-        };
-        reader.readAsDataURL(file);
+    if (!file || !userData) return;
 
-        // Upload to Cloudinary using existing service
-        const cloudUrl = await uploadImages(file);
-        
-        if (!cloudUrl) {
-          throw new Error('Upload failed');
-        }
+    try {
+      setIsLoading(true);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setSelectedImage(reader.result as string);
+      };
+      reader.readAsDataURL(file);
 
-        // Update user data with new image URL
-        if (userData) {
-          const userUpdateResponse = await fetch(`http://localhost:8081/user/${userData.id}`, {
-            method: 'PUT',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              ...userData,
-              avaURL: cloudUrl,
-              dateOfBirth: new Date(userData.dateOfBirth).toISOString(),
-              ngayVaoLam: userData.ngayVaoLam ? new Date(userData.ngayVaoLam).toISOString() : null,
-            }),
-          });
+      const cloudUrl = await uploadImages(file);
+      if (!cloudUrl) throw new Error('Upload failed');
 
-          if (!userUpdateResponse.ok) {
-            throw new Error('Failed to update user data');
-          }
+      const updatedUserData = {
+        ...userData,
+        avaURL: cloudUrl,
+        dateOfBirth: new Date(userData.dateOfBirth).toISOString(),
+        ngayVaoLam: userData.ngayVaoLam ? new Date(userData.ngayVaoLam).toISOString() : null,
+      };
 
-          setUserData(prev => prev ? { ...prev, avaURL: cloudUrl } : null);
-          alert('Cập nhật ảnh đại diện thành công!');
-        }
-      } catch (error) {
-        console.error("Error updating avatar:", error);
-        alert('Có lỗi xảy ra khi cập nhật ảnh đại diện!');
-      }
+      const response = await fetch(`http://localhost:8081/customer/${userData.id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updatedUserData),
+      });
+
+      if (!response.ok) throw new Error('Failed to update user data');
+
+      setUserData(prev => prev ? { ...prev, avaURL: cloudUrl } : null);
+      alert('Cập nhật ảnh đại diện thành công!');
+    } catch (error) {
+      console.error("Error updating avatar:", error);
+      alert('Có lỗi xảy ra khi cập nhật ảnh đại diện!');
+    } finally {
+      setIsLoading(false);
     }
-  };
-
-
-  const handlePasswordChange = (field: keyof PasswordUpdate) => (value: string | number) => {
-    setPasswordData(prev => ({
-      ...prev,
-      [field]: value.toString()
-    }));
   };
 
   const formatDate = (date: string | number | null) => {
@@ -140,65 +100,13 @@ const SettingPage: React.FC = () => {
     return dateString.split('T')[0];
   };
 
-  const roleOptions = [
-    { label: "Admin", value: "ADMIN" },
-    { label: "Nhân viên kho", value: "INVENTORY_STAFF" },
-    { label: "Nhân viên bán hàng", value: "SALE_STAFF" },
-  ];
   const handleSave = async () => {
     if (!userData) return;
     setIsLoading(true);
-    
+
     try {
-      // if (passwordData.newPassword || passwordData.confirmPassword) {
-      //   // Kiểm tra các trường bắt buộc
-      //   if (!passwordData.newPassword || !passwordData.confirmPassword) {
-      //     alert('Vui lòng nhập đầy đủ thông tin mật khẩu');
-      //     setIsLoading(false);
-      //     return;
-      //   }
-
-      //   if (passwordData.newPassword !== passwordData.confirmPassword) {
-      //     setPasswordErrors(prev => ({
-      //       ...prev,
-      //       confirmPassword: 'Mật khẩu xác nhận không khớp'
-      //     }));
-      //     alert('Mật khẩu xác nhận không khớp');
-      //     setIsLoading(false);
-      //     return;
-      //   }
-
-      //   if (passwordData.newPassword.length < 6) {
-      //     setPasswordErrors(prev => ({
-      //       ...prev,
-      //       newPassword: 'Mật khẩu mới phải có ít nhất 6 ký tự'
-      //     }));
-      //     alert('Mật khẩu mới phải có ít nhất 6 ký tự');
-      //     setIsLoading(false);
-      //     return;
-      //   }
-
-      //   const passwordResponse = await fetch(`http://localhost:8081/user/${userData.id}/password`, {
-      //     method: 'PUT',
-      //     headers: {
-      //       'Content-Type': 'application/json',
-      //     },
-      //     body: JSON.stringify({
-      //       newPassword: passwordData.newPassword,
-      //     }),
-      //   });
-
-      //   setPasswordData({
-      //     newPassword: '',
-      //     confirmPassword: ''
-      //   });
-      //   setPasswordErrors({
-      //     newPassword: '',
-      //     confirmPassword: ''
-      //   });
-      // }
-      const response = await fetch(`http://localhost:8081/user/${userData.id}`, {
-        method: 'PUT',
+      const response = await fetch(`http://localhost:8081/customer/${userData.id}`, {
+        method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -209,27 +117,20 @@ const SettingPage: React.FC = () => {
         }),
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to update user data');
-      }
-  
+      if (!response.ok) throw new Error('Failed to update user data');
       alert('Cập nhật thông tin thành công!');
     } catch (error) {
       console.error("Error saving data:", error);
-      const errorMessage = (error as Error).message || 'Có lỗi xảy ra khi cập nhật thông tin!';
-      alert(errorMessage);
+      alert('Có lỗi xảy ra khi cập nhật thông tin!');
     } finally {
       setIsLoading(false);
     }
   };
 
-  if (!userData) {
-    return <div>Loading...</div>;
-  }
+  if (!userData) return <div>Loading...</div>;
 
   return (
     <div className="hehee">
-      <Header title="User Profile" />
       <div style={{ padding: "10px" }}></div>
       <div className="setting-page">
         <Box sx={{ display: "flex", gap: "24px", marginBottom: "8px" }}>
@@ -249,7 +150,7 @@ const SettingPage: React.FC = () => {
             }}>
               {selectedImage ? (
                 <img 
-                  src={selectedImage} 
+                  src={selectedImage.toString()} 
                   alt="Selected" 
                   style={{ width: "100%", height: "100%", objectFit: "cover" }}
                 />
@@ -264,6 +165,7 @@ const SettingPage: React.FC = () => {
                 type="file"
                 onChange={handleImageChange}
                 accept="image/*"
+                disabled={isLoading}
               />
               <button
                 style={{
@@ -275,10 +177,11 @@ const SettingPage: React.FC = () => {
                   border: "none",
                   borderRadius: "8px",
                   padding: "8px 16px",
-                  cursor: "pointer",
+                  cursor: isLoading ? "not-allowed" : "pointer",
                   fontSize: "14px",
+                  opacity: isLoading ? 0.7 : 1,
                 }}
-                onClick={() => document.getElementById("upload-photo")?.click()}
+                onClick={() => !isLoading && document.getElementById("upload-photo")?.click()}
               >
                 <PhotoCameraIcon style={{ fontSize: "20px" }} />
                 Chọn ảnh
@@ -321,7 +224,7 @@ const SettingPage: React.FC = () => {
           </Box>
         </Box>
 
-        <Box sx={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "24px", marginBottom: "8px" }}>
+        <Box sx={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "24px", marginBottom: "8px" }}>
           <TextBox
             datatype="date"
             title="Ngày sinh"
@@ -329,14 +232,6 @@ const SettingPage: React.FC = () => {
             value={formatDate(userData.dateOfBirth)}
             onChange={(value) => setUserData({ ...userData, dateOfBirth: value })}
             icon={<CakeIcon style={{ color: "black" }} />}
-          />
-          <TextBox
-            datatype="select"
-            title="Chức vụ"
-            placeholder="Chọn chức vụ"
-            value={userData.role}
-            onChange={(value) => setUserData({ ...userData, role: value })}
-            options={roleOptions}
           />
           <TextBox
             datatype="select"
@@ -371,36 +266,6 @@ const SettingPage: React.FC = () => {
           />
         </Box>
 
-        <Box sx={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "24px", marginBottom: "8px" }}>
-          {/* <TextBox
-            datatype="string"
-            title="Mật khẩu cũ"
-            placeholder="Nhập mật khẩu cũ"
-            value={passwordData.oldPassword}
-            onChange={handlePasswordChange('oldPassword')}
-            icon={<KeyIcon style={{ color: "black" }} />}
-          /> */}
-          {/* <TextBox
-            datatype="string"
-            title="Mật khẩu mới"
-            placeholder="Nhập mật khẩu mới"
-            value={passwordData.newPassword}
-            onChange={handlePasswordChange('newPassword')}
-            icon={<KeyIcon style={{ color: "black" }} />}
-          /> */}
-        </Box>
-
-        <Box sx={{ display: "grid", gridTemplateColumns: "repeat(1, 1fr)" }}>
-          {/* <TextBox
-            datatype="string"
-            title="Xác nhận mật khẩu"
-            placeholder="Xác nhận mật khẩu mới"
-            value={passwordData.confirmPassword}
-            onChange={handlePasswordChange('confirmPassword')}
-            icon={<KeyIcon style={{ color: "black" }} />}
-          /> */}
-        </Box>
-
         <Box sx={{ 
           display: "flex", 
           justifyContent: "flex-end", 
@@ -425,4 +290,4 @@ const SettingPage: React.FC = () => {
   );
 };
 
-export default SettingPage;
+export default ProfileCustomer;
