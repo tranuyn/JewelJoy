@@ -1,5 +1,4 @@
-import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import axios from "axios";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 export interface CartItem {
   id: number;
@@ -123,6 +122,16 @@ const cartSlice = createSlice({
       }
       localStorage.setItem("cartItems", JSON.stringify(state.items));
     },
+    updateQuantity: (state, action: PayloadAction<{ id: number; quantity: number }>) => {
+      const { id, quantity } = action.payload;
+      const item = state.items.find(item => item.id === id);
+      if (item) {
+        item.quantity = quantity;
+      }
+    },
+    removeItem: (state, action: PayloadAction<number>) => {
+      state.items = state.items.filter(item => item.id !== action.payload);
+    },
   },
 });
 
@@ -132,6 +141,8 @@ export const {
   setSelectedItems,
   clearCart,
   addToCart,
+  updateQuantity,
+  removeItem
 } = cartSlice.actions;
 
 export default cartSlice.reducer;

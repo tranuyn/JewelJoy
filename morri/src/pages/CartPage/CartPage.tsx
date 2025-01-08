@@ -29,21 +29,19 @@ import {
   Typography,
 } from "@mui/material";
 import React, { useState } from "react";
+import { removeItem, updateQuantity } from "../../redux/slice/cartSlice";
+
+
 
 // Import images
-import diamondEarring from "../../assets/constant/diamond-earring.jpg";
-import goldBracelet from "../../assets/constant/gold-bracelet.jpg";
-import goldEarring from "../../assets/constant/gold-earring.jpg";
-import goldNecklace from "../../assets/constant/gold-necklace.jpg";
 import morriLogo from "../../assets/constant/morri-logo.png";
 
-import { CartItem, OrderSummary } from "../CartPage/cartTypes";
-import "./CartPage.css";
-import { useDispatch } from "react-redux";
-import { addToCart, setSelectedItems } from "../../redux/slice/cartSlice";
-import { useSelector } from "react-redux";
-import { RootState } from "../../redux/store";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { setSelectedItems } from "../../redux/slice/cartSlice";
+import { RootState } from "../../redux/store";
+import { OrderSummary } from "../CartPage/cartTypes";
+import "./CartPage.css";
 
 const CartPage: React.FC = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -61,14 +59,21 @@ const CartPage: React.FC = () => {
 
   const navigate = useNavigate();
 
+  // const handleQuantityChange = (id: number, increment: boolean) => {
+  //   // setCartItems(items =>
+  //   //   items.map(item =>
+  //   //     item.id === id
+  //   //       ? { ...item, quantity: increment ? item.quantity + 1 : Math.max(1, item.quantity - 1) }
+  //   //       : item
+  //   //   )
+  //   // );
+  // };
   const handleQuantityChange = (id: number, increment: boolean) => {
-    // setCartItems(items =>
-    //   items.map(item =>
-    //     item.id === id
-    //       ? { ...item, quantity: increment ? item.quantity + 1 : Math.max(1, item.quantity - 1) }
-    //       : item
-    //   )
-    // );
+    const item = cartItems.find((item) => item.id === id);
+    if (!item) return;
+    
+    const newQuantity = increment ? item.quantity + 1 : Math.max(1, item.quantity - 1);
+    dispatch(updateQuantity({ id, quantity: newQuantity }));
   };
 
   const handleSelectItem = (id: number) => {
@@ -78,7 +83,12 @@ const CartPage: React.FC = () => {
     else dispatch(setSelectedItems({ id, selected: true }));
   };
 
-  const handleDeleteItem = (id: number) => {};
+  const handleDeleteItem = (id: number) => {
+    const confirmDelete = window.confirm("Bạn có chắc chắn muốn xóa sản phẩm này?");
+    if (confirmDelete) {
+      dispatch(removeItem(id));
+    }
+  };
 
   const calculateOrderSummary = (): OrderSummary => {
     const selectedItems = cartItems.filter((item) => item.selected);
@@ -92,8 +102,8 @@ const CartPage: React.FC = () => {
       subtotal,
       shipping: 0,
       tax: 0,
-      discount: 20,
-      total: subtotal - 20,
+      discount: 0,
+      total: subtotal ,
     };
   };
 
@@ -221,7 +231,8 @@ const CartPage: React.FC = () => {
                       </Box>
                     </TableCell>
                     <TableCell align="right">
-                      {/* ${item.price.toFixed(2)} */}
+                      { item.price.toFixed(2) }
+                      
                     </TableCell>
                     <TableCell align="center">
                       <Box className="quantity-controls">
@@ -242,7 +253,7 @@ const CartPage: React.FC = () => {
                       </Box>
                     </TableCell>
                     <TableCell align="right">
-                      ${(item.price * item.quantity).toFixed(2)}
+                      {(item.price * item.quantity).toFixed(2)}
                     </TableCell>
                   </TableRow>
                 ))}
@@ -273,23 +284,23 @@ const CartPage: React.FC = () => {
               </Box>
               <Box className="summary-row">
                 <Typography>Tổng tiền</Typography>
-                <Typography>${summary?.subtotal.toFixed(2)}</Typography>
+                <Typography>{summary?.subtotal.toFixed(2)}</Typography>
               </Box>
               <Box className="summary-row">
                 <Typography>Phí vận chuyển</Typography>
-                <Typography>${summary?.shipping.toFixed(2)}</Typography>
+                <Typography>{summary?.shipping.toFixed(2)}</Typography>
               </Box>
               <Box className="summary-row">
                 <Typography>Thuế</Typography>
-                <Typography>${summary?.tax.toFixed(2)}</Typography>
+                <Typography>{summary?.tax.toFixed(2)}</Typography>
               </Box>
               <Box className="summary-row">
                 <Typography>Giảm giá</Typography>
-                <Typography>-${summary?.discount.toFixed(2)}</Typography>
+                <Typography>-{summary?.discount.toFixed(2)}</Typography>
               </Box>
               <Box className="summary-row total">
                 <Typography>Tổng</Typography>
-                <Typography>${summary?.total.toFixed(2)}</Typography>
+                <Typography>{summary?.total.toFixed(2)}</Typography>
               </Box>
               <Button
                 variant="contained"

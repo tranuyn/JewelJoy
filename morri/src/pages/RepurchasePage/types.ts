@@ -10,6 +10,7 @@ export interface Bill {
     status: string;
     material: string;
     total: string;
+    code:String,
     customerName: string;
     customerId: string;
     phoneNumber: string;
