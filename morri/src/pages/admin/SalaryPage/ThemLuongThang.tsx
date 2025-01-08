@@ -3,10 +3,11 @@ import { Box, Modal, CircularProgress } from "@mui/material";
 import TextBox from "../../../component/TextBox/TextBox";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import BtnComponent from "../../../component/BtnComponent/BtnComponent";
+
 interface ThemLuongThangProps {
   isModalOpen: boolean;
   setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  handleAddSalary: () => Promise<void>;
+  handleAddSalary: any;
 }
 const ThemLuongThang: React.FC<ThemLuongThangProps> = ({
   isModalOpen,
@@ -14,13 +15,15 @@ const ThemLuongThang: React.FC<ThemLuongThangProps> = ({
   handleAddSalary,
 }) => {
   const [loading, setLoading] = useState(false);
-  const handleAddSalaryModal = async () => {
+  const [baseSalary, setBaseSalary] = useState<number>(0);
+  const [commissionRate, setCommissionRate] = useState<number>(0);
+  const [salaryReceiveDate, setSalaryReceiveDate] = useState<string>(
+    new Date().toISOString().split("T")[0]
+  );
+  const handleSubmit = async () => {
     setLoading(true);
     try {
-      await handleAddSalary();
-      setIsModalOpen(false);
-    } catch (error) {
-      console.error("Error deleting:", error);
+      await handleAddSalary(baseSalary, commissionRate, salaryReceiveDate);
     } finally {
       setLoading(false);
     }
@@ -54,13 +57,7 @@ const ThemLuongThang: React.FC<ThemLuongThangProps> = ({
         >
           Thêm lương tháng
         </div>
-        <TextBox
-          datatype="string"
-          title="Mã NV"
-          placeholder=""
-          onChange={(value) => {}}
-          defaultValue=""
-        />
+
         <Box
           sx={{
             display: "flex",
@@ -71,14 +68,14 @@ const ThemLuongThang: React.FC<ThemLuongThangProps> = ({
         >
           <TextBox
             datatype="number"
-            title="Tiền thưởng"
-            placeholder="Nhập tiền thưởng..."
+            title="Tiền lương cơ bản"
+            placeholder="Nhập tiền lương cơ bản..."
             onChange={(value) => {}}
           />
           <TextBox
-            datatype="string"
-            title="Lí do thưởng"
-            placeholder="Nhập lí do thưởng"
+            datatype="number"
+            title="Tiền hoa hồng"
+            placeholder="Nhập tiền hoa hồng"
             onChange={(value) => {}}
           />
         </Box>
@@ -90,20 +87,7 @@ const ThemLuongThang: React.FC<ThemLuongThangProps> = ({
             marginRight: "10px",
             width: "100%",
           }}
-        >
-          <TextBox
-            datatype="number"
-            title="Tiền phạt"
-            placeholder="Nhập tiền phạt"
-            onChange={(value) => {}}
-          />
-          <TextBox
-            datatype="string"
-            title="Lí do phạt"
-            placeholder="Nhập lí do phạt"
-            onChange={(value) => {}}
-          />
-        </Box>
+        ></Box>
         <Box
           sx={{
             display: "flex",
@@ -122,13 +106,6 @@ const ThemLuongThang: React.FC<ThemLuongThangProps> = ({
             icon={<CalendarMonthIcon style={{ color: "black" }} />}
             //   defaultValue=`${New Date()}`
           />
-          <TextBox
-            datatype="number"
-            title="Tiền hoa hồng"
-            placeholder="Nhập tiền hoa hồng"
-            onChange={(value) => {}}
-            // icon={<CalendarMonthIcon style={{ color: "black" }} />}
-          />
         </Box>
         <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2 }}>
           <BtnComponent
@@ -141,13 +118,10 @@ const ThemLuongThang: React.FC<ThemLuongThangProps> = ({
             btnText={
               loading ? <CircularProgress size={20} color="inherit" /> : "Lưu"
             }
-            onClick={handleAddSalaryModal}
+            onClick={handleSubmit}
             disabled={loading}
           />
         </Box>
-        {/* <Box sx={{ width: 400 }}>
-          <CircularProgress color="primary" />
-        </Box> */}
       </Box>
     </Modal>
   );

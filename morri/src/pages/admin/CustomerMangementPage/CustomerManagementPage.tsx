@@ -10,6 +10,7 @@ import BtnComponent from "../../../component/BtnComponent/BtnComponent";
 import UpdateCustomer from "./updateCustomer";
 import DeleteComponent from "../../../component/DeleteComponent/DeleteComponent";
 import Snackbar from "../../../component/Snackbar/Snackbar";
+import { FormData } from "./updateCustomer";
 
 export interface Customer {
   id: string;
@@ -85,7 +86,7 @@ const CustomerManagementPage: React.FC = () => {
 
   const fetchCustomers = async () => {
     try {
-      const response = await fetch("http://localhost:8080/customer/");
+      const response = await fetch("http://localhost:8081/customer/");
       const data = await response.json();
       setCustomers(data);
     } catch (error) {
@@ -118,7 +119,7 @@ const CustomerManagementPage: React.FC = () => {
         setCustomerId(rowClicked.id);
         // const customerId = rowClicked.id;
         const response = await fetch(
-          `http://localhost:8080/customer/${customerId}`,
+          `http://localhost:8081/customer/${customerId}`,
           {
             method: "DELETE",
             headers: {
@@ -148,16 +149,20 @@ const CustomerManagementPage: React.FC = () => {
     }
   };
 
-  const handleUpdate = async (): Promise<void> => {
+  const handleUpdate = async (formData: FormData): Promise<void> => {
     try {
       // customerId
-      const response = await fetch(`http://localhost:8080/customer/`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({}),
-      });
+      console.log("Customer: " + rowClicked?.id);
+      const response = await fetch(
+        `http://localhost:8081/customer/${rowClicked?.id}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
+        }
+      );
 
       if (response.ok) {
         setSnackbarSeverity("success");
@@ -185,7 +190,7 @@ const CustomerManagementPage: React.FC = () => {
     try {
       console.log("form data: " + JSON.stringify(formData));
 
-      const response = await fetch("http://localhost:8080/customer/create", {
+      const response = await fetch("http://localhost:8081/customer/create", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

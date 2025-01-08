@@ -13,7 +13,7 @@ interface CustomerProps {
   handleUpdate: (formData: FormData) => Promise<void>;
   initialData: Customer | null;
 }
-interface FormData {
+export interface FormData {
   name: string | number;
   phoneNumber: string | number;
   gioiTinh: string | number;
@@ -46,14 +46,21 @@ const UpdateCustomer: React.FC<CustomerProps> = ({
   const [isLoading, setLoading] = useState(false);
 
   const handleUpdateModal = async () => {
+    const gender =
+      gioiTinh === "nam" ? "MALE" : gioiTinh === "nu" ? "FEMALE" : 0;
+    const formattedDateOfBirth = dateOfBirth
+      ? new Date(dateOfBirth).toISOString()
+      : 0;
+
     const formData: FormData = {
       name,
       phoneNumber,
-      gioiTinh,
-      dateOfBirth,
+      gioiTinh: gender,
+      dateOfBirth: formattedDateOfBirth,
       email,
       registrationDate,
     };
+    console.log("form data: " + JSON.stringify(formData));
 
     setLoading(true);
     try {
