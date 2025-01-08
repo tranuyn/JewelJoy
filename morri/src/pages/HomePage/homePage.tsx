@@ -2,14 +2,37 @@ import React from "react";
 import "./homePage.css";
 import WorkSchedule from "./WorkSchedule";
 
+import styled from "@emotion/styled";
+import DeleteIcon from "@mui/icons-material/Delete";
+import BorderColorIcon from "@mui/icons-material/BorderColor";
+import { Button, IconButton } from "@mui/material";
 const HomePage: React.FC = () => {
+  const StyledIconButton = styled(IconButton)`
+    margin: 4px 0px;
+  `;
   return (
     <div className="home-page">
       <span className="title-text">Hello Uyn</span>
       <div className="line" />
       <div>
         <div>
-          <h2>Chào mừng đến với Morri Jewelry</h2>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <h2>Chào mừng đến với Morri Jewelry</h2>
+            <StyledIconButton
+              className={`edit-button`}
+              size="small"
+              // onClick={}
+            >
+              <BorderColorIcon fontSize="small" />
+            </StyledIconButton>
+          </div>
           <span>
             Chúng mình đã háo hức chờ đợi khoảnh khắc này để gặp gỡ và làm việc
             cùng nhau. Morri Jewelry rất vui mừng được chào đón bạn đến với gia
@@ -24,7 +47,23 @@ const HomePage: React.FC = () => {
           </span>
         </div>
         <div className="line" />
-        <h2>Điều khoản, điều kiện</h2>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <h2>Điều khoản, điều kiện</h2>
+          <StyledIconButton
+            className={`edit-button`}
+            size="small"
+            // onClick={}
+          >
+            <BorderColorIcon fontSize="small" />
+          </StyledIconButton>
+        </div>
         <span>
           Khi bạn mua hàng và sử dụng dịch vụ, bạn đồng ý với các điều khoản và
           điều kiện dưới đây.

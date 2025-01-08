@@ -26,6 +26,10 @@ interface ProductType {
   quantityInBill: number;
   loaiSanPham: string;
 }
+interface Filters {
+  materials: string[]; // Array of selected materials
+  sort: string; // Sorting option (e.g., 'Increase', 'Decrease', etc.)
+}
 const ProductsAndService: React.FC = () => {
   const [activeTab, setActiveTab] = useState("Tất cả");
   const [products, setProducts] = useState<ProductType[]>([]);
@@ -33,6 +37,11 @@ const ProductsAndService: React.FC = () => {
   const { isAuthenticated, user, validateAuthStatus } = useAuth();
   const dispatch = useDispatch();
   const cartItems = useSelector((state: RootState) => state.cart.items);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filteredProducts, setFilteredProducts] = useState<ProductType[]>([]);
+  const [selectedMaterials, setSelectedMaterials] = useState<string[]>([]);
+  const [sortType, setSortType] = useState("Default");
+
   const handleSelectProduct = (product: ProductType) => {
     if (
       user?.role === "ADMIN" ||
@@ -99,6 +108,44 @@ const ProductsAndService: React.FC = () => {
     );
   };
 
+  useEffect(() => {
+    // Filter and sort products whenever dependencies change
+    let filtered = [...products];
+
+    // Apply search filter
+    if (searchQuery) {
+      filtered = filtered.filter(
+        (product) =>
+          product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          product.material.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    // Apply material filter
+    if (selectedMaterials.length > 0) {
+      filtered = filtered.filter((product) =>
+        selectedMaterials.some((material) =>
+          product.material.toLowerCase().includes(material.toLowerCase())
+        )
+      );
+    }
+
+    // Apply sorting
+    switch (sortType) {
+      case "Increase":
+        filtered.sort((a, b) => a.sellingPrice - b.sellingPrice);
+        break;
+      case "Decrease":
+        filtered.sort((a, b) => b.sellingPrice - a.sellingPrice);
+        break;
+      default:
+        // Keep original order
+        break;
+    }
+
+    setFilteredProducts(filtered);
+  }, [searchQuery, selectedMaterials, sortType, products]);
+
   const tabs = [
     "Tất cả",
     "Đá quý",
@@ -114,7 +161,13 @@ const ProductsAndService: React.FC = () => {
       try {
         const response = await fetch("http://localhost:8081/jewelry/"); // Replace with your API URL
         const data = await response.json();
-        setProducts(data); // Assume data is an array of products
+        const availableProducts = data.filter(
+          (item: { status: string }) => item.status === "available"
+        );
+
+        // Gán các sản phẩm đã lọc vào state
+        setProducts(availableProducts);
+        setFilteredProducts(availableProducts);
       } catch (error) {
         console.error("Error fetching products:", error);
       }
@@ -267,7 +320,7 @@ const ProductsAndService: React.FC = () => {
           <div className="pbcontainer">
             <div className="product-container">
               <Product
-                products={products}
+                products={filteredProducts}
                 onSelectProduct={handleSelectProduct}
               />
             </div>
@@ -287,6 +340,16 @@ const ProductsAndService: React.FC = () => {
           </div>
         );
     }
+  };
+  const handelQuery = (query: string) => {
+    setSearchQuery(query);
+  };
+  const handleMaterialFilter = (materials: string[]) => {
+    setSelectedMaterials(materials);
+  };
+
+  const handleSort = (type: string) => {
+    setSortType(type);
   };
 
   return (
@@ -320,17 +383,13 @@ const ProductsAndService: React.FC = () => {
         styleType="default"
         defaultTab="Tất cả"
       />
-      <SearchAndFilter />
-
-      {/* <div className="pbcontainer">
-        <div className="product-container">
-          <Product products={products} onSelectProduct={handleSelectProduct} />
-        </div>
-
-        <div className="bill-container">
-          <Bill selectedProducts={selectedProducts} />
-        </div>
-      </div> */}
+      {activeTab != "Dịch vụ" && (
+        <SearchAndFilter
+          onSearch={handelQuery}
+          onMaterialFilter={handleMaterialFilter}
+          onSort={handleSort}
+        />
+      )}
 
       <div className="page-content">
         <div className="content-text">{renderContent()}</div>

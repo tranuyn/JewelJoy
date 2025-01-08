@@ -1,0 +1,52 @@
+.edit-modal {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 80%;
+  max-width: 800px;
+  max-height: 90vh;
+  background-color: white;
+  box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.15);
+  border-radius: 8px;
+  padding: 24px;
+  overflow-y: auto;
+}
+
+.edit-modal-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.edit-modal-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 16px;
+  margin-top: 24px;
+}
+
+/* Tùy chỉnh thanh cuộn */
+.edit-modal::-webkit-scrollbar {
+  width: 8px;
+}
+
+.edit-modal::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.edit-modal::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+.edit-modal::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+.exportFileText {
+  font-weight:medium;
+  color: white;
+  font-size: 1em;
+}

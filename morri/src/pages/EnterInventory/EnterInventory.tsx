@@ -7,21 +7,6 @@ import HistoryEI from "./HistoryEI";
 const EnterInventory: React.FC = () => {
   const tabs = ["Tạo phiếu nhập kho", "Lịch sử nhập kho"];
   const [activeTab, setActiveTab] = useState("Tạo phiếu nhập kho");
-
-  const [page, setPage] = useState<number>(0);
-  const [rowsPerPage, setRowsPerPage] = useState<number>(10);
-
-  const handleChangePage = (newPage: number) => {
-    setPage(newPage);
-  };
-
-  const handleChangeRowsPerPage = (
-    event: React.ChangeEvent<HTMLSelectElement>
-  ) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
-  };
-
   return (
     <div className="EinventoryContainer">
       <Header title="Nhập kho" />

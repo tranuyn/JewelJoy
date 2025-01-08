@@ -1,7 +1,6 @@
 .EinventoryContainer {
   background-color: #f9fcff;
   flex: 1;
-  padding: 10px;
 }
 .formEnterContainer {
   background-color: white;
@@ -176,4 +175,10 @@
 .editbtn {
   color: rgba(0, 0, 0, 0.1) !important;
   margin: 4px 0;
+}
+.SapXep1 {
+  padding: 10px;
+  border-radius: 20px;
+  margin-bottom: 10px;
+  width: 50%;
 }

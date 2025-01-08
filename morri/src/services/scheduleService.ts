@@ -1,5 +1,4 @@
 // scheduleService.ts
-import axios from "axios";
 
 export interface Employee {
   id: string;
@@ -21,71 +20,88 @@ export interface Schedule {
   status: string;
 }
 
+export interface ScheduleUpdate {
+  workDate: string;
+  morningShifts: string[];
+  afternoonShifts: string[];
+}
+
 export const scheduleService = {
-  // Lấy danh sách nhân viên từ API
   async getEmployees(): Promise<Employee[]> {
     try {
-      const response = await axios.get("http://localhost:8081/user/");
-      // Chuyển đổi dữ liệu API thành định dạng Employee
-      const employees: Employee[] = response.data.map((user: any) => ({
-        id: user.id,
-        username: user.username,
-        email: user.email,
-        name: user.name,
-        phoneNumber: user.phoneNumber,
-        role: user.role,
-      }));
-      return employees;
+      const response = await fetch("http://localhost:8081/user/");
+      if (!response.ok) {
+        throw new Error("Lỗi khi tải danh sách nhân viên");
+      }
+      return await response.json();
     } catch (error) {
-      console.error("Error loading employees from API:", error);
+      console.error("Lỗi khi tải danh sách nhân viên:", error);
       throw error;
     }
   },
 
-  // Mock data cho schedules
-  mockSchedules: new Map<string, Schedule>(),
-
   async getScheduleByDate(date: string): Promise<Schedule[]> {
-    let schedule = this.mockSchedules.get(date);
+    try {
+      // Lấy tất cả lịch
+      const response = await fetch("http://localhost:8081/schedule");
+      if (!response.ok) {
+        throw new Error("Lỗi khi tải lịch làm việc");
+      }
+      const allSchedules: Schedule[] = await response.json();
 
-    if (!schedule) {
-      schedule = {
-        id: date,
-        workDate: date,
-        morningShifts: [],
-        afternoonShifts: [],
-        startTime: "09:00:00",
-        endTime: "17:00:00",
-        createdBy: null,
-        status: "ACTIVE",
-      };
-      this.mockSchedules.set(date, schedule);
+      // Tìm lịch cho ngày được chọn
+      const selectedDateSchedule = allSchedules.find((schedule) => {
+        const scheduleDate = new Date(schedule.workDate).toDateString();
+        const targetDate = new Date(date).toDateString();
+        return scheduleDate === targetDate;
+      });
+
+      return selectedDateSchedule ? [selectedDateSchedule] : [];
+    } catch (error) {
+      console.error("Lỗi khi tải lịch làm việc:", error);
+      throw error;
     }
-
-    return Promise.resolve([schedule]);
   },
 
   async updateShiftSchedule(
     id: string,
-    schedule: Partial<Schedule>
+    schedule: ScheduleUpdate // Sử dụng interface mới
   ): Promise<Schedule> {
-    const existingSchedule = this.mockSchedules.get(id) || {
-      id,
-      workDate: id,
-      morningShifts: [],
-      afternoonShifts: [],
-      startTime: "09:00:00",
-      endTime: "17:00:00",
-      createdBy: null,
-      status: "ACTIVE",
-    };
-
-    const updatedSchedule = {
-      ...existingSchedule,
-      ...schedule,
-    } as Schedule;
-
-    this.mockSchedules.set(id, updatedSchedule);
-    return Promise.resolve(updatedSchedule);
+    try {
+      const response = await fetch(`http://localhost:8081/schedule/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(schedule),
+      });
+      if (!response.ok) {
+        throw new Error("Lỗi khi cập nhật lịch");
+      }
+      return await response.json();
+    } catch (error) {
+      console.error("Lỗi khi cập nhật lịch:", error);
+      throw error;
+    }
   },
+
+  async createSchedule(schedule: ScheduleUpdate): Promise<Schedule> {
+    try {
+      const response = await fetch("http://localhost:8081/schedule", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(schedule),
+      });
+      if (!response.ok) {
+        throw new Error("Lỗi khi tạo lịch mới");
+      }
+      return await response.json();
+    } catch (error) {
+      console.error("Lỗi khi tạo lịch mới:", error);
+      throw error;
+    }
+    // Tương tự như trên
+  }
 };

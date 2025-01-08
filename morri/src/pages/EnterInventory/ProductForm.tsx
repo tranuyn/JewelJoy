@@ -42,11 +42,13 @@ const ProductForm: React.FC<ProductFormProps> = ({
   const [imagestemp, setImagestemp] = useState<string[]>([]);
 
   useEffect(() => {
-    // Chỉ cập nhật formData khi formProductData thay đổi, nhưng giữ lại dữ liệu người dùng nhập
-    setFormData((prevData) => ({
-      ...prevData,
-      ...formProductData,
-    }));
+    if (formProductData.id) {
+      setIsExist(true);
+      setFormData((prevData) => ({
+        ...formProductData,
+        enteredQuantity: prevData.enteredQuantity, // Giữ lại giá trị số lượng nhập
+      }));
+    }
   }, [formProductData]);
 
   const handleInputChange = (

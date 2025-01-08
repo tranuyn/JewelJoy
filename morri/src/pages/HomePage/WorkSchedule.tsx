@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Employee,
   Schedule,
@@ -24,22 +24,64 @@ const WorkSchedule: React.FC = () => {
   const [scheduleData, setScheduleData] = useState<DaySchedule>({});
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [currentSchedule, setCurrentSchedule] = useState<Schedule | null>(null);
 
+  const loadEmployees = useCallback(async () => {
+    try {
+      setLoading(true);
+      const data = await scheduleService.getEmployees();
+      setEmployees(data);
+    } catch (error) {
+      setError("Không thể tải danh sách nhân viên");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
   useEffect(() => {
-    const loadEmployees = async () => {
-      try {
-        const data = await scheduleService.getEmployees();
-        setEmployees(data);
-      } catch (error) {
-        console.error("Error loading employees:", error);
-      }
-    };
     loadEmployees();
+  }, [loadEmployees]);
+
+  const loadScheduleData = useCallback(async (date: string) => {
+    try {
+      setLoading(true);
+      const schedules = await scheduleService.getScheduleByDate(date);
+
+      if (schedules.length > 0) {
+        const schedule = schedules[0];
+        setCurrentSchedule(schedule);
+
+        // Cập nhật scheduleData với dữ liệu từ API
+        setScheduleData({
+          morning: {
+            employeeIds: schedule.morningShifts.map((emp) => emp.id),
+            maxCapacity: 5,
+          },
+          afternoon: {
+            employeeIds: schedule.afternoonShifts.map((emp) => emp.id),
+            maxCapacity: 5,
+          },
+        });
+      } else {
+        // Reset data nếu không có lịch cho ngày được chọn
+        setCurrentSchedule(null);
+        setScheduleData({
+          morning: { employeeIds: [], maxCapacity: 5 },
+          afternoon: { employeeIds: [], maxCapacity: 5 },
+        });
+      }
+    } catch (error) {
+      setError("Không thể tải lịch làm việc");
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   useEffect(() => {
-    loadScheduleData(formatDate(selectedDate));
-  }, [selectedDate]);
+    if (selectedDate) {
+      loadScheduleData(formatDate(selectedDate));
+    }
+  }, [selectedDate, loadScheduleData]);
 
   const getDaysInMonth = (date: Date): { firstDay: Date; lastDay: Date } => {
     const year = date.getFullYear();
@@ -72,110 +114,85 @@ const WorkSchedule: React.FC = () => {
     return date.toISOString().split("T")[0];
   };
 
-  const loadScheduleData = async (date: string) => {
+  // Thay đổi hàm handleEmployeeSelect như sau:
+  const handleEmployeeSelect = async (shift: ShiftType, employeeId: string) => {
     try {
       setLoading(true);
-      const schedules = await scheduleService.getScheduleByDate(date);
 
-      // Tìm lịch làm việc cho ngày được chọn
-      const daySchedule = schedules.find(
-        (schedule) =>
-          new Date(schedule.workDate).toDateString() ===
-          new Date(date).toDateString()
-      );
+      if (currentSchedule) {
+        // Chỉ gửi thông tin cần thiết
+        const updateData = {
+          workDate: currentSchedule.workDate,
+          morningShifts:
+            shift === "morning"
+              ? [
+                  ...currentSchedule.morningShifts.map((emp) => emp.id),
+                  employeeId,
+                ]
+              : currentSchedule.morningShifts.map((emp) => emp.id),
+          afternoonShifts:
+            shift === "afternoon"
+              ? [
+                  ...currentSchedule.afternoonShifts.map((emp) => emp.id),
+                  employeeId,
+                ]
+              : currentSchedule.afternoonShifts.map((emp) => emp.id),
+        };
 
-      const scheduleMap = {
-        morning: {
-          employeeIds:
-            daySchedule?.morningShifts?.map((emp: Employee) => emp.id) || [],
-          maxCapacity: 5,
-        },
-        afternoon: {
-          employeeIds:
-            daySchedule?.afternoonShifts?.map((emp: Employee) => emp.id) || [],
-          maxCapacity: 5,
-        },
-      };
+        await scheduleService.updateShiftSchedule(
+          currentSchedule.id,
+          updateData
+        );
+      } else {
+        // Tạo lịch mới
+        const selectedDateTime = new Date(selectedDate);
+        selectedDateTime.setHours(3, 30, 0);
+        console.log("Thời gian trong ngày: ", selectedDateTime.toISOString())
+        const newSchedule = {
+          workDate: selectedDateTime.toISOString(), // Sẽ cho ra định dạng ISO chuẩn UTC
+          morningShifts: shift === "morning" ? [employeeId] : [],
+          afternoonShifts: shift === "afternoon" ? [employeeId] : [],
+        };
 
-      setScheduleData(scheduleMap);
+        await scheduleService.createSchedule(newSchedule);
+      }
+
+      // Tải lại dữ liệu sau khi cập nhật
+      await loadScheduleData(formatDate(selectedDate));
     } catch (error) {
-      console.error("Error loading schedule:", error);
+      setError("Không thể cập nhật lịch làm việc");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleEmployeeSelect = async (shift: ShiftType, employeeId: string) => {
-    const dateKey = formatDate(selectedDate);
-    const currentShift = scheduleData[shift] || {
-      employeeIds: [],
-      maxCapacity: 5,
-    };
-
-    try {
-      const selectedEmployee = employees.find((emp) => emp.id === employeeId);
-      if (!selectedEmployee) return;
-
-      const schedules = await scheduleService.getScheduleByDate(dateKey);
-      const currentSchedule = schedules[0];
-
-      const updatedSchedule: Schedule = {
-        ...currentSchedule,
-        [shift === "morning" ? "morningShifts" : "afternoonShifts"]: [
-          ...(shift === "morning"
-            ? currentSchedule.morningShifts
-            : currentSchedule.afternoonShifts),
-          selectedEmployee,
-        ],
-      };
-
-      await scheduleService.updateShiftSchedule(dateKey, updatedSchedule);
-
-      setScheduleData((prev) => ({
-        ...prev,
-        [shift]: {
-          ...currentShift,
-          employeeIds: [...currentShift.employeeIds, employeeId],
-        },
-      }));
-    } catch (error) {
-      console.error("Error updating schedule:", error);
-    }
-  };
-
   const handleEmployeeRemove = async (shift: ShiftType, employeeId: string) => {
-    const dateKey = formatDate(selectedDate);
-    const currentShift = scheduleData[shift] || {
-      employeeIds: [],
-      maxCapacity: 5,
-    };
+    if (!currentSchedule) return;
 
     try {
-      const schedules = await scheduleService.getScheduleByDate(dateKey);
-      const currentSchedule = schedules[0];
-
-      const updatedSchedule: Schedule = {
-        ...currentSchedule,
-        [shift === "morning" ? "morningShifts" : "afternoonShifts"]: (shift ===
-        "morning"
-          ? currentSchedule.morningShifts
-          : currentSchedule.afternoonShifts
-        ).filter((emp) => emp.id !== employeeId),
+      setLoading(true);
+      const updateData = {
+        workDate: currentSchedule.workDate,
+        morningShifts:
+          shift === "morning"
+            ? currentSchedule.morningShifts
+                .filter((emp) => emp.id !== employeeId)
+                .map((emp) => emp.id)
+            : currentSchedule.morningShifts.map((emp) => emp.id),
+        afternoonShifts:
+          shift === "afternoon"
+            ? currentSchedule.afternoonShifts
+                .filter((emp) => emp.id !== employeeId)
+                .map((emp) => emp.id)
+            : currentSchedule.afternoonShifts.map((emp) => emp.id),
       };
 
-      await scheduleService.updateShiftSchedule(dateKey, updatedSchedule);
-
-      setScheduleData((prev) => ({
-        ...prev,
-        [shift]: {
-          ...currentShift,
-          employeeIds: currentShift.employeeIds.filter(
-            (id) => id !== employeeId
-          ),
-        },
-      }));
+      await scheduleService.updateShiftSchedule(currentSchedule.id, updateData);
+      await loadScheduleData(formatDate(selectedDate));
     } catch (error) {
-      console.error("Error updating schedule:", error);
+      setError("Không thể xóa nhân viên khỏi ca làm việc");
+    } finally {
+      setLoading(false);
     }
   };
 

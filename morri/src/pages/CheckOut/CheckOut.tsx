@@ -97,7 +97,7 @@ const Checkout = () => {
       setError(
         "Thông tin khách hàng không hợp lệ. Vui lòng nhập đầy đủ thông tin khách hàng."
       );
-      console.log("indfo" + customerInfo.name);
+      console.log("indfo", customerInfo);
       return;
     }
     setError(null);

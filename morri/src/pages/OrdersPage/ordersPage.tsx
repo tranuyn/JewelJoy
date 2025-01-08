@@ -193,17 +193,13 @@ const OrdersPage: React.FC = () => {
 
       const updatedBill: BillBan = {
         ...billDetails,
-        orderDetails: editingOrderDetails.map((detail) => ({
-          ...detail,
-          subtotal: detail.quantity * detail.unitPrice,
-        })),
+        orderDetails: editingOrderDetails,
         totalPrice: calculateNewTotal(editingOrderDetails),
       };
 
       await updateBillBan(billId, updatedBill);
-
-      // Refresh data
       const updatedData = await getAllBillBans();
+
       alert("Cập nhật đơn hàng thành công!");
       setEditingOrderCode(null);
       setRows(updatedData);
@@ -471,7 +467,7 @@ const OrdersPage: React.FC = () => {
             </table>
             <div className="numberOfPageContainer">
               <select onChange={handleChangeRowsPerPage} value={rowsPerPage}>
-                <option value={2}>5</option>
+                <option value={5}>5</option>
                 <option value={10}>10</option>
                 <option value={25}>25</option>
               </select>
