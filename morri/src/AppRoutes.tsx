@@ -24,7 +24,7 @@ const AppRoutes = () => {
         <Route path="/salary" element={<SalaryPage />} />
         <Route path="/products" element={<ProductsAndService />} />
         <Route path="/products/detail/:id" element={<ProductDetail />} />
-        <Route path="/products/checkout" element={<CheckOut />} />
+        <Route path="/products/checkout" element={<CheckOut />} /> 
         <Route
           path="/products/checkout/:orderId"
           element={<CheckOutSuccess />}

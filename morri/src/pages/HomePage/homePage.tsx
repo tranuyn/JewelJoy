@@ -1,18 +1,130 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import "./homePage.css";
 import WorkSchedule from "./WorkSchedule";
-
 import styled from "@emotion/styled";
 import DeleteIcon from "@mui/icons-material/Delete";
 import BorderColorIcon from "@mui/icons-material/BorderColor";
-import { Button, IconButton } from "@mui/material";
+import {
+  Button,
+  IconButton,
+  TextField,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+} from "@mui/material";
+import { useAuth } from "../../services/useAuth";
+
+interface TermAndCondition {
+  id: string;
+  greeting: string;
+  description: {
+    title: string;
+    content: string;
+  }[];
+}
+
 const HomePage: React.FC = () => {
+  const [termAndCondition, setTermAndCondition] =
+    useState<TermAndCondition | null>(null);
+  const [isEditingGreeting, setIsEditingGreeting] = useState(false);
+  const [editedGreeting, setEditedGreeting] = useState("");
+  const [isEditingDescription, setIsEditingDescription] = useState(false);
+  const [editedDescription, setEditedDescription] = useState<
+    { title: string; content: string }[]
+  >([]);
+
+  const { isAuthenticated, user, validateAuthStatus } = useAuth();
+
+  useEffect(() => {
+    validateAuthStatus();
+  }, [validateAuthStatus]);
+
   const StyledIconButton = styled(IconButton)`
     margin: 4px 0px;
   `;
+
+  // Fetch data
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch("http://localhost:8081/termAndCondition/");
+        const data = await response.json();
+        setTermAndCondition(data[0]); // Assuming we want the first item
+        setEditedGreeting(data[0].greeting);
+        setEditedDescription(data[0].description);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+    fetchData();
+  }, []);
+
+  // Update greeting
+  const handleUpdateGreeting = async () => {
+    if (!termAndCondition) return;
+
+    try {
+      const response = await fetch(
+        `http://localhost:8081/termAndCondition/${termAndCondition.id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            ...termAndCondition,
+            greeting: editedGreeting,
+          }),
+        }
+      );
+
+      if (response.ok) {
+        setTermAndCondition({
+          ...termAndCondition,
+          greeting: editedGreeting,
+        });
+        setIsEditingGreeting(false);
+      }
+    } catch (error) {
+      console.error("Error updating greeting:", error);
+    }
+  };
+
+  // Update description
+  const handleUpdateDescription = async () => {
+    if (!termAndCondition) return;
+
+    try {
+      const response = await fetch(
+        `http://localhost:8081/termAndCondition/${termAndCondition.id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            ...termAndCondition,
+            description: editedDescription,
+          }),
+        }
+      );
+
+      if (response.ok) {
+        setTermAndCondition({
+          ...termAndCondition,
+          description: editedDescription,
+        });
+        setIsEditingDescription(false);
+      }
+    } catch (error) {
+      console.error("Error updating description:", error);
+    }
+  };
+
   return (
     <div className="home-page">
-      <span className="title-text">Hello Uyn</span>
+      <span className="title-text">Hello {user?.username}</span>
       <div className="line" />
       <div>
         <div>
@@ -26,25 +138,18 @@ const HomePage: React.FC = () => {
           >
             <h2>Chào mừng đến với Morri Jewelry</h2>
             <StyledIconButton
-              className={`edit-button`}
+              className="edit-button"
               size="small"
-              // onClick={}
+              onClick={() => setIsEditingGreeting(true)}
             >
               <BorderColorIcon fontSize="small" />
             </StyledIconButton>
           </div>
-          <span>
-            Chúng mình đã háo hức chờ đợi khoảnh khắc này để gặp gỡ và làm việc
-            cùng nhau. Morri Jewelry rất vui mừng được chào đón bạn đến với gia
-            đình Morri. Hãy cùng nhau tạo ra những trải nghiệm khó quên và xây
-            dựng một môi trường làm việc tuyệt vời. Hãy sẵn sàng khám phá, đổi
-            mới và đạt được thành công đáng kể.
-            <br />
-            Chào mừng đến với <strong>Morri Jewelry</strong>! <br />
-            Trân trọng,
-            <br />
-            <strong>Morri</strong>
-          </span>
+          <span
+            dangerouslySetInnerHTML={{
+              __html: termAndCondition?.greeting?.replace(/\n/g, "<br/>") || "",
+            }}
+          />
         </div>
         <div className="line" />
         <div
@@ -57,51 +162,143 @@ const HomePage: React.FC = () => {
         >
           <h2>Điều khoản, điều kiện</h2>
           <StyledIconButton
-            className={`edit-button`}
+            className="edit-button"
             size="small"
-            // onClick={}
+            onClick={() => setIsEditingDescription(true)}
           >
             <BorderColorIcon fontSize="small" />
           </StyledIconButton>
         </div>
-        <span>
-          Khi bạn mua hàng và sử dụng dịch vụ, bạn đồng ý với các điều khoản và
-          điều kiện dưới đây.
-          <br />
-          <strong>1. Sản phẩm:</strong> Tất cả sản phẩm đều được mô tả một cách
-          chính xác. Chúng tôi không đảm bảo rằng màu sắc và hình ảnh trên trang
-          web hoàn toàn giống với sản phẩm thực tế.
-          <br />
-          <strong>2. Đặt hàng:</strong> Khi đặt hàng, bạn đồng ý cung cấp thông
-          tin chính xác và đầy đủ. Chúng tôi có quyền từ chối hoặc hủy bỏ đơn
-          hàng nếu thông tin không chính xác.
-          <br />
-          <strong>3. Phương thức thanh toán:</strong> Chúng tôi chấp nhận nhiều
-          phương thức thanh toán khác nhau. Tất cả giao dịch sẽ được xử lý an
-          toàn và bảo mật.
-          <br />
-          <strong>4. Chính sách hoàn trả:</strong> Chúng tôi có chính sách hoàn
-          trả trong vòng 14 ngày. Sản phẩm phải còn nguyên vẹn và không bị hư
-          hại.
-          <br />
-          <strong>5. Quyền lợi và trách nhiệm:</strong> Chúng tôi cam kết cung
-          cấp dịch vụ tốt nhất cho khách hàng. Tuy nhiên, chúng tôi không chịu
-          trách nhiệm cho bất kỳ thiệt hại nào phát sinh từ việc sử dụng sản
-          phẩm.
-          <br />
-          <strong>6. Thay đổi điều khoản:</strong> Chúng tôi có quyền thay đổi
-          các điều khoản và điều kiện này mà không cần thông báo trước. Khách
-          hàng nên thường xuyên kiểm tra để cập nhật các thay đổi.
-          <br />
-          <strong>7. Liên hệ:</strong> Nếu bạn có bất kỳ câu hỏi nào về các điều
-          khoản này, xin vui lòng liên hệ với chúng tôi qua email hoặc số điện
-          thoại.
-        </span>
+        <div>
+          {termAndCondition?.description.map((item, index) => (
+            <div key={index}>
+              <strong>
+                {index + 1}. {item.title}:
+              </strong>{" "}
+              {item.content}
+              <br />
+            </div>
+          ))}
+        </div>
       </div>
 
       <div className="line" />
       <h2>Lịch làm việc</h2>
       <WorkSchedule />
+
+      {/* Edit Greeting Dialog */}
+      <Dialog
+        open={isEditingGreeting}
+        onClose={() => setIsEditingGreeting(false)}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle>Chỉnh sửa lời chào</DialogTitle>
+        <DialogContent>
+          <TextField
+            fullWidth
+            multiline
+            rows={4}
+            value={editedGreeting}
+            onChange={(e) => setEditedGreeting(e.target.value)}
+            margin="normal"
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={() => setIsEditingGreeting(false)}
+            sx={{
+              backgroundColor: "rgba(255, 0, 0, 0.8)",
+              color: "white",
+              "&:hover": {
+                backgroundColor: "rgba(255, 0, 0, 0.4)",
+              },
+            }}
+          >
+            Hủy
+          </Button>
+          <Button
+            onClick={handleUpdateDescription}
+            variant="contained"
+            sx={{
+              backgroundColor: "#3E5C63",
+              color: "white",
+              "&:hover": {
+                backgroundColor: "#6E858A",
+              },
+            }}
+          >
+            Lưu
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Edit Description Dialog */}
+      <Dialog
+        open={isEditingDescription}
+        onClose={() => setIsEditingDescription(false)}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle>Chỉnh sửa điều khoản</DialogTitle>
+        <DialogContent>
+          {editedDescription.map((item, index) => (
+            <div key={index} style={{ marginBottom: "20px" }}>
+              <TextField
+                fullWidth
+                label="Tiêu đề"
+                value={item.title}
+                onChange={(e) => {
+                  const newDescription = [...editedDescription];
+                  newDescription[index].title = e.target.value;
+                  setEditedDescription(newDescription);
+                }}
+                margin="normal"
+              />
+              <TextField
+                fullWidth
+                multiline
+                rows={3}
+                label="Nội dung"
+                value={item.content}
+                onChange={(e) => {
+                  const newDescription = [...editedDescription];
+                  newDescription[index].content = e.target.value;
+                  setEditedDescription(newDescription);
+                }}
+                margin="normal"
+              />
+            </div>
+          ))}
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={() => setIsEditingDescription(false)}
+            sx={{
+              backgroundColor: "rgba(255, 0, 0, 0.8)",
+              color: "white",
+              "&:hover": {
+                backgroundColor: "rgba(255, 0, 0, 0.4)",
+              },
+            }}
+          >
+            Hủy
+          </Button>
+          <Button
+            onClick={handleUpdateDescription}
+            variant="contained"
+            sx={{
+              backgroundColor: "#3E5C63",
+              color: "white",
+              "&:hover": {
+                backgroundColor: "#6E858A",
+              },
+            }}
+          >
+            Lưu
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 };
