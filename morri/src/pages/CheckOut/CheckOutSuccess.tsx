@@ -38,6 +38,9 @@ const CheckOutSuccess = () => {
 
   const { user } = useAuth();
   const dispatch = useDispatch();
+  const [totalPrice, setTotalPrice] = useState<number | null>(
+    location.state.totalPrice
+  );
 
   useEffect(() => {
     if (location.state) {
@@ -45,9 +48,10 @@ const CheckOutSuccess = () => {
       setSelectedProducts(location.state.selectedProducts);
       setCustomerInfo(location.state.customerInfo);
       setStaffInfo(location.state.staffInfo);
+      setTotalPrice(location.state.totalPrice);
     }
-    
   }, [location.state]);
+  console.log("state: " + location.state.totalPrice);
 
   function formatPrice(price: number): string {
     if (isNaN(price)) {
@@ -188,9 +192,13 @@ const CheckOutSuccess = () => {
               <div className="billItemNameCheckout">{product.name}</div>
             </div>
 
-            <div style={{ color: "#000", marginLeft: "10px" }}>
-              đ {formatPrice(product.sellingPrice)}
-            </div>
+            {totalPrice != null ? (
+              <div style={{ color: "#000", marginLeft: "10px" }}>
+                đ {formatPrice(product.sellingPrice)}
+              </div>
+            ) : (
+              <div style={{ color: "#000", marginLeft: "10px" }}>đ NAN</div>
+            )}
 
             <div style={{ marginLeft: "10px" }}>
               số lượng: {product.quantityInBill}
@@ -212,11 +220,7 @@ const CheckOutSuccess = () => {
           className="billItemPriceCheckout"
           style={{ fontSize: "18px", color: "#F92121" }}
         >
-          {formatPrice(
-            selectedProducts.reduce((total, product) => {
-              return total + product.sellingPrice * product.quantityInBill;
-            }, 0)
-          )}{" "}
+          {formatPrice(location.state.totalPrice)}
           VND
         </div>
       </div>

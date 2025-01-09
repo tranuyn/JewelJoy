@@ -4,7 +4,14 @@ import "./style.css";
 import CachedIcon from "@mui/icons-material/Cached";
 import { DataObject, DataObjectOutlined } from "@mui/icons-material";
 interface CustomerSectionProps {
-  setCustomerInfo: React.Dispatch<React.SetStateAction<any>>;
+  setCustomerInfo: React.Dispatch<React.SetStateAction<CustomerInfo | null>>;
+}
+interface CustomerInfo {
+  id?: string;
+  phoneNumber: string;
+  name: string;
+  gioiTinh: string;
+  dateOfBirth: string;
 }
 const CustomerSection: React.FC<CustomerSectionProps> = ({
   setCustomerInfo,
@@ -33,16 +40,22 @@ const CustomerSection: React.FC<CustomerSectionProps> = ({
       if (!response.ok) {
         setCustomerInfo(null);
         setCustomerLocalInfo(null);
+        return;
       }
       const data = await response.json();
 
-      if (data.dateOfBirth === null) {
-        setCustomerInfo({
-          ...data, // Spread the properties of data
-          dateOfBirth: selectedBirthday, // Add/override the dateOfBirth property
-        });
-      }
+      // Cập nhật state local
       setCustomerLocalInfo(data);
+
+      // Cập nhật state cha với thông tin hiện có
+      setCustomerInfo({
+        ...data,
+        dateOfBirth: data.dateOfBirth || selectedBirthday, // Giữ ngày sinh đã chọn nếu data.dateOfBirth là null
+      });
+
+      // Cập nhật các state local
+      setName(data.name);
+      setSelectedGender(data.gioiTinh);
     } catch (error) {
       console.error("Error fetching user data:", error);
     }
@@ -57,15 +70,16 @@ const CustomerSection: React.FC<CustomerSectionProps> = ({
   };
 
   useEffect(() => {
-    // Khi thông tin thay đổi, cập nhật thông tin khách hàng
-    setCustomerInfo({
-      id: customerInfo?.id,
-      phoneNumber: phone,
-      name,
-      gioiTinh: selectedGender,
-      dateOfBirth: selectedBirthday,
-    });
-  }, [phone, name, selectedGender, selectedBirthday]);
+    if (customerInfo) {
+      setCustomerInfo(
+        (prevInfo: CustomerInfo | null) =>
+          ({
+            ...(prevInfo || {}),
+            dateOfBirth: selectedBirthday,
+          } as CustomerInfo)
+      );
+    }
+  }, [selectedBirthday]);
 
   return (
     <div className="customerContainerBig">

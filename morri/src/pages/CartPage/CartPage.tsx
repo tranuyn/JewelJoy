@@ -31,8 +31,6 @@ import {
 import React, { useState } from "react";
 import { removeItem, updateQuantity } from "../../redux/slice/cartSlice";
 
-
-
 // Import images
 import morriLogo from "../../assets/constant/morri-logo.png";
 
@@ -71,8 +69,10 @@ const CartPage: React.FC = () => {
   const handleQuantityChange = (id: number, increment: boolean) => {
     const item = cartItems.find((item) => item.id === id);
     if (!item) return;
-    
-    const newQuantity = increment ? item.quantity + 1 : Math.max(1, item.quantity - 1);
+
+    const newQuantity = increment
+      ? item.quantity + 1
+      : Math.max(1, item.quantity - 1);
     dispatch(updateQuantity({ id, quantity: newQuantity }));
   };
 
@@ -84,7 +84,9 @@ const CartPage: React.FC = () => {
   };
 
   const handleDeleteItem = (id: number) => {
-    const confirmDelete = window.confirm("Bạn có chắc chắn muốn xóa sản phẩm này?");
+    const confirmDelete = window.confirm(
+      "Bạn có chắc chắn muốn xóa sản phẩm này?"
+    );
     if (confirmDelete) {
       dispatch(removeItem(id));
     }
@@ -103,7 +105,7 @@ const CartPage: React.FC = () => {
       shipping: 0,
       tax: 0,
       discount: 0,
-      total: subtotal ,
+      total: subtotal,
     };
   };
 
@@ -231,8 +233,7 @@ const CartPage: React.FC = () => {
                       </Box>
                     </TableCell>
                     <TableCell align="right">
-                      { item.price.toFixed(2) }
-                      
+                      {(item.price * 1).toFixed(2)}
                     </TableCell>
                     <TableCell align="center">
                       <Box className="quantity-controls">

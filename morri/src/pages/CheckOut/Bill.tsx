@@ -24,13 +24,25 @@ interface BillProps {
   onBuyNow: (
     updatedProducts: ProductType[],
     selectedButton: string,
-    note: string
+    note: string,
+    totalPrice: number
   ) => void;
+}
+interface Voucher {
+  id: number;
+  name: string;
+  voucherCode: string;
+  discount: number;
+  description: string;
 }
 
 const Bill: React.FC<BillProps> = ({ selectedProducts, onBuyNow }) => {
   const cartItems = useSelector((state: RootState) => state.cart.items);
   const [quantities, setQuantities] = useState<Record<string, number>>({});
+
+  const [discount, setDiscount] = useState<Voucher[]>([]);
+  const [selectedDiscount, setSelectedDiscount] = useState<number | null>(null);
+
   const [selectedProductInBill, setSelectedProducts] =
     useState<ProductType[]>(selectedProducts);
   const [selectedButton, setSelectedButton] = useState<string | null>(null);
@@ -48,6 +60,7 @@ const Bill: React.FC<BillProps> = ({ selectedProducts, onBuyNow }) => {
   useEffect(() => {
     setSelectedProducts(selectedProducts);
     console.log(selectedProductInBill);
+    handleGetDiscount();
   }, [selectedProducts, cartItems]);
 
   const [dropdownOpen, setDropdownOpen] = useState<string | null>(null);
@@ -87,6 +100,35 @@ const Bill: React.FC<BillProps> = ({ selectedProducts, onBuyNow }) => {
       .replace(/\B(?=(\d{3})+(?!\d))/g, "."); // Thêm dấu chấm sau mỗi 3 chữ số
   }
 
+  const calculateSubtotal = () => {
+    return selectedProducts.reduce((total, product) => {
+      return total + product.sellingPrice * quantities[product.id];
+    }, 0);
+  };
+
+  useEffect(() => {
+    console.log("Selected Discount: ", selectedDiscount);
+    console.log("Subtotal: ", calculateSubtotal());
+    console.log("Total with Discount: ", calculateTotalWithDiscount());
+  }, [selectedDiscount]);
+
+  const calculateTotalWithDiscount = () => {
+    const subtotal = calculateSubtotal();
+    if (!selectedDiscount) return subtotal;
+
+    const selectedVoucher = discount.find((v) => v.id === selectedDiscount);
+    if (!selectedVoucher) return subtotal;
+
+    const discountAmount = (subtotal * selectedVoucher.discount) / 100;
+    return subtotal - discountAmount;
+  };
+  const handleDiscountChange = (
+    event: React.ChangeEvent<HTMLSelectElement>
+  ) => {
+    const value = event.target.value;
+    setSelectedDiscount(parseInt(value));
+  };
+
   const handleBuyNow = () => {
     if (!selectedButton) {
       // Nếu chưa chọn nút, có thể là một lỗi hoặc thông báo cho người dùng
@@ -101,12 +143,30 @@ const Bill: React.FC<BillProps> = ({ selectedProducts, onBuyNow }) => {
       };
     });
 
-    onBuyNow(updatedProducts, selectedButton, note);
+    let hehe = calculateSubtotal();
+    if (selectedDiscount != null) {
+      hehe = calculateSubtotal() - selectedDiscount;
+    }
+    onBuyNow(updatedProducts, selectedButton, note, hehe);
   };
 
   // Hàm để thay đổi state khi click vào button
   const handleButtonClick = (button: string) => {
     setSelectedButton(button);
+  };
+
+  const handleGetDiscount = async () => {
+    try {
+      const response = await fetch("http://localhost:8081/voucher/active");
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data: Voucher[] = await response.json();
+      console.log(data);
+      setDiscount(data);
+    } catch (error) {
+      console.error("Error fetching staff:", error);
+    }
   };
 
   return (
@@ -205,14 +265,23 @@ const Bill: React.FC<BillProps> = ({ selectedProducts, onBuyNow }) => {
           className="billItemPriceCheckout"
           style={{ fontSize: "18px", color: "#F92121" }}
         >
-          {formatPrice(
-            selectedProducts.reduce((total, product) => {
-              return total + product.sellingPrice * quantities[product.id];
-            }, 0)
-          )}{" "}
-          VND
+          {formatPrice(calculateSubtotal())} VND
         </div>
       </div>
+
+      {selectedDiscount && (
+        <div className="totalCheckout">
+          <div style={{ fontWeight: 600, fontSize: "18px" }}>
+            Sau khi giảm giá:
+          </div>
+          <div
+            className="billItemPriceCheckout"
+            style={{ fontSize: "18px", color: "#F92121" }}
+          >
+            {formatPrice(calculateTotalWithDiscount() - selectedDiscount)} VND
+          </div>
+        </div>
+      )}
 
       <div style={{ margin: "10px 30px" }}>
         <div className="billItemNameCheckout" style={{ margin: "10px 0px" }}>
@@ -252,6 +321,24 @@ const Bill: React.FC<BillProps> = ({ selectedProducts, onBuyNow }) => {
             <QrCodeScannerIcon sx={{ marginRight: "10px" }} /> Thanh toán qua QR
           </button>
         </div>
+        <select
+          value={selectedDiscount?.toString() || ""}
+          onChange={handleDiscountChange}
+          style={{
+            padding: "5px 10px",
+            borderRadius: "4px",
+            marginTop: "10px",
+            width: "100%",
+          }}
+        >
+          <option value="">Chọn mã giảm giá</option>
+          {discount.map((voucher) => (
+            <option key={voucher.id} value={voucher.id}>
+              {voucher.name} - Giảm {voucher.discount}%
+            </option>
+          ))}
+        </select>
+
         <div className="billItemNameCheckout" style={{ margin: "10px 0px" }}>
           Ghi chú cho đơn hàng (không bắt buộc)
         </div>

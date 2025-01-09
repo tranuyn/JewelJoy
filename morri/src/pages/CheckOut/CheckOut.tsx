@@ -44,6 +44,8 @@ const Checkout = () => {
   const [note, setNote] = useState("");
   const cartItems = useSelector((state: RootState) => state.cart.items);
   const { user } = useAuth();
+  const [totalPrice, setTotalPrice] = useState<number>(1);
+  const [updatedProducts, setUpdatedProducts] = useState<ProductType[]>([]);
 
   const navigate = useNavigate();
   useEffect(() => {
@@ -77,9 +79,15 @@ const Checkout = () => {
     }
   }, [location.state, cartItems, user?.role]);
 
-  const handleSetCustomerInfo = (info: any) => {
-    setCustomerInfo(info);
+  const handleSetCustomerInfo = async (info: any) => {
+    await setCustomerInfo(info);
   };
+
+  useEffect(() => {
+    if (updatedProducts.length > 0) {
+      handleBuyNow(updatedProducts);
+    }
+  }, [totalPrice, updatedProducts, note, selectedButton, customerInfo]);
 
   const handleBuyNow = async (updatedProducts: ProductType[]) => {
     if (!staffInfo && user?.role != "CUSTOMER") {
@@ -145,60 +153,57 @@ const Checkout = () => {
   };
 
   const createOrder = async (phone: string) => {
-    try {
-      const body = {
-        createAt: new Date().toISOString(),
-        customer: customerInfo.id,
-        orderDetails: selectedProducts.map((product) => ({
-          product: product.id,
-          quantity: product.quantityInBill,
-          unitPrice: product.sellingPrice,
-          subtotal: product.sellingPrice * product.quantityInBill,
-        })),
-        paymentMethod: selectedButton,
-        note: note,
-        totalPrice: selectedProducts.reduce(
-          (total, product) =>
-            total + product.sellingPrice * product.quantityInBill,
-          0
-        ),
-        ...(user?.role !== "CUSTOMER" && { staff: staffInfo.id }),
-        ...(user?.role !== "CUSTOMER"
-          ? { status: "COMPLETED" }
-          : { status: "ON_DELIVERY" }),
-      };
+    // try {
 
-      console.log(body);
+    const body = {
+      createAt: new Date().toISOString(),
+      customer: customerInfo.id,
+      orderDetails: selectedProducts.map((product) => ({
+        product: product.id,
+        quantity: product.quantityInBill,
+        unitPrice: product.sellingPrice,
+        subtotal: product.sellingPrice * product.quantityInBill,
+      })),
+      paymentMethod: selectedButton,
+      note: note,
+      totalPrice: totalPrice,
+      ...(user?.role !== "CUSTOMER" && { staff: staffInfo.id }),
+      ...(user?.role !== "CUSTOMER"
+        ? { status: "COMPLETED" }
+        : { status: "ON_DELIVERY" }),
+    };
+    console.log(body);
 
-      const response = await fetch("http://localhost:8081/billBan/create", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(body),
-      });
+    //   console.log(body);
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        alert("Tạo đơn hàng thất bại: " + errorData.detail);
-        throw new Error("Không thể tạo đơn hàng");
-      }
+    const response = await fetch("http://localhost:8081/billBan/create", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    });
 
-      const data = await response.json();
-
-      navigate(`/products/checkout/${data.id}`, {
-        state: {
-          selectedProducts,
-          customerInfo,
-          staffInfo,
-          note: note,
-          orderId: data.id,
-          selectedButton: selectedButton,
-        },
-      });
-    } catch (error) {
-      console.error("Error creating order:", error);
+    if (!response.ok) {
+      const errorData = await response.json();
+      alert("Tạo đơn hàng thất bại: " + errorData.detail);
+      throw new Error("Không thể tạo đơn hàng");
     }
+
+    const data = await response.json();
+
+    alert("Tạo đơn hàng thành công");
+    navigate(`/products/checkout/${data.id}`, {
+      state: {
+        selectedProducts,
+        customerInfo,
+        staffInfo,
+        note: note,
+        orderId: data.id,
+        selectedButton: selectedButton,
+        totalPrice: totalPrice,
+      },
+    });
   };
 
   return (
@@ -264,10 +269,20 @@ const Checkout = () => {
 
           <Bill
             selectedProducts={selectedProducts}
-            onBuyNow={(updatedProducts, selectedButton, note) => {
-              handleBuyNow(updatedProducts);
-              setSelectedButton(selectedButton);
-              setNote(note);
+            onBuyNow={async (
+              updatedProducts,
+              selectedButton,
+              note,
+              totalPrice
+            ) => {
+              // Đảm bảo setTotalPrice hoàn thành trước khi tiếp tục
+              await setTotalPrice(totalPrice);
+              await setNote(note);
+              await setSelectedButton(selectedButton);
+              console.log("Total price after set: ", totalPrice);
+              setUpdatedProducts(updatedProducts); // Lưu updatedProducts vào state
+              // Sau khi setTotalPrice xong, mới gọi handleBuyNow
+              // handleBuyNow(updatedProducts);
             }}
           />
         </div>
