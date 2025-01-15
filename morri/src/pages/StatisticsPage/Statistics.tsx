@@ -35,7 +35,7 @@ function Statistics({}: Props) {
   // Hàm lọc cho cả completedBills và onDeliveryBills
   const filterByToday = (bills: BillBanResponse[]) => {
     const today = new Date();
-    console.log(bills.filter(bill => new Date(bill.date).toDateString()))
+    console.log("ngày hôm nay: ", today, "và ngày của bill ",new Date(bills[0]?.date).toDateString());
     return bills.filter(bill => new Date(bill.date).toDateString() === today.toDateString());
   };
 

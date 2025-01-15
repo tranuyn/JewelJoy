@@ -41,9 +41,12 @@ const ReportTab: React.FC<ReportTabProps> = ({ date }) => {
           throw new Error('Network response was not ok');
         }
 
-        const data = await response.json();
-        setReportData(data);
-        setFilteredData(data);
+        // const data = await response.json();
+        // console.log(data)
+        const data:InventoryItem[] = await response.json();
+        const filteredProducts = data.filter(item => item.product.code !== null);
+        setReportData(filteredProducts);
+        setFilteredData(filteredProducts);
       } catch (error) {
         console.error('Error fetching inventory report:', error);
         setError('Không thể tải dữ liệu báo cáo!');

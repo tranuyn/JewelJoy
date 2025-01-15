@@ -40,6 +40,21 @@ export const scheduleService = {
     }
   },
 
+  async getAllSchedule(): Promise<Schedule[]> {
+    try {
+      const response = await fetch("http://localhost:8081/schedule");
+      if (!response.ok) {
+        throw new Error("Lỗi khi tải lịch làm việc");
+      }
+      const data = await response.json();
+      console.log("tôi tải tất cả lịch làm việc: ", data);
+      return data;
+    } catch (error) {
+      console.error("Lỗi khi tải tất cả lịch làm việc:", error);
+      throw error;
+    }
+  },
+
   async getScheduleByDate(date: string): Promise<Schedule[]> {
     try {
       // Lấy tất cả lịch
@@ -65,7 +80,7 @@ export const scheduleService = {
 
   async updateShiftSchedule(
     id: string,
-    schedule: ScheduleUpdate // Sử dụng interface mới
+    schedule: ScheduleUpdate
   ): Promise<Schedule> {
     try {
       const response = await fetch(`http://localhost:8081/schedule/${id}`, {
@@ -103,5 +118,5 @@ export const scheduleService = {
       throw error;
     }
     // Tương tự như trên
-  }
+  },
 };

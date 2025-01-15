@@ -86,7 +86,7 @@ export interface BillBanResponse {
 }
 export interface UpdateOrderDetail {
   id: string;
-  product: string; // Chỉ cần ID của product
+  product: string; //ID của product
   quantity: number;
   unitPrice: number;
   subtotal: number;
@@ -95,9 +95,9 @@ export interface UpdateBillBan {
   totalPrice: number;
   status: "ON_DELIVERY" | "COMPLETED" | "CANCELLED";
   paymentMethod: string;
-  customer: string; // Chỉ cần ID của customer
+  customer: string; //  ID của customer
   orderDetails: UpdateOrderDetail[];
-  staff: string; // Chỉ cần ID của staff
+  staff: string; //  ID của staff
   additionalCharge: number;
   createAt: string;
   note: string;
@@ -120,7 +120,7 @@ export const getAllBillBans = async (): Promise<BillBanResponse[]> => {
     staffId: bill.staff?.id || "",
     order: bill.orderDetails?.length || 0,
     dateTime: bill.createAt,
-    date: new Date(bill.createAt).toLocaleDateString(),
+    date: new Date(bill.createAt).toDateString(),
     options: 0,
     orderDetails: bill.orderDetails,
     totalPrice: bill.totalPrice,

@@ -59,8 +59,10 @@ const Inventory: React.FC = () => {
       setLoading(true);
       try {
         const response = await fetch("http://localhost:8081/jewelry/");
-        const data = await response.json();
-        setProducts(data);
+        const data: Product[] = await response.json();
+        const filteredProducts = data.filter(product => product.code !== null);
+      
+      setProducts(filteredProducts);
       } catch (error) {
         console.error("Error fetching products:", error);
         setError("Không thể tải dữ liệu sản phẩm!");

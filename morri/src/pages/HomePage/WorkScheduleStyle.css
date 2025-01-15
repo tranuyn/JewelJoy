@@ -66,6 +66,15 @@
   background: #CED6D8;
 }
 
+.currentDay {
+  font-weight: bold !important;
+  color: #567077
+}
+
+.workDay {
+  color: #EFB26A;
+}
+
 .scheduleCard {
   background: white;
   border-radius: 8px;
@@ -178,3 +187,7 @@
   color: #666;
 }
 
+.dayCell.hasSchedule {
+  background-color: red;
+  color: white;
+}

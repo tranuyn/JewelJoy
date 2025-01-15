@@ -231,7 +231,7 @@ const InventoryTab: React.FC<InventoryTabProps> = ({
       <div className="page-content">
         <div
           className="filters"
-          style={{ display: "flex", gap: "10px", marginBottom: 10 }}
+          style={{ display: "flex", marginBottom: 10, justifyContent: 'space-between' }}
         >
           <div className="psearchbar">
             <SearchIcon sx={{ color: "#737373" }} />
@@ -245,7 +245,7 @@ const InventoryTab: React.FC<InventoryTabProps> = ({
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            style={{ padding: "5px 10px", borderRadius: "4px" }}
+            style={{ padding: "5px 10px", borderRadius: "4px", backgroundColor: '#EFB26A', color: 'white', borderColor: 'white' }}
           >
             <option value="all">Tất cả trạng thái</option>
             <option value="available">Đang kinh doanh</option>

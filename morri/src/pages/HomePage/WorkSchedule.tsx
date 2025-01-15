@@ -20,6 +20,7 @@ interface DaySchedule {
 
 const WorkSchedule: React.FC = () => {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [allSchedule, setAllSchedule] = useState<Schedule[]>([]);
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
   const [scheduleData, setScheduleData] = useState<DaySchedule>({});
   const [employees, setEmployees] = useState<Employee[]>([]);
@@ -41,6 +42,20 @@ const WorkSchedule: React.FC = () => {
   useEffect(() => {
     loadEmployees();
   }, [loadEmployees]);
+
+  useEffect(() => {
+    const loadAllSchedule = async () => {
+      try {
+        setLoading(true);
+        setAllSchedule(await scheduleService.getAllSchedule());
+      } catch (error) {
+        setError("Không thể tải tất cả lịch làm việc");
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadAllSchedule();
+  }, []);
 
   const loadScheduleData = useCallback(async (date: string) => {
     try {
@@ -114,7 +129,6 @@ const WorkSchedule: React.FC = () => {
     return date.toISOString().split("T")[0];
   };
 
-  // Thay đổi hàm handleEmployeeSelect như sau:
   const handleEmployeeSelect = async (shift: ShiftType, employeeId: string) => {
     try {
       setLoading(true);
@@ -147,7 +161,7 @@ const WorkSchedule: React.FC = () => {
         // Tạo lịch mới
         const selectedDateTime = new Date(selectedDate);
         selectedDateTime.setHours(3, 30, 0);
-        console.log("Thời gian trong ngày: ", selectedDateTime.toISOString())
+        console.log("Thời gian trong ngày: ", selectedDateTime.toISOString());
         const newSchedule = {
           workDate: selectedDateTime.toISOString(), // Sẽ cho ra định dạng ISO chuẩn UTC
           morningShifts: shift === "morning" ? [employeeId] : [],
@@ -238,13 +252,27 @@ const WorkSchedule: React.FC = () => {
           <div className="dayHeader">Fri</div>
           <div className="dayHeader">Sat</div>
           <div className="dayHeader">Sun</div>
-
           {generateCalendarDays().map((day, index) => (
             <div
               key={index}
               className={`dayCell ${
                 day && formatDate(day) === formatDate(selectedDate)
                   ? "selectedDay"
+                  : day && formatDate(day) === formatDate(new Date())
+                  ? "currentDay"
+                  : day &&
+                    allSchedule.some(
+                      (schedule) =>
+                        formatDate(new Date(schedule.workDate)) ===
+                        formatDate(day)
+                    )
+                  ? "workDay"
+                  : ""
+              } ${
+                day &&
+                formatDate(day) === formatDate(selectedDate) &&
+                formatDate(day) === formatDate(new Date())
+                  ? "selectedDay currentDay"
                   : ""
               }`}
               onClick={() => day && setSelectedDate(day)}

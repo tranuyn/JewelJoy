@@ -83,10 +83,10 @@ const OrdersPage: React.FC = () => {
   const searchFiltered = rows.filter((row) =>
     row.customer.toLowerCase().includes(searchTerm.toLowerCase())
   );
-  
+
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
-    setPage(0); 
+    setPage(0);
   };
   // Gọi API để lấy danh sách đơn hàng
   useEffect(() => {
@@ -245,7 +245,7 @@ const OrdersPage: React.FC = () => {
         paymentMethod: billDetails.paymentMethod,
         customer: billDetails.customer.id,
         orderDetails: updatedOrderDetails,
-        staff: billDetails.staff.id,
+        staff: billDetails.staff?.id || "",
         additionalCharge: billDetails.additionalCharge,
         createAt: billDetails.createAt,
         note: billDetails.note,
@@ -271,20 +271,44 @@ const OrdersPage: React.FC = () => {
   };
 
   const handleCancelOrder = async (billId: string) => {
-    // try {
-    //   const billDetails = await getBillBanById(billId);
-    //   const updatedBill: BillBan = {
-    //     ...billDetails,
-    //     status: "CANCELLED",
-    //   };
-    //   await updateBillBan(billId, updatedBill);
-    //   const updatedData = await getAllBillBans();
-    //   alert("Đã hủy đơn hàng thành công!");
-    //   setRows(updatedData);
-    // } catch (error) {
-    //   console.error("Lỗi khi hủy đơn hàng:", error);
-    //   alert("Có lỗi xảy ra khi hủy đơn hàng!");
-    // }
+    const confirmCancel = window.confirm(
+      "Bạn có chắc chắn muốn hủy đơn hàng này không?"
+    );
+
+    if (!confirmCancel) {
+      return;
+    }
+    try {
+      const billDetails = await getBillBanById(billId);
+
+      // Tạo đối tượng cập nhật với thông tin cần thiết
+      const updatedBill: UpdateBillBan = {
+        totalPrice: billDetails.totalPrice,
+        status: "CANCELLED",
+        paymentMethod: billDetails.paymentMethod,
+        customer: billDetails.customer.id,
+        orderDetails: billDetails.orderDetails.map((detail) => ({
+          id: detail.id,
+          product: detail.product.id,
+          quantity: detail.quantity,
+          unitPrice: detail.unitPrice,
+          subtotal: detail.subtotal,
+        })),
+        staff: billDetails.staff?.id || "",
+        additionalCharge: billDetails.additionalCharge,
+        createAt: billDetails.createAt,
+        note: billDetails.note,
+      };
+
+      await updateBillBan(billId, updatedBill);
+
+      const updatedData = await getAllBillBans();
+      alert("Đã hủy đơn hàng thành công!");
+      setRows(updatedData);
+    } catch (error) {
+      console.error("Lỗi khi hủy đơn hàng:", error);
+      alert("Có lỗi xảy ra khi hủy đơn hàng!");
+    }
   };
 
   const handleChangePage = (newPage: number) => {
@@ -377,7 +401,10 @@ const OrdersPage: React.FC = () => {
                               <StyledIconButton
                                 className="delete-button"
                                 size="small"
-                                onClick={() => handleCancelOrder(row.code)}
+                                onClick={(event) => {
+                                  event.stopPropagation(); 
+                                  handleCancelOrder(row.code);
+                                }}
                               >
                                 <DeleteIcon fontSize="small" />
                               </StyledIconButton>
