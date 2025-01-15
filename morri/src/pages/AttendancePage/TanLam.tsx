@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import BtnComponent from "../../component/BtnComponent/BtnComponent";
-import { Box, CircularProgress, Alert } from "@mui/material";
+import { Box, CircularProgress, Alert, Avatar } from "@mui/material";
 import XinVangModal from "./XinVangModal";
 import * as faceapi from "face-api.js";
 import { useAuth } from "../../services/useAuth";
@@ -24,6 +24,11 @@ const TanLam: React.FC<XinVangProps> = ({
   const [attendanceStatus, setAttendanceStatus] = useState<string>("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [modelsLoaded, setModelsLoaded] = useState(false);
+  const [faceMatchScore, setFaceMatchScore] = useState<number | null>(null);
+  const [referenceDescriptor, setReferenceDescriptor] =
+    useState<Float32Array | null>(null);
+
+  const CONFIDENCE_THRESHOLD = 80;
 
   useEffect(() => {
     const loadModels = async () => {
@@ -36,6 +41,7 @@ const TanLam: React.FC<XinVangProps> = ({
           faceapi.nets.faceRecognitionNet.load(MODEL_URL),
         ]);
         setModelsLoaded(true);
+        await loadReferenceImage();
       } catch (err) {
         setError("Failed to load face detection models");
       }
@@ -51,12 +57,79 @@ const TanLam: React.FC<XinVangProps> = ({
     };
   }, []);
 
+  const loadReferenceImage = async () => {
+    if (!user?.avaURL) {
+      setError("No reference image available");
+      return;
+    }
+
+    try {
+      const proxyUrl = "https://cors-anywhere.herokuapp.com/";
+      const img = await faceapi.fetchImage(proxyUrl + user.avaURL);
+      const detection = await faceapi
+        .detectSingleFace(img, new faceapi.TinyFaceDetectorOptions())
+        .withFaceLandmarks()
+        .withFaceDescriptor();
+
+      if (detection) {
+        setReferenceDescriptor(detection.descriptor);
+      } else {
+        setError("No face detected in reference image");
+      }
+    } catch (err) {
+      setError("Failed to load reference image");
+    }
+  };
+
+  const compareFaces = async (
+    descriptor1: Float32Array,
+    descriptor2: Float32Array
+  ) => {
+    const distance = faceapi.euclideanDistance(descriptor1, descriptor2);
+    const similarity = Math.max(0, Math.min(100, (1 - distance) * 100));
+    return similarity;
+  };
+
+  const detectAndDrawFace = async () => {
+    if (!videoRef.current || !canvasRef.current || !modelsLoaded) return;
+
+    const canvas = canvasRef.current;
+    canvas.width = videoRef.current.videoWidth;
+    canvas.height = videoRef.current.videoHeight;
+
+    const detection = await faceapi
+      .detectSingleFace(videoRef.current, new faceapi.TinyFaceDetectorOptions())
+      .withFaceLandmarks()
+      .withFaceDescriptor();
+
+    const ctx = canvas.getContext("2d");
+    if (ctx && detection) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.strokeStyle = "#00ff00";
+      ctx.lineWidth = 2;
+      ctx.strokeRect(
+        detection.detection.box.x,
+        detection.detection.box.y,
+        detection.detection.box.width,
+        detection.detection.box.height
+      );
+
+      if (referenceDescriptor) {
+        const score = await compareFaces(
+          detection.descriptor,
+          referenceDescriptor
+        );
+        setFaceMatchScore(score);
+      }
+    }
+  };
+
   useEffect(() => {
     if (modelsLoaded && videoRef.current) {
       const interval = setInterval(detectAndDrawFace, 100);
       return () => clearInterval(interval);
     }
-  }, [modelsLoaded]);
+  }, [modelsLoaded, referenceDescriptor]);
 
   const startVideo = async () => {
     try {
@@ -72,44 +145,30 @@ const TanLam: React.FC<XinVangProps> = ({
     }
   };
 
-  const detectAndDrawFace = async () => {
-    if (!videoRef.current || !canvasRef.current || !modelsLoaded) return;
-
-    const canvas = canvasRef.current;
-    canvas.width = videoRef.current.videoWidth;
-    canvas.height = videoRef.current.videoHeight;
-
-    const detection = await faceapi.detectSingleFace(
-      videoRef.current,
-      new faceapi.TinyFaceDetectorOptions()
-    );
-
-    const ctx = canvas.getContext("2d");
-    if (ctx && detection) {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.strokeStyle = "#00ff00";
-      ctx.lineWidth = 2;
-      ctx.strokeRect(
-        detection.box.x,
-        detection.box.y,
-        detection.box.width,
-        detection.box.height
-      );
-    }
-  };
-
   const handleDiemDanh = async () => {
     setIsProcessing(true);
     try {
-      const detection = await faceapi.detectSingleFace(
-        videoRef.current!,
-        new faceapi.TinyFaceDetectorOptions()
-      );
+      const detection = await faceapi
+        .detectSingleFace(
+          videoRef.current!,
+          new faceapi.TinyFaceDetectorOptions()
+        )
+        .withFaceLandmarks()
+        .withFaceDescriptor();
 
-      if (!detection) {
-        throw new Error("No face detected");
+      if (!detection || !referenceDescriptor) {
+        throw new Error("No face detected or reference image not loaded");
       }
 
+      const similarity = await compareFaces(
+        detection.descriptor,
+        referenceDescriptor
+      );
+
+      if (similarity < CONFIDENCE_THRESHOLD) {
+        throw new Error("Face verification failed. Please try again.");
+      }
+      console.log("user id: " + user?.id);
       const response = await fetch(
         "http://localhost:8081/attendance/check-out",
         {
@@ -117,7 +176,7 @@ const TanLam: React.FC<XinVangProps> = ({
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             employee: user?.id,
-            notes: "Regular check-in",
+            notes: "Regular check-out",
           }),
         }
       );
@@ -163,6 +222,17 @@ const TanLam: React.FC<XinVangProps> = ({
           }}
         />
 
+        {faceMatchScore !== null && (
+          <Alert
+            severity={
+              faceMatchScore >= CONFIDENCE_THRESHOLD ? "success" : "warning"
+            }
+            sx={{ mt: 2 }}
+          >
+            Face match confidence: {faceMatchScore.toFixed(1)}%
+          </Alert>
+        )}
+
         {error && (
           <Alert severity="error" sx={{ mt: 2 }}>
             {error}
@@ -174,6 +244,7 @@ const TanLam: React.FC<XinVangProps> = ({
           </Alert>
         )}
       </div>
+      <Avatar src={user?.avaURL} />
 
       <Box sx={{ display: "flex", justifyContent: "center", gap: 2, mt: 2 }}>
         <BtnComponent
@@ -185,7 +256,12 @@ const TanLam: React.FC<XinVangProps> = ({
           btnColorType="primary"
           btnText={isProcessing ? "Processing..." : "Diem danh"}
           onClick={handleDiemDanh}
-          disabled={isProcessing || !modelsLoaded}
+          disabled={
+            isProcessing ||
+            !modelsLoaded ||
+            !referenceDescriptor ||
+            (faceMatchScore !== null && faceMatchScore < CONFIDENCE_THRESHOLD)
+          }
         />
       </Box>
 

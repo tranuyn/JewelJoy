@@ -31,6 +31,7 @@ export const InventoryStaffRoutes = () => {
       <Route path="/attendance" element={<AttendancePage />} />
       <Route path="/staff" element={<StaffPage />} />
       <Route path="/settings" element={<SettingPage />} />
+      <Route path="/attendance" element={<AttendancePage />} />
 
       <Route path="/products" element={<ProductsAndService />} />
       <Route path="/products/detail/:id" element={<ProductDetail />} />
