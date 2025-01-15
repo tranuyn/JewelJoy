@@ -4,6 +4,7 @@ import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import "./CalendarStyles.css";
 import DeleteComponent from "../../component/DeleteComponent/DeleteComponent";
+import UpdateModal from "./UpdateModal";
 
 interface Employee {
   id: string;
@@ -40,6 +41,7 @@ interface AbsenceRecord {
   employee: Employee;
   reason: string;
   status: string;
+  absenceStatus: "APPROVED" | "REJECTED" | "PENDING";
 }
 
 interface AttendanceData {
@@ -55,7 +57,7 @@ interface AttendanceData {
   totalLateArrivals: number;
 }
 
-interface TableRow {
+export interface TableRow {
   id: string;
   employeeId: string;
   employeeName: string;
@@ -65,17 +67,18 @@ interface TableRow {
   checkOutTime: string;
   workingHours: string;
   status: string;
+  absenceStatus: string;
 }
-
 const columns = [
   { field: "employeeId", headerName: "Mã nhân viên" },
   { field: "employeeName", headerName: "Tên nhân viên" },
   { field: "date", headerName: "Ngày" },
-  { field: "reason", headerName: "Lý do" },
+  { field: "reason", headerName: "Note/Lý do" },
   { field: "checkInTime", headerName: "Giờ check-in" },
   { field: "checkOutTime", headerName: "Giờ check-out" },
   { field: "workingHours", headerName: "Số giờ làm việc" },
   { field: "status", headerName: "Trạng thái" },
+  { field: "absenceStatus", headerName: "Tình trạng xin nghỉ" },
 ];
 
 const TongHop: React.FC = () => {
@@ -192,6 +195,7 @@ const TongHop: React.FC = () => {
               : "-",
             workingHours: record.workingHours?.toString() || "-",
             status: record.status || "",
+            absenceStatus: "-", // Regular attendance records don't have absence status
           })
         );
         allRows.push(...attendanceRows);
@@ -210,6 +214,7 @@ const TongHop: React.FC = () => {
             checkOutTime: "-",
             workingHours: "0",
             status: "ABSENT",
+            absenceStatus: absence.status || "PENDING",
           })
         );
         allRows.push(...absenceRows);
@@ -219,25 +224,103 @@ const TongHop: React.FC = () => {
     return allRows;
   };
 
-  const handleEdit = (row: TableRow) => {
+  const handleEdit = (row: any) => {
     setSelectedRow(row);
     setIsModalUpdateOpen(true);
   };
 
+  const handleUpdate = async (formData: any) => {
+    if (!selectedRow) return;
+
+    try {
+      const isAbsence = selectedRow.status === "ABSENT";
+      const endpoint = isAbsence
+        ? `http://localhost:8081/attendance/absence/${selectedRow.id}`
+        : `http://localhost:8081/attendance/record/${selectedRow.id}`;
+
+      const baseDate = new Date(selectedRow.date);
+      console.log("baseDate: " + baseDate);
+      const requestBody = isAbsence
+        ? {
+            reason: formData.reason,
+            status: formData.status,
+          }
+        : {
+            notes: formData.notes,
+            ...(formData.checkIn && {
+              checkIn: new Date(
+                baseDate.getFullYear(),
+                baseDate.getMonth(),
+                baseDate.getDate(),
+                ...formData.checkIn.split(":").map(Number)
+              ).toISOString(),
+            }),
+            ...(formData.checkOut && {
+              checkOut: new Date(
+                baseDate.getFullYear(),
+                baseDate.getMonth(),
+                baseDate.getDate(),
+                ...formData.checkOut.split(":").map(Number)
+              ).toISOString(),
+            }),
+          };
+
+      const response = await fetch(endpoint, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null);
+        throw new Error(
+          errorData?.message ||
+            `Failed to update ${
+              isAbsence ? "absence" : "attendance"
+            } record. Status: ${response.status}`
+        );
+      }
+      setIsModalUpdateOpen(false);
+      await fetchAllAttendanceData();
+    } catch (error) {
+      console.error("Error updating record:", error);
+      alert(
+        `Failed to update record: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`
+      );
+    }
+  };
   const handleDelete = async () => {
     if (!selectedRow) return;
     try {
-      // Implement delete logic here
-      console.log("Deleting row:", selectedRow);
+      const isAbsence = selectedRow.status === "ABSENT";
+      const endpoint = isAbsence
+        ? `http://localhost:8081/attendance/absence/${selectedRow.id}`
+        : `http://localhost:8081/attendance/record/${selectedRow.id}`;
+
+      const response = await fetch(endpoint, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(
+          `Failed to delete ${isAbsence ? "absence" : "attendance"} record`
+        );
+      }
+
       setIsDeleteModalOpen(false);
-      // Refresh data after deletion
       await fetchAllAttendanceData();
     } catch (error) {
       console.error("Error deleting record:", error);
     }
   };
-
-  const handleDeleteOpen = (row: TableRow) => {
+  const handleDeleteOpen = (row: any) => {
     setSelectedRow(row);
     setIsDeleteModalOpen(true);
   };
@@ -286,8 +369,14 @@ const TongHop: React.FC = () => {
             columns={columns}
             data={filteredData}
             onRowClick={(row) => setSelectedRow(row as TableRow)}
-            onEdit={() => handleEdit}
-            onDelete={() => handleDeleteOpen}
+            onEdit={handleEdit}
+            onDelete={handleDeleteOpen}
+          />
+          <UpdateModal
+            isOpen={isModalUpdateOpen}
+            onClose={() => setIsModalUpdateOpen(false)}
+            onUpdate={handleUpdate}
+            row={selectedRow || ({} as TableRow)}
           />
           <DeleteComponent
             isModalOpen={isDeleteModalOpen}

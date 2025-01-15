@@ -1,21 +1,4 @@
-// export interface BonusPenaltyRecord {
-//     id?: string;
-//     type: "BONUS" | "PENALTY";
-//     amount: number;
-//     reason: string|number;
-//     date: string|number;
-//   }
-
-//   export interface Salary {
-//     id: string;
-//     employeeId: string;
-//     baseSalary: number;
-//     calculatedBasePay: number;
-//     totalBonusAndPenalty: number;
-//     totalSalary: number;
-//     salaryReceiveDate: string;
-//     bonusRecords: BonusPenaltyRecord[];
-//   }
+ 
 export interface BonusPenaltyRecord {
   id?: string;
   type: "BONUS" | "PENALTY";
@@ -38,19 +21,7 @@ export interface EmployeeDetails {
   ngayVaoLam: string;
   role: string;
   luongCoBan: string;
-}
-
-// export interface Salary {
-//   id: string;
-//   employeeId: string;
-//   staffName?: string;
-//   totalSalary: number;
-//   totalThuong: number;
-//   totalPhat: number;
-//   salaryDate: string;
-//   totalFlower: number;
-//   bonusRecords?: BonusPenaltyRecord[];
-// }
+} 
 export interface Salary {
   id: string;
   employeeId: EmployeeDetails;

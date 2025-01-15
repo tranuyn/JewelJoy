@@ -38,6 +38,8 @@ export const SalesStaffRoutes = () => {
       <Route path="/settings" element={<SettingPage />} />
       <Route path="/products/detail/:id" element={<ProductDetail />} />
       <Route path="/products" element={<ProductsAndService />} />
+      <Route path="/attendance" element={<AttendancePage />} />
+
       <Route path="/orders" element={<OrdersPage />} />
       <Route path="/products/checkout" element={<CheckOut />} />
       <Route path="/products/checkout/:orderId" element={<CheckOutSuccess />} />

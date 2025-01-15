@@ -51,6 +51,8 @@ const XinVangModal: React.FC<XinVang> = ({
         throw new Error("Please fill in all required fields");
       }
       console.log("huhu ,date :" + formData.date);
+      const formattedDate = new Date(formData.date).toISOString();
+
       const response = await fetch(`http://localhost:8081/attendance/absence`, {
         method: "POST",
         headers: {
@@ -59,7 +61,7 @@ const XinVangModal: React.FC<XinVang> = ({
         body: JSON.stringify({
           employee: user?.id,
           reason: formData.reason,
-          date: formData.date,
+          date: formattedDate,
           status: formData.status,
         }),
       });
