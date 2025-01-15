@@ -4,18 +4,19 @@ import Header from "../../component/Title_header/Header";
 import DiemDanh from "./DiemDanh";
 import TongHop from "./TongHop";
 import XinVangModal from "./XinVangModal";
+import { useAuth } from "../../services/useAuth";
 
 const AttendancePage: React.FC = () => {
   const [activeTab, setActiveTab] = useState("Diem danh");
+  const { user } = useAuth();
 
-  const tabs = ["Diem danh", "Tong hop"];
-
+  const tabs = ["Diem danh", ...(user?.role === "ADMIN" ? ["Tong hop"] : [])];
   const renderContent = () => {
     switch (activeTab) {
       case "Diem danh":
         return <DiemDanh />;
       case "Tong hop":
-        return <TongHop />;
+        return user?.role === "ADMIN" ? <TongHop /> : null;
       default:
         return <DiemDanh />;
     }
