@@ -54,7 +54,7 @@ const WorkSchedule: React.FC = () => {
       setLoading(false);
     }
   }, []);
-  
+
   useEffect(() => {
     loadAllSchedule();
   }, [loadAllSchedule]);
@@ -136,7 +136,6 @@ const WorkSchedule: React.FC = () => {
       setLoading(true);
 
       if (currentSchedule) {
-        // Chỉ gửi thông tin cần thiết
         const updateData = {
           workDate: currentSchedule.workDate,
           morningShifts:
@@ -165,12 +164,15 @@ const WorkSchedule: React.FC = () => {
         selectedDateTime.setHours(3, 30, 0);
         console.log("Thời gian trong ngày: ", selectedDateTime.toISOString());
         const newSchedule = {
-          workDate: selectedDateTime.toISOString(), 
+          workDate: selectedDateTime.toISOString(),
           morningShifts: shift === "morning" ? [employeeId] : [],
           afternoonShifts: shift === "afternoon" ? [employeeId] : [],
         };
 
-        await scheduleService.createSchedule(newSchedule);
+        const createdSchedule = await scheduleService.createSchedule(
+          newSchedule
+        );
+        setAllSchedule((prev) => [...prev, createdSchedule]);
       }
 
       // Tải lại dữ liệu sau khi cập nhật
@@ -303,7 +305,9 @@ const WorkSchedule: React.FC = () => {
                 <div key={shift} className="shiftContainer">
                   <div className="shiftHeader">
                     <span className="shiftTitle">
-                      {shift === "morning" ? "Ca sáng (7:30 - 14:30)" : "Ca chiều (14:30 - 21:30)"}
+                      {shift === "morning"
+                        ? "Ca sáng (7:30 - 14:30)"
+                        : "Ca chiều (14:30 - 21:30)"}
                     </span>
                   </div>
                   <div className="employeeCount">
