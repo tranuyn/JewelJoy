@@ -24,6 +24,7 @@ import { ProtectedRoute } from "./ProtectedRoute";
 import EnterInventory from "../pages/EnterInventory/EnterInventory";
 import ViewOrEdit from "../pages/EnterInventory/ViewOrEdit/ViewOrEdit";
 import EmployeeHomePage from "../pages/HomePage/EmployeeHomePage";
+import RoutingHomePage from "../pages/HomePage/RoutingHomePage";
 
 export const AdminRoutes = () => {
 
@@ -34,8 +35,8 @@ export const AdminRoutes = () => {
           <AdminLayout />
         </ProtectedRoute>
       }
-    >
-      <Route path="/home" element={<HomePage />} />
+    > 
+      <Route path="/home" element={<RoutingHomePage />} />
       {/* <Route path="/home" element={<EmployeeHomePage />} /> */}
       <Route path="/products" element={<ProductsAndService />} />
       <Route path="/products/detail/:id" element={<ProductDetail />} />

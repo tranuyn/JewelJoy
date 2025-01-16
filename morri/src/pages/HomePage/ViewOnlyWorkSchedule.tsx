@@ -10,6 +10,7 @@ const ViewOnlyWorkSchedule: React.FC = () => {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
   const [currentSchedule, setCurrentSchedule] = useState<Schedule | null>(null);
+  const [allSchedule, setAllSchedule] = useState<Schedule[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -39,6 +40,20 @@ const ViewOnlyWorkSchedule: React.FC = () => {
       loadScheduleData(formatDate(selectedDate));
     }
   }, [selectedDate, loadScheduleData]);
+
+  useEffect(() => {
+    const loadAllSchedule = async () => {
+      try {
+        setLoading(true);
+        setAllSchedule(await scheduleService.getAllSchedule());
+      } catch (error) {
+        setError("Không thể tải tất cả lịch làm việc");
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadAllSchedule();
+  }, []);
 
   const getDaysInMonth = (date: Date): { firstDay: Date; lastDay: Date } => {
     const year = date.getFullYear();
@@ -105,13 +120,27 @@ const ViewOnlyWorkSchedule: React.FC = () => {
           <div className="dayHeader">Fri</div>
           <div className="dayHeader">Sat</div>
           <div className="dayHeader">Sun</div>
-
           {generateCalendarDays().map((day, index) => (
             <div
               key={index}
               className={`dayCell ${
                 day && formatDate(day) === formatDate(selectedDate)
                   ? "selectedDay"
+                  : day && formatDate(day) === formatDate(new Date())
+                  ? "currentDay"
+                  : day &&
+                    allSchedule.some(
+                      (schedule) =>
+                        formatDate(new Date(schedule.workDate)) ===
+                        formatDate(day)
+                    )
+                  ? "workDay"
+                  : ""
+              } ${
+                day &&
+                formatDate(day) === formatDate(selectedDate) &&
+                formatDate(day) === formatDate(new Date())
+                  ? "selectedDay currentDay"
                   : ""
               }`}
               onClick={() => day && setSelectedDate(day)}
@@ -134,7 +163,7 @@ const ViewOnlyWorkSchedule: React.FC = () => {
           <div>
             <div className="shiftContainer">
               <div className="shiftHeader">
-                <span className="shiftTitle">Ca sáng</span>
+                <span className="shiftTitle">Ca sáng (7:30 - 14:30)</span>
               </div>
               <div className="employeeList">
                 {currentSchedule?.morningShifts?.length ? (
@@ -151,7 +180,7 @@ const ViewOnlyWorkSchedule: React.FC = () => {
 
             <div className="shiftContainer">
               <div className="shiftHeader">
-                <span className="shiftTitle">Ca chiều</span>
+                <span className="shiftTitle">Ca chiều (14:30 - 21:30)</span>
               </div>
               <div className="employeeList">
                 {currentSchedule?.afternoonShifts?.length ? (

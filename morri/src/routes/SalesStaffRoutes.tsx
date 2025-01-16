@@ -16,13 +16,9 @@ import ProductDetail from "../pages/ProductDetail/ProductDetail";
 import CustomerManagementPage from "../pages/admin/CustomerMangementPage/CustomerManagementPage";
 import EmployeeHomePage from "../pages/HomePage/EmployeeHomePage";
 import { useAuth } from "../services/useAuth";
+import RoutingHomePage from "../pages/HomePage/RoutingHomePage";
 
 export const SalesStaffRoutes = () => {
-  // const { isAuthenticated, user, validateAuthStatus } = useAuth();
-
-  // useEffect(() => {
-  //   validateAuthStatus();
-  // }, [validateAuthStatus]);
   return (
     <Route
       element={
@@ -31,8 +27,7 @@ export const SalesStaffRoutes = () => {
         </ProtectedRoute>
       }
     >
-      <Route path="/home" element={<HomePage />} />
-      {/* <Route path="/home" element={<EmployeeHomePage />} /> */}
+      <Route path="/home" element={<RoutingHomePage />} />
       <Route path="/attendance" element={<AttendancePage />} />
       <Route path="/staff" element={<StaffPage />} />
       <Route path="/settings" element={<SettingPage />} />

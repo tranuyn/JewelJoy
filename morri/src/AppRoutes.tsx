@@ -13,12 +13,13 @@ import CheckOutSuccess from "./pages/CheckOut/CheckOutSuccess";
 import ProductDetail from "./pages/ProductDetail/ProductDetail";
 import EnterInventory from "./pages/EnterInventory/EnterInventory";
 import ViewOrEdit from "./pages/EnterInventory/ViewOrEdit/ViewOrEdit";
+import RoutingHomePage from "./pages/HomePage/RoutingHomePage";
 
 const AppRoutes = () => {
   return (
     <Routes>
       <Route path="/" element={<DashboardLayout />}>
-        <Route path="/home" element={<HomePage />} />
+        <Route path="/home" element={<RoutingHomePage />} />
         <Route path="/staff" element={<SalaryPage />} />
         <Route path="/repurchase" element={<SalaryPage />} />
         <Route path="/salary" element={<SalaryPage />} />

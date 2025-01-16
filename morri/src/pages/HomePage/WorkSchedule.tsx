@@ -43,19 +43,21 @@ const WorkSchedule: React.FC = () => {
     loadEmployees();
   }, [loadEmployees]);
 
-  useEffect(() => {
-    const loadAllSchedule = async () => {
-      try {
-        setLoading(true);
-        setAllSchedule(await scheduleService.getAllSchedule());
-      } catch (error) {
-        setError("Không thể tải tất cả lịch làm việc");
-      } finally {
-        setLoading(false);
-      }
-    };
-    loadAllSchedule();
+  const loadAllSchedule = useCallback(async () => {
+    try {
+      setLoading(true);
+      const schedules = await scheduleService.getAllSchedule();
+      setAllSchedule(schedules);
+    } catch (error) {
+      setError("Không thể tải tất cả lịch làm việc");
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    loadAllSchedule();
+  }, [loadAllSchedule]);
 
   const loadScheduleData = useCallback(async (date: string) => {
     try {
@@ -134,7 +136,6 @@ const WorkSchedule: React.FC = () => {
       setLoading(true);
 
       if (currentSchedule) {
-        // Chỉ gửi thông tin cần thiết
         const updateData = {
           workDate: currentSchedule.workDate,
           morningShifts:
@@ -163,12 +164,15 @@ const WorkSchedule: React.FC = () => {
         selectedDateTime.setHours(3, 30, 0);
         console.log("Thời gian trong ngày: ", selectedDateTime.toISOString());
         const newSchedule = {
-          workDate: selectedDateTime.toISOString(), // Sẽ cho ra định dạng ISO chuẩn UTC
+          workDate: selectedDateTime.toISOString(),
           morningShifts: shift === "morning" ? [employeeId] : [],
           afternoonShifts: shift === "afternoon" ? [employeeId] : [],
         };
 
-        await scheduleService.createSchedule(newSchedule);
+        const createdSchedule = await scheduleService.createSchedule(
+          newSchedule
+        );
+        setAllSchedule((prev) => [...prev, createdSchedule]);
       }
 
       // Tải lại dữ liệu sau khi cập nhật
@@ -301,7 +305,9 @@ const WorkSchedule: React.FC = () => {
                 <div key={shift} className="shiftContainer">
                   <div className="shiftHeader">
                     <span className="shiftTitle">
-                      {shift === "morning" ? "Ca sáng" : "Ca chiều"}
+                      {shift === "morning"
+                        ? "Ca sáng (7:30 - 14:30)"
+                        : "Ca chiều (14:30 - 21:30)"}
                     </span>
                   </div>
                   <div className="employeeCount">
