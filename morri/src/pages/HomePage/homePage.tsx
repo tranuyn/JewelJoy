@@ -29,7 +29,7 @@ const HomePage: React.FC = () => {
     useState<TermAndCondition | null>(null);
   const [isEditingGreeting, setIsEditingGreeting] = useState(false);
   const [editedGreeting, setEditedGreeting] = useState("");
-  const [isEditingDescription, setIsEditingDescription] = useState(false);
+  const [isEditingTermAndCondition, setIsEditingTermAndCondition] = useState(false);
   const [editedDescription, setEditedDescription] = useState<
     { title: string; content: string }[]
   >([]);
@@ -60,39 +60,8 @@ const HomePage: React.FC = () => {
     fetchData();
   }, []);
 
-  // Update greeting
-  const handleUpdateGreeting = async () => {
-    if (!termAndCondition) return;
-
-    try {
-      const response = await fetch(
-        `http://localhost:8081/termAndCondition/${termAndCondition.id}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            ...termAndCondition,
-            greeting: editedGreeting,
-          }),
-        }
-      );
-
-      if (response.ok) {
-        setTermAndCondition({
-          ...termAndCondition,
-          greeting: editedGreeting,
-        });
-        setIsEditingGreeting(false);
-      }
-    } catch (error) {
-      console.error("Error updating greeting:", error);
-    }
-  };
-
   // Update description
-  const handleUpdateDescription = async () => {
+  const handleUpdateTermAndCondition = async () => {
     if (!termAndCondition) return;
 
     try {
@@ -115,7 +84,7 @@ const HomePage: React.FC = () => {
           ...termAndCondition,
           description: editedDescription,
         });
-        setIsEditingDescription(false);
+        setIsEditingTermAndCondition(false);
       }
     } catch (error) {
       console.error("Error updating description:", error);
@@ -164,7 +133,7 @@ const HomePage: React.FC = () => {
           <StyledIconButton
             className="edit-button"
             size="small"
-            onClick={() => setIsEditingDescription(true)}
+            onClick={() => setIsEditingTermAndCondition(true)}
           >
             <BorderColorIcon fontSize="small" />
           </StyledIconButton>
@@ -218,7 +187,7 @@ const HomePage: React.FC = () => {
             Hủy
           </Button>
           <Button
-            onClick={handleUpdateDescription}
+            onClick={handleUpdateTermAndCondition}
             variant="contained"
             sx={{
               backgroundColor: "#3E5C63",
@@ -235,8 +204,8 @@ const HomePage: React.FC = () => {
 
       {/* Edit Description Dialog */}
       <Dialog
-        open={isEditingDescription}
-        onClose={() => setIsEditingDescription(false)}
+        open={isEditingTermAndCondition}
+        onClose={() => setIsEditingTermAndCondition(false)}
         maxWidth="md"
         fullWidth
       >
@@ -273,7 +242,7 @@ const HomePage: React.FC = () => {
         </DialogContent>
         <DialogActions>
           <Button
-            onClick={() => setIsEditingDescription(false)}
+            onClick={() => setIsEditingTermAndCondition(false)}
             sx={{
               backgroundColor: "rgba(255, 0, 0, 0.8)",
               color: "white",
@@ -285,7 +254,7 @@ const HomePage: React.FC = () => {
             Hủy
           </Button>
           <Button
-            onClick={handleUpdateDescription}
+            onClick={handleUpdateTermAndCondition}
             variant="contained"
             sx={{
               backgroundColor: "#3E5C63",

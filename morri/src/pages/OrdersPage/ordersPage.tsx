@@ -107,8 +107,18 @@ const OrdersPage: React.FC = () => {
 
     fetchOrders();
   }, []);
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const day = date.getDate().toString().padStart(2, "0");
+    const month = (date.getMonth() + 1).toString().padStart(2, "0");
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+  };
 
   const filteredRows = searchFiltered.filter((row) => {
+    if (row.customer === "Unknown") {
+      return false;
+    }
     switch (activeTab) {
       case "Đơn đang đặt":
         return row.status === "ON_DELIVERY";
@@ -383,7 +393,9 @@ const OrdersPage: React.FC = () => {
                           key={column.id}
                           className={column.id === "options" ? "options" : ""}
                         >
-                          {column.id === "totalPrice" ? (
+                          {column.id === "date" ? (
+                            formatDate(row.date)
+                          ) : column.id === "totalPrice" ? (
                             <span>
                               {row.totalPrice.toLocaleString("vi-VN")} đ
                             </span>
@@ -402,7 +414,7 @@ const OrdersPage: React.FC = () => {
                                 className="delete-button"
                                 size="small"
                                 onClick={(event) => {
-                                  event.stopPropagation(); 
+                                  event.stopPropagation();
                                   handleCancelOrder(row.code);
                                 }}
                               >
