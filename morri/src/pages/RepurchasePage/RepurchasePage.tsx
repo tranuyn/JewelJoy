@@ -66,7 +66,11 @@ const RepurchasePage: React.FC = () => {
     const handleAddBill = (formValues: FormValues) => {
         // Implement add bill logic here
        fetchBills(); // Refresh the data after adding
+       
+    };
 
+    const handleSearch = (value: string) => {
+        setSearchKeyword(value);
     };
 
     const filteredBills = bills.filter(bill =>
