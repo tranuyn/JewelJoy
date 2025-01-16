@@ -391,9 +391,7 @@ const ProductsAndService: React.FC = () => {
         />
       )}
 
-      <div className="page-content">
-        <div className="content-text">{renderContent()}</div>
-      </div>
+      <div>{renderContent()}</div>
     </div>
   );
 };

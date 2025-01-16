@@ -110,6 +110,28 @@ const ProductForm: React.FC<ProductFormProps> = ({
         weight: data.weight || prevData.weight,
         chiPhiPhatSinh: data.chiPhiPhatSinh || prevData.chiPhiPhatSinh,
       }));
+      setProductFormData((prevData) => {
+        const newData = [...prevData];
+        const currentIndex = prevData.findIndex(
+          (item) => item.code === data.code
+        );
+        newData[currentIndex] = {
+          ...newData[currentIndex],
+          id: data.id,
+          name: data.name,
+          code: data.code,
+          description: data.description,
+          material: data.material,
+          sellingPrice: data.sellingPrice,
+          costPrice: data.costPrice,
+          imageUrl: data.imageUrl,
+          quantity: data.quantity,
+          loaiSanPham: data.loaiSanPham,
+          weight: data.weight,
+          chiPhiPhatSinh: data.chiPhiPhatSinh,
+        };
+        return newData;
+      });
     } catch (error) {
       console.error("Error fetching user data:", error);
     }

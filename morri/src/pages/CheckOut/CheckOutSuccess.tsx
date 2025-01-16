@@ -24,9 +24,10 @@ interface LocationState {
 }
 
 const CheckOutSuccess = () => {
-  const location = useLocation(); // Explicitly type the location
+  const location = useLocation();
+  console.log(location.state); // Explicitly type the location
   const [selectedProducts, setSelectedProducts] = useState<ProductType[]>(
-    location.state?.selectedProducts || [] // Fallback to an empty array if state is undefined
+    location.state?.updatedProducts || [] // Fallback to an empty array if state is undefined
   );
   const [customerInfo, setCustomerInfo] = useState<Record<string, string>>(
     location.state?.customerInfo || {} // Fallback to an empty object if state is undefined
@@ -45,7 +46,7 @@ const CheckOutSuccess = () => {
   useEffect(() => {
     if (location.state) {
       console.log(location.state);
-      setSelectedProducts(location.state.selectedProducts);
+      setSelectedProducts(location.state.updatedProducts);
       setCustomerInfo(location.state.customerInfo);
       setStaffInfo(location.state.staffInfo);
       setTotalPrice(location.state.totalPrice);
@@ -100,23 +101,44 @@ const CheckOutSuccess = () => {
         <CheckCircleIcon sx={{ color: "#4ECB71", marginRight: "10px" }} />
         <p>Đặt hàng thành công</p>
       </div>
+
       <div
         style={{
           display: "flex",
           flexDirection: "row",
-          justifyContent: "space-around",
+          justifyContent: "space-between",
+          width: "100%",
         }}
       >
+        <p
+          style={{
+            display: "flex",
+            alignItems: "center",
+            fontWeight: "600",
+          }}
+        >
+          <PersonOutlineIcon sx={{ color: "#EFB26A", marginRight: "8px" }} />
+          Thông tin khách hàng
+        </p>
+        <p>Số điện thoại: {customerInfo.phoneNumber}</p>
+        <p>Họ và tên: {customerInfo.name}</p>
+        <p>
+          Giới tính:{" "}
+          {customerInfo?.gioiTinh === "MALE"
+            ? "Nam"
+            : customerInfo?.gioiTinh === "FEMALE"
+            ? "Nữ"
+            : "Không có dữ liệu"}
+        </p>
+        <p>Ngày sinh: {formatDate(customerInfo.dateOfBirth)}</p>
+      </div>
+      {user?.role != "CUSTOMER" && (
         <div
           style={{
-            ...(user?.role === "CUSTOMER"
-              ? {
-                  display: "flex",
-                  flexDirection: "row",
-                  justifyContent: "space-between",
-                  width: "100%",
-                }
-              : {}),
+            display: "flex",
+            flexDirection: "row",
+            justifyContent: "space-between",
+            width: "100%",
           }}
         >
           <p
@@ -127,49 +149,22 @@ const CheckOutSuccess = () => {
             }}
           >
             <PersonOutlineIcon sx={{ color: "#EFB26A", marginRight: "8px" }} />
-            Thông tin khách hàng
+            Thông tin nhân viên
           </p>
-          <p>Số điện thoại: {customerInfo.phoneNumber}</p>
-          <p>Họ và tên: {customerInfo.name}</p>
+          <p>Họ và tên: {staffInfo.name}</p>
+          <p>Email: {staffInfo.email}</p>
+          <p>Số điện thoại: {staffInfo.phoneNumber}</p>
           <p>
             Giới tính:{" "}
-            {customerInfo?.gioiTinh === "MALE"
+            {staffInfo?.gender === "MALE"
               ? "Nam"
-              : customerInfo?.gioiTinh === "FEMALE"
+              : staffInfo?.gender === "FEMALE"
               ? "Nữ"
               : "Không có dữ liệu"}
           </p>
-          <p>Ngày sinh: {formatDate(customerInfo.dateOfBirth)}</p>
+          <p>CCCD/CMND: {staffInfo.cccd}</p>
         </div>
-        {user?.role != "CUSTOMER" && (
-          <div>
-            <p
-              style={{
-                display: "flex",
-                alignItems: "center",
-                fontWeight: "600",
-              }}
-            >
-              <PersonOutlineIcon
-                sx={{ color: "#EFB26A", marginRight: "8px" }}
-              />
-              Thông tin nhân viên
-            </p>
-            <p>Họ và tên: {staffInfo.name}</p>
-            <p>Email: {staffInfo.email}</p>
-            <p>Số điện thoại: {staffInfo.phoneNumber}</p>
-            <p>
-              Giới tính:{" "}
-              {staffInfo?.gender === "MALE"
-                ? "Nam"
-                : staffInfo?.gender === "FEMALE"
-                ? "Nữ"
-                : "Không có dữ liệu"}
-            </p>
-            <p>CCCD/CMND: {staffInfo.cccd}</p>
-          </div>
-        )}
-      </div>
+      )}
 
       {selectedProducts.map((product) => (
         <div key={product.id} className="billItemContainerCheckout">

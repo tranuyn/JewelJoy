@@ -70,7 +70,6 @@ const Bill: React.FC<BillProps> = ({ selectedProducts, onBuyNow }) => {
   };
 
   const decrementQuantity = (id: string) => {
-    if (quantities[id] === 1) return;
     setQuantities((prev) => ({
       ...prev,
       [id]: prev[id] - 1,
@@ -101,10 +100,9 @@ const Bill: React.FC<BillProps> = ({ selectedProducts, onBuyNow }) => {
   }
 
   useEffect(() => {
-    console.log("Selected Discount: ", selectedDiscount);
-    console.log("Subtotal: ", calculateSubtotal());
     console.log("Total with Discount: ", calculateTotalWithDiscount());
-  }, [selectedDiscount]);
+    console.log("quantities: ", quantities);
+  }, [selectedDiscount, quantities]);
 
   const calculateSubtotal = () => {
     return selectedProductInBill.reduce((total, product) => {
@@ -135,7 +133,7 @@ const Bill: React.FC<BillProps> = ({ selectedProducts, onBuyNow }) => {
     console.log(selectedDiscount);
   };
 
-  const handleBuyNow = () => {
+  const handleBuyNow = async () => {
     if (!selectedButton) {
       // Nếu chưa chọn nút, có thể là một lỗi hoặc thông báo cho người dùng
       alert("Vui lòng chọn phương thức thanh toán!");
@@ -169,7 +167,6 @@ const Bill: React.FC<BillProps> = ({ selectedProducts, onBuyNow }) => {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const data: Voucher[] = await response.json();
-      console.log(data);
       setDiscount(data);
     } catch (error) {
       console.error("Error fetching staff:", error);

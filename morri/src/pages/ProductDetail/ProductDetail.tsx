@@ -24,6 +24,7 @@ interface FormProductData {
   weight: number;
   chiPhiPhatSinh: number;
   images: File[];
+  quantityInBill: number;
 }
 
 const ProductDetail: React.FC = () => {
@@ -45,6 +46,7 @@ const ProductDetail: React.FC = () => {
     weight: 0,
     chiPhiPhatSinh: 0,
     images: [],
+    quantityInBill: 1,
   });
   const [activeTab, setActiveTab] = useState("Tất cả");
   const [selectedImgIndex, setSelectedImgIndex] = useState(0);
@@ -120,13 +122,42 @@ const ProductDetail: React.FC = () => {
       return;
     }
     setQuantityToBuy(count - 1);
+
+    setProduct((prev) => {
+      if (!prev) {
+        return prev; // If prev is undefined, return it to avoid errors
+      }
+
+      return {
+        ...prev,
+        quantityInBill: prev.quantityInBill > 1 ? prev.quantityInBill - 1 : 0, // Ensure quantity doesn't go below 0
+      };
+    });
   };
+
+  useEffect(() => {
+    if (product) {
+      console.log("product updated:", product?.quantityInBill);
+    }
+  }, [quantityToBuy]);
 
   const increaseQuantityClick = (count: number) => {
     if (count === product?.quantity) {
       return;
     }
     setQuantityToBuy(count + 1);
+    const updatedQuantityInBill = (product?.quantityInBill || 1) + 1;
+    setProduct((prev) => {
+      if (!prev) {
+        return prev; // Nếu product không tồn tại, không làm gì cả
+      }
+
+      return {
+        ...prev,
+        quantityInBill: updatedQuantityInBill, // Cập nhật quantityInBill
+      };
+    });
+    console.log("product", product?.quantityInBill);
   };
 
   const navigate = useNavigate();
@@ -135,8 +166,10 @@ const ProductDetail: React.FC = () => {
       alert("sản phẩm không xác định");
       return;
     }
+
     const selectedProducts = [product];
     const quantities = { [product?.id]: quantityToBuy };
+    console.log(selectedProducts);
     navigate("/products/checkout", {
       state: {
         selectedProducts,
