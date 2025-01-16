@@ -30,7 +30,7 @@ interface BillProps {
 }
 interface Voucher {
   id: number;
-  name: string;
+  voucherName: string;
   voucherCode: string;
   discount: number;
   description: string;
@@ -100,33 +100,39 @@ const Bill: React.FC<BillProps> = ({ selectedProducts, onBuyNow }) => {
       .replace(/\B(?=(\d{3})+(?!\d))/g, "."); // Thêm dấu chấm sau mỗi 3 chữ số
   }
 
-  const calculateSubtotal = () => {
-    return selectedProducts.reduce((total, product) => {
-      return total + product.sellingPrice * quantities[product.id];
-    }, 0);
-  };
-
   useEffect(() => {
     console.log("Selected Discount: ", selectedDiscount);
     console.log("Subtotal: ", calculateSubtotal());
     console.log("Total with Discount: ", calculateTotalWithDiscount());
   }, [selectedDiscount]);
 
+  const calculateSubtotal = () => {
+    return selectedProductInBill.reduce((total, product) => {
+      return total + product.sellingPrice * quantities[product.id];
+    }, 0);
+  };
+
   const calculateTotalWithDiscount = () => {
     const subtotal = calculateSubtotal();
-    if (!selectedDiscount) return subtotal;
+    console.log("subtotal:", subtotal);
 
-    const selectedVoucher = discount.find((v) => v.id === selectedDiscount);
-    if (!selectedVoucher) return subtotal;
+    if (!selectedDiscount) {
+      console.log("No discount selected");
+      return subtotal;
+    }
 
-    const discountAmount = (subtotal * selectedVoucher.discount) / 100;
+    console.log("vao1 ", selectedDiscount);
+    const discountAmount = subtotal * (selectedDiscount / 100);
+    console.log(discountAmount);
     return subtotal - discountAmount;
   };
+
   const handleDiscountChange = (
     event: React.ChangeEvent<HTMLSelectElement>
   ) => {
     const value = event.target.value;
     setSelectedDiscount(parseInt(value));
+    console.log(selectedDiscount);
   };
 
   const handleBuyNow = () => {
@@ -143,11 +149,12 @@ const Bill: React.FC<BillProps> = ({ selectedProducts, onBuyNow }) => {
       };
     });
 
-    let hehe = calculateSubtotal();
-    if (selectedDiscount != null) {
-      hehe = calculateSubtotal() - selectedDiscount;
+    const finalPrice = calculateTotalWithDiscount();
+    if (finalPrice === 0) {
+      alert("Vui lòng chọn sản phẩm để thanh toán!");
     }
-    onBuyNow(updatedProducts, selectedButton, note, hehe);
+
+    onBuyNow(updatedProducts, selectedButton, note, finalPrice);
   };
 
   // Hàm để thay đổi state khi click vào button
@@ -269,7 +276,7 @@ const Bill: React.FC<BillProps> = ({ selectedProducts, onBuyNow }) => {
         </div>
       </div>
 
-      {selectedDiscount && (
+      {selectedDiscount !== null && (
         <div className="totalCheckout">
           <div style={{ fontWeight: 600, fontSize: "18px" }}>
             Sau khi giảm giá:
@@ -278,7 +285,7 @@ const Bill: React.FC<BillProps> = ({ selectedProducts, onBuyNow }) => {
             className="billItemPriceCheckout"
             style={{ fontSize: "18px", color: "#F92121" }}
           >
-            {formatPrice(calculateTotalWithDiscount() - selectedDiscount)} VND
+            {formatPrice(calculateTotalWithDiscount())} VND
           </div>
         </div>
       )}
@@ -322,7 +329,7 @@ const Bill: React.FC<BillProps> = ({ selectedProducts, onBuyNow }) => {
           </button>
         </div>
         <select
-          value={selectedDiscount?.toString() || ""}
+          value={selectedDiscount === null ? "" : selectedDiscount}
           onChange={handleDiscountChange}
           style={{
             padding: "5px 10px",
@@ -331,10 +338,10 @@ const Bill: React.FC<BillProps> = ({ selectedProducts, onBuyNow }) => {
             width: "100%",
           }}
         >
-          <option value="">Chọn mã giảm giá</option>
+          <option value="">Hủy mã giảm giá</option>
           {discount.map((voucher) => (
-            <option key={voucher.id} value={voucher.id}>
-              {voucher.name} - Giảm {voucher.discount}%
+            <option key={voucher.id} value={voucher.discount}>
+              {voucher.voucherName} - Giảm {voucher.discount}%
             </option>
           ))}
         </select>

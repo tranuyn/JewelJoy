@@ -2,12 +2,22 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import "./NotFound.css";
 import BtnComponent from "../../component/BtnComponent/BtnComponent";
+import { useAuth } from "../../services/useAuth";
 
 const NotFound: React.FC = () => {
   const navigate = useNavigate();
+  const { isAuthenticated, user, validateAuthStatus } = useAuth();
 
   const handleGoHome = () => {
-    navigate("/login");
+    if (
+      user?.role === "ADMIN" ||
+      user?.role === "INVENTORY_STAFF" ||
+      user?.role === "SALE_STAFF"
+    ) {
+      navigate("/home");
+    } else {
+      navigate("/products");
+    }
   };
 
   return (

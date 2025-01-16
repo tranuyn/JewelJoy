@@ -132,6 +132,7 @@ const ProductDetail: React.FC = () => {
   const navigate = useNavigate();
   const handleBuyNow = () => {
     if (!product?.id) {
+      alert("sản phẩm không xác định");
       return;
     }
     const selectedProducts = [product];
@@ -266,11 +267,11 @@ const ProductDetail: React.FC = () => {
           </div>
         </div>
         <div className="part4">
-          {(user?.role === "ADMIN" ||
+          {/* {(user?.role === "ADMIN" ||
             user?.role === "INVENTORY_STAFF" ||
             user?.role === "SALE_STAFF") && (
             <button className="viewSupplierBtn">Xem nhà cung cấp</button>
-          )}
+          )} */}
           <div>{product.description}</div>
         </div>
       </div>

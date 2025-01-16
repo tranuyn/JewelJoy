@@ -74,7 +74,7 @@ const StaffSection: React.FC<StaffSectionProps> = ({ setStaffInfo }) => {
           </div>
         </div>
       </div>
-      <button className="viewButton">Xem hồ sơ nhân viên</button>
+      {/* <button className="viewButton">Xem hồ sơ nhân viên</button> */}
     </div>
   );
 };
