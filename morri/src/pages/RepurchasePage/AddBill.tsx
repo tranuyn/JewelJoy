@@ -47,6 +47,19 @@ interface BillMua {
     staffId: String|undefined;
 }
 
+const PRODUCT_TYPE_OPTIONS = [
+    { label: "Nhẫn", value: "NHAN" },
+    { label: "Bông tai", value: "BONGTAI" },
+    { label: "Vòng tay", value: "VONGTAY" },
+];
+
+const MATERIAL_TYPE_OPTIONS = [
+    { label: "Kim cương", value: "Kim cương" },
+    { label: "Vàng", value: "Vàng" },
+    { label: "Bạc", value: "Bạc" },    
+    { label: "Bạch kim", value: "Bạch kim" },
+];
+
 export const createBill = async (formValues: FormValues, productId: string, userId: String|undefined): Promise<void> => {
     try {
         const billData: BillMua = {
@@ -372,22 +385,36 @@ const AddBill: React.FC<AddBillProps> = ({ isModalOpen, setIsModalOpen, onSubmit
                             defaultValue=""
                         />
 
-                        <TextBox
+                        {/* <TextBox
                             datatype="string"
                             title="Loại sản phẩm *"
                             placeholder="Nhập loại sản phẩm"
                             onChange={handleChange('productType')}
                             defaultValue=""
-                        />
-                        
+                        /> */}                        
                         <TextBox
+                            datatype="select"
+                            title="Loại sản phẩm *"
+                            placeholder="Chọn loại sản phẩm"
+                            value={formValues.productType || ''}
+                            onChange={handleChange('productType')}
+                            options={PRODUCT_TYPE_OPTIONS}
+                        />
+                        {/* <TextBox
                             datatype="string"
                             title="Chất liệu *"
                             placeholder="Nhập chất liệu sản phẩm"
                             onChange={handleChange('material')}
                             defaultValue=""
-                        />
-                                                
+                        /> */}
+                        <TextBox
+                            datatype="select"
+                            title="Chất liệu *"
+                            placeholder="Chọn chất liệu"
+                            value={formValues.material || ''}
+                            onChange={handleChange('material')}
+                            options={MATERIAL_TYPE_OPTIONS}
+                        />                        
                     </Box>
 
                     <Box sx={{ 
