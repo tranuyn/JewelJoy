@@ -466,27 +466,7 @@ const SalaryPage: React.FC = () => {
                 onClick={() => setModalThemLuongOpen(true)}
               />
             </div>
-            <div className="stat-box">
-              <Box sx={{ display: "flex", gap: 4 }}>
-                <TextBox
-                  datatype="number"
-                  placeholder={""}
-                  title="Số giờ làm việc thực tế"
-                  defaultValue={attendanceData?.totalWorkingHours.toFixed(2)}
-                  onChange={(value) => {}}
-                  icon={<HourglassBottomIcon style={{ color: "black" }} />}
-                />
-                <TextBox
-                  datatype="number"
-                  title="Số ngày làm việc thực tế"
-                  placeholder={""}
-                  // defaultValue={"2000"}
-                  defaultValue={attendanceData?.workingDays?.toString() || "0"}
-                  onChange={(value) => {}}
-                  icon={<CalendarTodayIcon style={{ color: "black" }} />}
-                />
-              </Box>
-            </div>
+
             <div className="bottom-row">
               <BonusPenaltySection
                 selectedUser={selectedUser}

@@ -45,7 +45,14 @@ const UpdateSalaryModal: React.FC<UpdateSalaryModalProps> = ({
   const handleSubmit = async () => {
     setLoading(true);
     try {
-      await handleUpdateSalary(baseSalary, commissionRate, receiveDate);
+      const formattedReceiveDate = new Date(receiveDate).toISOString();
+      console.log("Formatted receiveDate for backend:", formattedReceiveDate);
+      await handleUpdateSalary(
+        baseSalary,
+        commissionRate,
+        formattedReceiveDate
+      );
+      // await handleUpdateSalary(baseSalary, commissionRate, receiveDate);
     } finally {
       setLoading(false);
     }
@@ -89,7 +96,7 @@ const UpdateSalaryModal: React.FC<UpdateSalaryModalProps> = ({
           datatype="date"
           title="Ngày nhận lương"
           placeholder=""
-          onChange={(value) => {}}
+          onChange={(value) => setReceiveDate(value)}
           icon={<CalendarMonthIcon style={{ color: "black" }} />}
           defaultValue={salaryData?.salaryReceiveDate}
         />
