@@ -27,8 +27,6 @@ const AddCustomer: React.FC<Customer> = ({
   handleAdd,
 }) => {
   const [name, setName] = useState<string | number>("");
-  // const [value, setValue] = useState<string | number>("");
-
   const [phoneNumber, setPhoneNumber] = useState<string | number>("");
   const [gioiTinh, setGioiTinh] = useState<string | number>("");
   const [dateOfBirth, setDateOfBirth] = useState<string | number>("");
@@ -37,8 +35,32 @@ const AddCustomer: React.FC<Customer> = ({
     new Date().toISOString().split("T")[0]
   );
   const [isLoading, setLoading] = useState(false);
+  const [error, setError] = useState<string>("");
+
+  const validateInput = () => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const phoneRegex = /^[0-9]{9,11}$/;
+
+    const phoneStr = phoneNumber.toString();
+    const emailStr = email.toString();
+
+    if (!phoneRegex.test(phoneStr)) {
+      setError("Số điện thoại không hợp lệ. Vui lòng nhập từ 9-11 số.");
+      return false;
+    }
+
+    if (!emailRegex.test(emailStr)) {
+      setError("Email không hợp lệ. Vui lòng nhập đúng định dạng email.");
+      return false;
+    }
+
+    setError("");
+    return true;
+  };
 
   const handleAddModal = async () => {
+    if (!validateInput()) return;
+
     const formData: FormData = {
       name,
       phoneNumber,
@@ -85,6 +107,14 @@ const AddCustomer: React.FC<Customer> = ({
         >
           Thêm Khách Hàng
         </div>
+
+        {error && (
+          <div
+            style={{ color: "red", marginBottom: "1rem", textAlign: "center" }}
+          >
+            {error}
+          </div>
+        )}
 
         <TextBox
           datatype="string"
@@ -138,7 +168,6 @@ const AddCustomer: React.FC<Customer> = ({
             datatype="date"
             title="Ngày ĐK thành viên"
             placeholder=""
-            // onChange={setRegistrationDate}
             icon={<CalendarMonthIcon style={{ color: "black" }} />}
             defaultValue={registrationDate}
           />
