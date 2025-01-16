@@ -1,38 +1,25 @@
-import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
-import ListAltIcon from "@mui/icons-material/ListAlt";
-import LocationOnIcon from "@mui/icons-material/LocationOn";
-import LogoutIcon from "@mui/icons-material/Logout";
-import PersonIcon from "@mui/icons-material/Person";
-import PhoneIcon from "@mui/icons-material/Phone";
 import RemoveIcon from "@mui/icons-material/Remove";
-import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import {
-  AppBar,
   Box,
   Button,
   Checkbox,
   Grid,
   IconButton,
-  Menu,
-  MenuItem,
   Paper,
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableRow,
-  TextField,
-  Toolbar,
   Tooltip,
-  Typography,
+  Typography
 } from "@mui/material";
 import React, { useState } from "react";
 import { removeItem, updateQuantity } from "../../redux/slice/cartSlice";
 
 // Import images
-import morriLogo from "../../assets/constant/morri-logo.png";
 
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
@@ -135,7 +122,7 @@ const CartPage: React.FC = () => {
 
   return (
     <Box className="root">
-      <AppBar position="static" className="header">
+      {/* <AppBar position="static" className="header">
         <Toolbar>
           <img src={morriLogo} alt="Morri" className="logo" />
           <Box className="nav-links">
@@ -177,7 +164,7 @@ const CartPage: React.FC = () => {
           <LogoutIcon className="menu-icon" />
           <Typography>Đăng xuất</Typography>
         </MenuItem>
-      </Menu>
+      </Menu> */}
 
       <Box className="cart-container">
         <Box className="title-section">
@@ -261,7 +248,7 @@ const CartPage: React.FC = () => {
               </TableBody>
             </Table>
 
-            <Box className="voucher-section">
+            {/* <Box className="voucher-section">
               <TextField
                 placeholder="Mã voucher"
                 value={voucher}
@@ -271,7 +258,7 @@ const CartPage: React.FC = () => {
               <Button variant="contained" className="apply-button">
                 Áp dụng
               </Button>
-            </Box>
+            </Box> */}
           </Grid>
 
           <Grid item xs={12} md={4}>
