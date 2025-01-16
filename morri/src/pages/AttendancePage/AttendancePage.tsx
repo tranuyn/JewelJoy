@@ -10,12 +10,12 @@ const AttendancePage: React.FC = () => {
   const [activeTab, setActiveTab] = useState("Diem danh");
   const { user } = useAuth();
 
-  const tabs = ["Diem danh", ...(user?.role === "ADMIN" ? ["Tong hop"] : [])];
+  const tabs = ["Điểm danh", ...(user?.role === "ADMIN" ? ["Tổng hợp"] : [])];
   const renderContent = () => {
     switch (activeTab) {
-      case "Diem danh":
+      case "Điểm danh":
         return <DiemDanh />;
-      case "Tong hop":
+      case "Tổng hợp":
         return user?.role === "ADMIN" ? <TongHop /> : null;
       default:
         return <DiemDanh />;
@@ -23,13 +23,13 @@ const AttendancePage: React.FC = () => {
   };
   return (
     <div style={{ backgroundColor: "#F9FCFF", height: "100%" }}>
-      <Header title="Cham cong" />
+      <Header title="Chấm công" />
 
       <TabBar
         tabs={tabs}
         onTabChange={setActiveTab}
         styleType="default"
-        defaultTab="Diem danh"
+        defaultTab="Điểm danh"
       />
 
       <div className="page-content">

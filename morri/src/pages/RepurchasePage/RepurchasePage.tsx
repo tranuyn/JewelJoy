@@ -1,5 +1,5 @@
 import { Box } from "@mui/material";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import BtnComponent from "../../component/BtnComponent/BtnComponent";
 import DeleteComponent from "../../component/DeleteComponent/DeleteComponent";
 import TableComponent from "../../component/TableComponent/TableComponent";
@@ -10,38 +10,51 @@ import { Bill, Column, FormValues } from "./types";
 
 const columns: Column[] = [
     { field: "id", headerName: "Mã phiếu" },
-    { field: "name", headerName: "Tên trang sức" },
-    { field: "type", headerName: "Loại sản phẩm" },
+    { field: "customerName", headerName: "Tên khách hàng" },
+    { field: "totalPrice", headerName: "Tổng tiền" },
     { field: "status", headerName: "Tình trạng" },
-    { field: "material", headerName: "Chất liệu" },
-    { field: "total", headerName: "Tổng tiền" },
+    { field: "staffName", headerName: "Nhân viên" },
+    { field: "createdAt", headerName: "Ngày tạo" }
 ];
-
-const initialBills: Bill[] = [
-    {
-        id: "ML001",
-        name: "Vòng bạc charm trái tim xbyeee",
-        type: "Vòng tay",
-        status: "75%",
-        material: "Bạc",
-        total: "2.000.000 VNĐ",
-        code: "xbyeee",
-        customerName: "Nguyễn Văn A",
-        customerId: "KH001",
-        phoneNumber: "0123456789",
-        identityNumber: "123456789",
-        purchaseDate: "2024-01-03",
-        employeeName: "NV001"
-    },
-];
-
 
 const RepurchasePage: React.FC = () => {
-    const [bills, setBills] = useState<Bill[]>(initialBills);
+    const [bills, setBills] = useState<Bill[]>([]);
     const [searchKeyword, setSearchKeyword] = useState("");
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [selectedBill, setSelectedBill] = useState<Bill | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [isDeleting, setIsDeleting] = useState(false);
+
+    useEffect(() => {
+        fetchBills();
+    }, []);
+
+    const fetchBills = async () => {
+        try {
+            const response = await fetch('http://localhost:8081/billMua');
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            const data = await response.json();
+            
+            // Transform the data to match the table structure
+            const transformedData = data.map((bill: any) => ({
+                id: bill.id,
+                customerName: bill.customerName || bill.customerId?.name || 'N/A',
+                totalPrice: formatCurrency(bill.totalPrice),
+                status: bill.status.toString(),
+                staffName: bill.staffId?.name || 'N/A',
+                createdAt: new Date(bill.createdAt).toLocaleDateString('vi-VN') || 'N/A'
+            }));
+            
+            setBills(transformedData);
+            setLoading(false);
+        } catch (error) {
+            console.error("Error fetching bills:", error);
+            setLoading(false);
+        }
+    };
 
     const formatCurrency = (amount: number): string => {
         return new Intl.NumberFormat('vi-VN', {
@@ -51,45 +64,48 @@ const RepurchasePage: React.FC = () => {
     };
 
     const handleAddBill = (formValues: FormValues) => {
-        const newBill: Bill = {
-            id: `ML${String(bills.length + 1).padStart(3, '0')}`,
-            name: formValues.productName as string,
-            type: formValues.productType as string,
-            status: formValues.condition as string,
-            material: formValues.material as string,
-            total: formatCurrency(Number(formValues.buybackPrice)),
-            code: formValues.productCode as string,
-            customerName: formValues.customerName as string,
-            customerId: formValues.customerId as string,
-            phoneNumber: formValues.phoneNumber as string,
-            identityNumber: formValues.identityNumber as string,
-            purchaseDate: formValues.purchaseDate as string,
-            employeeName: formValues.employeeName as string
-        };
+        // Implement add bill logic here
+       fetchBills(); // Refresh the data after adding
 
-        setBills(prevBills => [...prevBills, newBill]);
-    };
-
-    const handleSearch = (value: string) => {
-        setSearchKeyword(value);
     };
 
     const filteredBills = bills.filter(bill =>
         bill.id.toLowerCase().includes(searchKeyword.toLowerCase()) ||
-        bill.name.toLowerCase().includes(searchKeyword.toLowerCase())
+        bill.customerName.toLowerCase().includes(searchKeyword.toLowerCase())
     );
 
+
     const handleDelete = async (): Promise<void> => {
-        if (selectedBill) {
-            try {
-                setBills(prevBills => prevBills.filter(bill => bill.id !== selectedBill.id));
-                setIsDeleteModalOpen(false);
-                setSelectedBill(null);
-            } catch (error) {
-                console.error("Error deleting bill:", error);
+        if (!selectedBill) return;
+
+        setIsDeleting(true);
+        try {
+            const response = await fetch(`http://localhost:8081/billMua/${selectedBill.id}`, {
+                method: 'DELETE',
+            });
+            
+            if (!response.ok) {
+                throw new Error('Failed to delete bill');
             }
+            
+            setBills(prevBills => prevBills.filter(bill => bill.id !== selectedBill.id));
+            setIsDeleteModalOpen(false);
+            setSelectedBill(null);
+            
+            alert("Xóa phiếu mua thành công!");
+        } catch (error) {
+            console.error("Error deleting bill:", error);
+            alert("Không thể xóa phiếu mua. Vui lòng thử lại sau.");
+        } finally {
+            setIsDeleting(false);
         }
     };
+
+    if (loading) {
+        return <div>Loading...</div>;
+    }
+
+    
 
     return (
         <div className="customer-management">
@@ -114,12 +130,6 @@ const RepurchasePage: React.FC = () => {
                     setIsModalOpen={setIsModalOpen}
                     onSubmit={handleAddBill}
                 />
-
-                {/* <SearchComponent
-                    placeholder={"Tìm mã phiếu"}
-                    keyword={searchKeyword}
-                    onSearch={handleSearch}
-                /> */}
             </Box>
             
             <div style={{ padding: "10px" }}></div>
@@ -140,7 +150,7 @@ const RepurchasePage: React.FC = () => {
             <DeleteComponent
                 isModalOpen={isDeleteModalOpen}
                 setIsModalOpen={setIsDeleteModalOpen}
-                deleteName={selectedBill?.name || ""}
+                deleteName={selectedBill?.id || ""}
                 handleDelete={handleDelete}
             />
         </div>

@@ -15,14 +15,20 @@ const ThemLuongThang: React.FC<ThemLuongThangProps> = ({
   handleAddSalary,
 }) => {
   const [loading, setLoading] = useState(false);
-  const [baseSalary, setBaseSalary] = useState<number>(0);
-  const [commissionRate, setCommissionRate] = useState<number>(0);
-  const [salaryReceiveDate, setSalaryReceiveDate] = useState<string>(
+  const [baseSalary, setBaseSalary] = useState<number | string>(0);
+  const [commissionRate, setCommissionRate] = useState<number | string>(0);
+  const [salaryReceiveDate, setSalaryReceiveDate] = useState<string | number>(
     new Date().toISOString().split("T")[0]
   );
   const handleSubmit = async () => {
     setLoading(true);
     try {
+      console.log(
+        "base salary received",
+        baseSalary,
+        commissionRate,
+        salaryReceiveDate
+      );
       await handleAddSalary(baseSalary, commissionRate, salaryReceiveDate);
     } finally {
       setLoading(false);
@@ -70,13 +76,13 @@ const ThemLuongThang: React.FC<ThemLuongThangProps> = ({
             datatype="number"
             title="Tiền lương cơ bản"
             placeholder="Nhập tiền lương cơ bản..."
-            onChange={(value) => {}}
+            onChange={(value) => setBaseSalary(value)}
           />
           <TextBox
             datatype="number"
             title="Tiền hoa hồng"
             placeholder="Nhập tiền hoa hồng"
-            onChange={(value) => {}}
+            onChange={(value) => setCommissionRate(value)}
           />
         </Box>
         <Box
@@ -102,7 +108,7 @@ const ThemLuongThang: React.FC<ThemLuongThangProps> = ({
             datatype="date"
             title="Ngày nhận lương"
             placeholder=""
-            onChange={(value) => {}}
+            onChange={(value) => setSalaryReceiveDate(value)}
             icon={<CalendarMonthIcon style={{ color: "black" }} />}
             //   defaultValue=`${New Date()}`
           />

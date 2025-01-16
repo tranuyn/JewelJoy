@@ -23,7 +23,31 @@ export interface Customer {
   danhSachSanPhamDaMua: string[] | null;
 }
 
-const columns = [
+export interface Customer {
+  id: string;
+  name: string;
+  gioiTinh: string;
+  email: string;
+  phoneNumber: string;
+  dateOfBirth: string;
+  ngayDangKyThanhVien: string;
+  danhSachSanPhamDaMua: string[] | null;
+}
+
+interface PurchaseCustomer {
+  id: string;
+  customerName: string;
+  cccd: string;
+  sdt: string | null;
+  totalPrice: number;
+  createdAt: string;
+  customerId?: {
+    name: string;
+    phoneNumber: string;
+  };
+}
+
+const sellColumns = [
   { field: "ID", headerName: "ID khách hàng" },
   { field: "name", headerName: "Tên khách hàng" },
   { field: "dateOfBirth", headerName: "Ngày sinh" },
@@ -32,12 +56,26 @@ const columns = [
   { field: "gender", headerName: "Giới tính" },
   { field: "registrationDate", headerName: "Ngày đăng ký" },
 ];
+
+const buyColumns = [
+  { field: "name", headerName: "Tên khách hàng" },
+  { field: "phoneNumber", headerName: "SDT" },
+  { field: "cccd", headerName: "CCCD" },
+  { field: "purchaseCount", headerName: "SL mua" },
+  { field: "totalSpent", headerName: "Tổng tiền" },
+  { field: "lastPurchaseDate", headerName: "Ngày mua gần nhất" },
+];
 type SnackbarSeverity = "success" | "error" | "warning" | "info";
 
 const CustomerManagementPage: React.FC = () => {
   const [customers, setCustomers] = useState<Customer[]>([]);
+  const [purchaseCustomers, setPurchaseCustomers] = useState<
+    PurchaseCustomer[]
+  >([]);
   const [filteredCustomers, setFilteredCustomers] = useState<Customer[]>([]);
-
+  const [filteredPurchaseCustomers, setFilteredPurchaseCustomers] = useState<
+    PurchaseCustomer[]
+  >([]);
   const [activeTab, setActiveTab] = useState<string>("Khách hàng bán");
   const [searchKeyword, setSearchKeyword] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -47,41 +85,27 @@ const CustomerManagementPage: React.FC = () => {
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [customerId, setCustomerId] = useState("");
   const [rowClicked, setRowClicked] = useState<Customer | null>(null);
-  const [snackbarSeverity, setSnackbarSeverity] =
-    useState<SnackbarSeverity>("info");
-  const handleCloseSnackbar = () => {
-    setSnackbarVisible(false);
-  };
+  const [snackbarSeverity, setSnackbarSeverity] = useState<
+    "success" | "error" | "warning" | "info"
+  >("info");
+
   useEffect(() => {
     fetchCustomers();
+    fetchPurchaseCustomers();
   }, []);
+
   useEffect(() => {
     filterCustomers();
-  }, [searchKeyword, customers]);
-  const filterCustomers = () => {
-    if (!searchKeyword.trim()) {
-      setFilteredCustomers(customers);
-      return;
+  }, [searchKeyword, customers, purchaseCustomers, activeTab]);
+
+  const fetchPurchaseCustomers = async () => {
+    try {
+      const response = await fetch("http://localhost:8081/billMua");
+      const data = await response.json();
+      setPurchaseCustomers(data);
+    } catch (error) {
+      console.error("Error fetching purchase customers:", error);
     }
-
-    const keyword = searchKeyword.toLowerCase().trim();
-    const filtered = customers.filter((customer) => {
-      return (
-        customer.name.toLowerCase().includes(keyword) ||
-        customer.email?.toLowerCase().includes(keyword) ||
-        customer.phoneNumber?.toLowerCase().includes(keyword) ||
-        customer.id.toLowerCase().includes(keyword) ||
-        formatDate(customer.dateOfBirth).toLowerCase().includes(keyword) ||
-        formatDate(customer.ngayDangKyThanhVien)
-          .toLowerCase()
-          .includes(keyword) ||
-        (customer.gioiTinh === "MALE" ? "Nam" : "Nữ")
-          .toLowerCase()
-          .includes(keyword)
-      );
-    });
-
-    setFilteredCustomers(filtered);
   };
 
   const fetchCustomers = async () => {
@@ -94,25 +118,92 @@ const CustomerManagementPage: React.FC = () => {
     }
   };
 
-  const formatDate = (dateString: string | null) => {
-    if (!dateString) return "";
-    return new Date(dateString).toLocaleDateString();
+  const filterCustomers = () => {
+    const keyword = searchKeyword.toLowerCase().trim();
+
+    if (activeTab === "Khách hàng bán") {
+      const filtered = customers.filter((customer) =>
+        !keyword
+          ? true
+          : customer.name?.toLowerCase().includes(keyword) ||
+            customer.email?.toLowerCase().includes(keyword) ||
+            customer.phoneNumber?.toLowerCase().includes(keyword) ||
+            customer.id?.toLowerCase().includes(keyword)
+      );
+      setFilteredCustomers(filtered);
+    } else {
+      const filtered = purchaseCustomers.filter((customer) =>
+        !keyword
+          ? true
+          : customer.customerName?.toLowerCase().includes(keyword) ||
+            customer.cccd?.toLowerCase().includes(keyword) ||
+            customer.customerId?.phoneNumber?.toLowerCase().includes(keyword)
+      );
+      setFilteredPurchaseCustomers(filtered);
+    }
   };
 
-  const transformedData = filteredCustomers.map((customer) => ({
-    ID: customer.id,
-    name: customer.name,
-    email: customer.email || "N/A",
-    dateOfBirth: formatDate(customer.dateOfBirth),
-    phoneNumber: customer.phoneNumber || "N/A",
-    orderCount: customer.danhSachSanPhamDaMua?.length || 0,
-    gender: customer.gioiTinh === "MALE" ? "Nam" : "Nữ",
-    registrationDate: formatDate(customer.ngayDangKyThanhVien),
-  }));
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return "";
+    const options: Intl.DateTimeFormatOptions = {
+      day: "2-digit",
+      month: "2-digit",
+      year: "2-digit",
+    };
+    return new Intl.DateTimeFormat("vi-VN", options).format(
+      new Date(dateString)
+    );
+  };
+
+  const transformSellData = () => {
+    return filteredCustomers.map((customer) => ({
+      ID: customer.id,
+      name: customer.name,
+      dateOfBirth: formatDate(customer.dateOfBirth),
+      phoneNumber: customer.phoneNumber || "N/A",
+      orderCount: customer.danhSachSanPhamDaMua?.length || 0,
+      gender: customer.gioiTinh === "MALE" ? "Nam" : "Nữ",
+      registrationDate: formatDate(customer.ngayDangKyThanhVien),
+    }));
+  };
+
+  const transformBuyData = () => {
+    // Group purchases by customer (either by CCCD for non-members or by customerId for members)
+    const customerPurchases = purchaseCustomers.reduce((acc, purchase) => {
+      const key = purchase.customerId?.name || purchase.customerName;
+      if (!acc[key]) {
+        acc[key] = {
+          name: purchase.customerId?.name || purchase.customerName,
+          phoneNumber:
+            purchase.customerId?.phoneNumber || purchase.sdt || "N/A",
+          cccd: purchase.cccd || "N/A",
+          purchaseCount: 0,
+          totalSpent: 0,
+          lastPurchaseDate: purchase.createdAt,
+        };
+      }
+      acc[key].purchaseCount++;
+      acc[key].totalSpent += purchase.totalPrice;
+      if (new Date(purchase.createdAt) > new Date(acc[key].lastPurchaseDate)) {
+        acc[key].lastPurchaseDate = purchase.createdAt;
+      }
+      return acc;
+    }, {} as Record<string, any>);
+
+    return Object.values(customerPurchases).map((customer) => ({
+      ...customer,
+      totalSpent: new Intl.NumberFormat("vi-VN", {
+        style: "currency",
+        currency: "VND",
+      }).format(customer.totalSpent),
+      lastPurchaseDate: formatDate(customer.lastPurchaseDate),
+    }));
+  };
 
   const handleSearch = (value: string) => {
     setSearchKeyword(value);
   };
+
   const handleDelete = async (): Promise<void> => {
     try {
       if (rowClicked) {
@@ -148,32 +239,55 @@ const CustomerManagementPage: React.FC = () => {
       setIsDeleteModalOpen(false);
     }
   };
-
   const handleUpdate = async (formData: FormData): Promise<void> => {
     try {
-      // customerId
-      console.log("Customer: " + rowClicked?.id);
+      if (!rowClicked?.id) {
+        throw new Error("No customer selected");
+      }
+
+      const updatedCustomer = {
+        name: formData.name || rowClicked.name,
+        gioiTinh: formData.gioiTinh
+          ? formData.gioiTinh === "Nam"
+            ? "MALE"
+            : "FEMALE"
+          : rowClicked.gioiTinh,
+        phoneNumber: formData.phoneNumber || rowClicked.phoneNumber,
+        dateOfBirth: formData.dateOfBirth
+          ? new Date(formData.dateOfBirth).toISOString()
+          : rowClicked.dateOfBirth,
+        email: formData.email || rowClicked.email,
+        ngayDangKyThanhVien: formData.registrationDate
+          ? new Date(formData.registrationDate).toISOString()
+          : rowClicked.ngayDangKyThanhVien,
+      };
+
       const response = await fetch(
-        `http://localhost:8081/customer/${rowClicked?.id}`,
+        `http://localhost:8081/customer/${rowClicked.id}`,
         {
           method: "PATCH",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(formData),
+          body: JSON.stringify(updatedCustomer),
         }
       );
 
-      if (response.ok) {
-        setSnackbarSeverity("success");
-        setSnackbarMessage("Cập nhật khách hàng thành công!");
-        setSnackbarVisible(true);
-        setIsModalUpdateOpen(false);
-        await fetchCustomers();
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to update customer");
       }
+
+      setSnackbarSeverity("success");
+      setSnackbarMessage("Cập nhật khách hàng thành công!");
+      setSnackbarVisible(true);
+      setIsModalUpdateOpen(false);
+      await fetchCustomers();
     } catch (error) {
       setSnackbarSeverity("error");
-      setSnackbarMessage("Error cập nhật khách hàng!");
+      setSnackbarMessage(
+        error instanceof Error ? error.message : "Error cập nhật khách hàng!"
+      );
       setSnackbarVisible(true);
       setIsModalUpdateOpen(false);
     }
@@ -188,36 +302,49 @@ const CustomerManagementPage: React.FC = () => {
     registrationDate?: string | number;
   }): Promise<void> => {
     try {
-      console.log("form data: " + JSON.stringify(formData));
+      const formatDate = (dateString: string | number) => {
+        const date = new Date(dateString);
+        return date.toISOString();
+      };
+
+      const requestBody = {
+        name: formData.name,
+        gioiTinh: formData.gioiTinh === "Nam" ? "MALE" : "FEMALE",
+        phoneNumber: formData.phoneNumber,
+        dateOfBirth: formatDate(formData.dateOfBirth),
+        email: formData.email || undefined,
+        ngayDangKyThanhVien: formData.registrationDate
+          ? formatDate(formData.registrationDate)
+          : undefined,
+      };
+
+      console.log("Request body:", JSON.stringify(requestBody));
 
       const response = await fetch("http://localhost:8081/customer/create", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          name: formData.name,
-          gioiTinh: formData.gioiTinh === "Nam" ? "MALE" : "FEMALE",
-          phoneNumber: formData.phoneNumber,
-          dateOfBirth: formData.dateOfBirth,
-          email: formData.email || undefined,
-          ngayDangKyThanhVien: formData.registrationDate,
-        }),
+        body: JSON.stringify(requestBody),
       });
-      console.log("response: " + JSON.stringify(response));
+      console.log("response body:", JSON.stringify(response));
 
-      if (response.ok) {
-        setSnackbarSeverity("success");
-        setSnackbarMessage("Thêm khách hàng thành công!");
-        setSnackbarVisible(true);
-        setIsModalOpen(false);
-        await fetchCustomers();
-      } else {
-        throw new Error("Failed to add customer");
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to add customer");
       }
+
+      setSnackbarSeverity("success");
+      setSnackbarMessage("Thêm khách hàng thành công!");
+      setSnackbarVisible(true);
+      setIsModalOpen(false);
+      await fetchCustomers();
     } catch (error) {
+      console.error("Error adding customer:", error);
       setSnackbarSeverity("error");
-      setSnackbarMessage("Error thêm khách hàng!");
+      setSnackbarMessage(
+        error instanceof Error ? error.message : "Error thêm khách hàng!"
+      );
       setSnackbarVisible(true);
       setIsModalOpen(false);
     }
@@ -238,26 +365,23 @@ const CustomerManagementPage: React.FC = () => {
           marginLeft: "20px",
         }}
       >
-        <BtnComponent
-          btnColorType="primary"
-          btnText="Thêm khách hàng"
-          onClick={() => setIsModalOpen(true)}
-        />
-        <AddCustomer
-          isModalOpen={isModalOpen}
-          setIsModalOpen={setIsModalOpen}
-          handleAdd={handleAdd}
-        />
+        {activeTab === "Khách hàng bán" && (
+          <BtnComponent
+            btnColorType="primary"
+            btnText="Thêm khách hàng"
+            onClick={() => setIsModalOpen(true)}
+          />
+        )}
         <Box sx={{ marginRight: "300px" }}>
-          {/* <TabBar
+          <TabBar
             tabs={tabs}
             onTabChange={setActiveTab}
             defaultTab="Khách hàng bán"
             styleType="custom"
-          /> */}
+          />
         </Box>
         <SearchComponent
-          placeholder="Search customers..."
+          placeholder="Tìm kiếm khách hàng..."
           keyword={searchKeyword}
           onSearch={handleSearch}
         />
@@ -266,31 +390,42 @@ const CustomerManagementPage: React.FC = () => {
       <div style={{ padding: "10px" }}></div>
 
       <TableComponent
-        columns={columns}
-        data={transformedData}
-        onRowClick={(row) =>
-          setRowClicked({
-            id: row.ID,
-            name: row.name,
-            gioiTinh: row.gender === "Nam" ? "MALE" : "FEMALE",
-            email: row.email,
-            phoneNumber: row.phoneNumber,
-            dateOfBirth: row.dateOfBirth,
-            ngayDangKyThanhVien: row.registrationDate,
-            danhSachSanPhamDaMua: [],
-          })
+        columns={activeTab === "Khách hàng bán" ? sellColumns : buyColumns}
+        data={
+          activeTab === "Khách hàng bán"
+            ? transformSellData()
+            : transformBuyData()
         }
-        onEdit={(row) => setIsModalUpdateOpen(true)}
-        onDelete={(row) => setIsDeleteModalOpen(true)}
+        onRowClick={(row) => {
+          if (activeTab === "Khách hàng bán") {
+            const customer = customers.find((c) => c.id === row.ID);
+            setRowClicked(customer || null);
+          }
+        }}
+        onEdit={
+          activeTab === "Khách hàng bán"
+            ? (row) => setIsModalUpdateOpen(true)
+            : undefined
+        }
+        onDelete={
+          activeTab === "Khách hàng bán"
+            ? (row) => setIsDeleteModalOpen(true)
+            : undefined
+        }
       />
 
+      {/* Keep existing modals */}
+      <AddCustomer
+        isModalOpen={isModalOpen}
+        setIsModalOpen={setIsModalOpen}
+        handleAdd={handleAdd}
+      />
       <UpdateCustomer
         isModalOpen={isModalUpdateOpen}
         setIsModalOpen={setIsModalUpdateOpen}
         initialData={rowClicked}
         handleUpdate={handleUpdate}
       />
-
       <DeleteComponent
         isModalOpen={isDeleteModalOpen}
         setIsModalOpen={setIsDeleteModalOpen}
@@ -301,7 +436,7 @@ const CustomerManagementPage: React.FC = () => {
         snackbarSeverity={snackbarSeverity}
         message={snackbarMessage}
         show={snackbarVisible}
-        onClose={handleCloseSnackbar}
+        onClose={() => setSnackbarVisible(false)}
         autoHideDuration={5000}
       />
     </div>
