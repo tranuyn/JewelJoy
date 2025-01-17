@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Box, Modal } from "@mui/material";
+import { Box, Modal, FormControl, Select, MenuItem, OutlinedInput, Chip } from "@mui/material";
 import TextBox from "../../component/TextBox/TextBox";
 import BtnComponent from "../../component/BtnComponent/BtnComponent";
 import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
@@ -19,6 +19,13 @@ interface ServiceFormData {
   serviceDescription: string;
   serviceUrl: string | null;
   price: string;
+}
+
+interface BookingFormData {
+  customerName: string;
+  customerPhone: string;
+  customerGender: string;
+  phieuServiceStatus: string;
 }
 
 const formatDateToISO = (date: string): string => {
@@ -41,10 +48,17 @@ const DynamicUpdateForm: React.FC<DynamicUpdateFormProps> = ({
     serviceUrl: null,
     price: "",
   });
+  const [bookingFormData, setBookingFormData] = useState<BookingFormData>({
+    customerName: "",
+    customerPhone: "",
+    customerGender: "",
+    phieuServiceStatus: "",
+  });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
   if (currentData) {
+    if (formType === "Dịch vụ") {
     setFormData({
       serviceName: currentData.serviceName || "",
       serviceDescription: currentData.serviceDescription || "",
@@ -52,7 +66,15 @@ const DynamicUpdateForm: React.FC<DynamicUpdateFormProps> = ({
       price: currentData.price?.toString() || "",
     });
     setSelectedImage(currentData.serviceUrl || "https://via.placeholder.com/50");
+  } else if (formType === "Đặt lịch") {
+    setBookingFormData({
+      customerName: currentData.customerName || "",
+      customerPhone: currentData.customerPhone || "",
+      customerGender: currentData.customerGender || "",
+      phieuServiceStatus: currentData.phieuServiceStatus || "",
+    });
   }
+}
 }, [currentData]);
 
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -68,64 +90,162 @@ const DynamicUpdateForm: React.FC<DynamicUpdateFormProps> = ({
   };
 
   const handleSubmit = async () => {
-    if (formType !== "Dịch vụ") return;
+    if (formType == "Dịch vụ") {
+      setIsSubmitting(true);
 
-    setIsSubmitting(true);
+      try {
+        let uploadedImageUrl = selectedImage;
+        if (imageFile) {
+          uploadedImageUrl = await uploadImages(imageFile);
+          if (!uploadedImageUrl) throw new Error("Failed to upload image");
+        }
+        const updates: Partial<Service> = {
+          id: currentData.id, 
+          serviceName: formData.serviceName,
+          serviceDescription: formData.serviceDescription,
+          serviceUrl: uploadedImageUrl,
+          price: parseFloat(formData.price)
+        };
+  
+        
+        if (formData.serviceName !== currentData.serviceName) {
+          updates.serviceName = formData.serviceName;
+        }
+        if (formData.serviceDescription !== currentData.serviceDescription) {
+          updates.serviceDescription = formData.serviceDescription;
+        }
+        if (uploadedImageUrl !== currentData.serviceUrl) {
+          updates.serviceUrl = uploadedImageUrl;
+        }
+        if (formData.price !== currentData.price?.toString()) {
+          updates.price = parseFloat(formData.price);
+        }
+  
+        const response = await fetch(`http://localhost:8081/service/${currentData.id}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(updates),
+        });
+        if (!response.ok) {
+          throw new Error("Failed to create service");
+        }
+  
+        if (!response.ok) {
+          throw new Error("Failed to update service");
+        }
+  
+        const updatedService = await response.json();
+        
+        await handleUpdate(updatedService);    
+        setIsModalOpen(false);
+      } catch (error) {
+        console.error("Error creating service:", error);
+        alert("Failed to create service. Please try again.");
+      } finally {
+        setIsSubmitting(false);
+      }
+    } else {
+      setIsSubmitting(true);
+      try {
+        const updates = { 
+          customerName: bookingFormData.customerName,
+          customerPhone: bookingFormData.customerPhone,
+          customerGender: bookingFormData.customerGender,
+          phieuServiceStatus: bookingFormData.phieuServiceStatus,
+        };  console.log("update", updates);
 
-    try {
-      let uploadedImageUrl = selectedImage;
-      if (imageFile) {
-        uploadedImageUrl = await uploadImages(imageFile);
-        if (!uploadedImageUrl) throw new Error("Failed to upload image");
-      }
-      const updates: Partial<Service> = {
-        id: currentData.id, // Keep the original ID
-        serviceName: formData.serviceName,
-        serviceDescription: formData.serviceDescription,
-        serviceUrl: uploadedImageUrl,
-        price: parseFloat(formData.price)
-      };
+  
+        const response = await fetch(`http://localhost:8081/phieuDichVu/${currentData.id}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(updates),
+        });
+        console.log("update response", JSON.stringify(response));
 
-      
-      // Only include changed fields
-      if (formData.serviceName !== currentData.serviceName) {
-        updates.serviceName = formData.serviceName;
-      }
-      if (formData.serviceDescription !== currentData.serviceDescription) {
-        updates.serviceDescription = formData.serviceDescription;
-      }
-      if (uploadedImageUrl !== currentData.serviceUrl) {
-        updates.serviceUrl = uploadedImageUrl;
-      }
-      if (formData.price !== currentData.price?.toString()) {
-        updates.price = parseFloat(formData.price);
-      }
+         if (!response.ok) {
+          // console.log("update response", JSONresponse);
 
-      const response = await fetch(`http://localhost:8081/service/${currentData.id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(updates),
-      });
-      if (!response.ok) {
-        throw new Error("Failed to create service");
+          throw new Error("Failed to update booking");
+          
+        }
+  
+        const updatedBooking = await response.json();
+        await handleUpdate(updatedBooking);
+        setIsModalOpen(false);
+      } catch (error) {
+        console.error("Error updating booking:", error);
+        alert("Failed to update booking. Please try again.");
+      } finally {
+        setIsSubmitting(false);
       }
-
-      if (!response.ok) {
-        throw new Error("Failed to update service");
-      }
-
-      const updatedService = await response.json();
-      
-      await handleUpdate(updatedService);    
-      setIsModalOpen(false);
-    } catch (error) {
-      console.error("Error creating service:", error);
-      alert("Failed to create service. Please try again.");
-    } finally {
-      setIsSubmitting(false);
     }
+
+    // setIsSubmitting(true);
+
+    // try {
+    //   let uploadedImageUrl = selectedImage;
+    //   if (imageFile) {
+    //     uploadedImageUrl = await uploadImages(imageFile);
+    //     if (!uploadedImageUrl) throw new Error("Failed to upload image");
+    //   }
+    //   const updates: Partial<Service> = {
+    //     id: currentData.id, 
+    //     serviceName: formData.serviceName,
+    //     serviceDescription: formData.serviceDescription,
+    //     serviceUrl: uploadedImageUrl,
+    //     price: parseFloat(formData.price)
+    //   };
+
+      
+    //   if (formData.serviceName !== currentData.serviceName) {
+    //     updates.serviceName = formData.serviceName;
+    //   }
+    //   if (formData.serviceDescription !== currentData.serviceDescription) {
+    //     updates.serviceDescription = formData.serviceDescription;
+    //   }
+    //   if (uploadedImageUrl !== currentData.serviceUrl) {
+    //     updates.serviceUrl = uploadedImageUrl;
+    //   }
+    //   if (formData.price !== currentData.price?.toString()) {
+    //     updates.price = parseFloat(formData.price);
+    //   }
+
+    //   const response = await fetch(`http://localhost:8081/service/${currentData.id}`, {
+    //     method: "PUT",
+    //     headers: {
+    //       "Content-Type": "application/json",
+    //     },
+    //     body: JSON.stringify(updates),
+    //   });
+    //   if (!response.ok) {
+    //     throw new Error("Failed to create service");
+    //   }
+
+    //   if (!response.ok) {
+    //     throw new Error("Failed to update service");
+    //   }
+
+    //   const updatedService = await response.json();
+      
+    //   await handleUpdate(updatedService);    
+    //   setIsModalOpen(false);
+    // } catch (error) {
+    //   console.error("Error creating service:", error);
+    //   alert("Failed to create service. Please try again.");
+    // } finally {
+    //   setIsSubmitting(false);
+    // }
+  };
+
+  const handleBookingInputChange = (field: keyof BookingFormData, value: any) => {
+    setBookingFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
   };
 
   const handleInputChange = (field: keyof ServiceFormData, value: string | number) => {
@@ -225,44 +345,43 @@ const DynamicUpdateForm: React.FC<DynamicUpdateFormProps> = ({
             datatype="string"
             title="Tên khách hàng *"
             placeholder="Nhập tên khách hàng"
-            onChange={(value) => {}}
+            onChange={(value) => handleBookingInputChange("customerName", value)}
             defaultValue={currentData?.customerName || ""}
           />
           <TextBox
             datatype="string"
             title="Số điện thoại *"
             placeholder="Nhập số điện thoại"
-            onChange={(value) => {}}
-            defaultValue={currentData?.phoneNumber || ""}
+            onChange={(value) => handleBookingInputChange("customerPhone", value)}
+            defaultValue={currentData?.customerPhone || ""}
           />
-          <TextBox
-            datatype="string"
-            title="Mã dịch vụ *"
-            placeholder="Nhập mã dịch vụ"
-            onChange={(value) => {}}
-            defaultValue={currentData?.serviceCode || ""}
-          />
-          <TextBox
-            datatype="string"
-            title="Giới tính"
-            placeholder="Nhập giới tính"
-            onChange={(value) => {}}
-            defaultValue={currentData?.gender || ""}
-          />
-          <TextBox
-            datatype="date"
-            title="Ngày đăng ký *"
-            placeholder="Chọn ngày đăng ký"
-            onChange={(value) => {}}
-            defaultValue={currentData?.registrationDate ? formatDateToISO(currentData.registrationDate) : ""}
-          />
-          <TextBox
-            datatype="string"
-            title="Tình trạng dịch vụ *"
-            placeholder="Nhập tình trạng dịch vụ"
-            onChange={(value) => {}}
-            defaultValue={currentData?.serviceStatus || ""}
-          />
+            {/* <TextBox
+              datatype="string"
+              title="Giới tính"
+              placeholder="Nhập giới tính"
+              onChange={(value) => {}}
+              defaultValue={currentData?.gender || ""}
+            /> */}
+            <FormControl fullWidth style={{ marginBottom: "8px" }}>
+              <div style={{ marginBottom: "8px", color: "#264850" }}>Giới tính</div>
+              <Select
+          onChange={(e) => handleBookingInputChange("customerGender", e.target.value)}
+          defaultValue={currentData?.customerGender || ""}
+              >
+                <MenuItem value="Female">Nữ</MenuItem>
+                <MenuItem value="Male">Nam</MenuItem>
+              </Select>
+            </FormControl>
+          <FormControl fullWidth style={{ marginBottom: "8px" }}>
+              <div style={{ marginBottom: "8px", color: "#264850" }}>Trạng thái</div>
+              <Select
+          onChange={(e) => handleBookingInputChange("phieuServiceStatus", e.target.value)}
+          defaultValue={currentData?.phieuServiceStatus || ""}
+              >
+                <MenuItem value="NOT_YET">Chưa hoàn thành</MenuItem>
+                <MenuItem value="COMPLETED">Hoàn thành</MenuItem>
+              </Select>
+            </FormControl>
         </>
       );
     }
