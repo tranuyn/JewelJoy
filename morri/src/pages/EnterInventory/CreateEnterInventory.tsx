@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, act } from "react";
 import "./style.css";
 import InputCpn from "./inputComponent";
 import ProductForm from "./ProductForm";
@@ -148,7 +148,7 @@ const CreateEI: React.FC = () => {
   }, [formCount]);
   useEffect(() => {
     console.log("Updated productForms:", formProductData);
-  }, [formProductData]);
+  }, [formProductData, formData]);
 
   const handleInputChange = (
     event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -289,6 +289,37 @@ const CreateEI: React.FC = () => {
       alert(
         "Thông tin Nhà cung cấp không hợp lệ. Vui lòng nhập đầy đủ thông tin Nhà cung cấp."
       );
+      return;
+    }
+    let hasError = false;
+    formProductData.forEach((product) => {
+      if (product.name === "") {
+        alert("Vui lòng nhập tên cho sản phẩm " + product.name);
+        hasError = true;
+        return;
+      }
+      if (product.sellingPrice <= 0) {
+        alert("Vui lòng nhập giá bán cho sản phẩm " + product.name);
+        hasError = true;
+        return;
+      }
+      if (product.code === "") {
+        alert("Vui lòng nhập mã cho sản phẩm " + product.name);
+        hasError = true;
+        return;
+      }
+      if (product.enteredQuantity <= 0) {
+        alert("Vui lòng nhập số lượng nhập kho cho sản phẩm " + product.name);
+        hasError = true;
+        return;
+      }
+      if (product.loaiSanPham === "") {
+        alert("Vui lòng chọn loại sản phẩm cho sản phẩm " + product.name);
+        hasError = true;
+        return;
+      }
+    });
+    if (hasError) {
       return;
     }
     setError(null);
