@@ -67,14 +67,14 @@ interface BookingFormData {
   services: string[];
   nameService: string;
   description: string;
-  deliverystatus: string;
+  phieuServiceStatus: string;
   totalPrice: number;
   quantity: number;
   staffLapHoaDon: string | undefined;
   staffLamDichVu: string | undefined;
 }
 
-interface ServiceWithPrice {
+export interface ServiceWithPrice {
   id: string;
   serviceName: string;
   price: number;
@@ -104,12 +104,12 @@ const DynamicAddForm: React.FC<DynamicAddFormProps> = ({
   const [formBookingData, setFormBookingData] = useState<BookingFormData>({
     customerName: "",
     customerPhone: "",
-    customerGender: "Female", // Default value
+    customerGender: " ", // Default value
     deliveryDate: new Date().toISOString(),
     services: [],
     nameService: `#${String(Math.floor(Math.random() * 1000)).padStart(3, '0')}`,
     description: "",
-    deliverystatus: "NOT_YET",
+    phieuServiceStatus: "NOT_YET",
     totalPrice: 0,
     quantity: 1,
     staffLapHoaDon: user?.id,
@@ -169,7 +169,7 @@ const DynamicAddForm: React.FC<DynamicAddFormProps> = ({
       services: [],
       nameService: `#${String(Math.floor(Math.random() * 1000)).padStart(3, '0')}`,
       description: "",
-      deliverystatus: "NOT_YET",
+      phieuServiceStatus: "NOT_YET",
       totalPrice: 0,
       quantity: 1,
       staffLapHoaDon: user?.id,
@@ -200,15 +200,31 @@ const DynamicAddForm: React.FC<DynamicAddFormProps> = ({
 
         updateServices(newService);
       } else {
-        const bookingData = {
-          ...formBookingData,
-          totalPrice: selectedServices.reduce((sum, service) => sum + (service.price || 0), 0) * formBookingData.quantity,
-          deliveryDate: new Date(formBookingData.deliveryDate).toISOString(),
-        };
+        const deliveryDate = new Date(formBookingData.deliveryDate);
+      const formattedDeliveryDate = deliveryDate.toISOString();
+
+      const bookingData = {
+        nameService: formBookingData.nameService,
+        services: formBookingData.services.map(serviceId => serviceId), // Just pass the service IDs directly
+        description: formBookingData.description,
+        staffLapHoaDon: formBookingData.staffLapHoaDon, // Pass the ID directly
+        customerName: formBookingData.customerName,
+        customerPhone: formBookingData.customerPhone,
+        customerGender: formBookingData.customerGender,
+        staffLamDichVu: formBookingData.staffLamDichVu, // Pass the ID directly
+        quantity: formBookingData.quantity,
+        totalPrice: formBookingData.totalPrice,
+        deliveryDate: formattedDeliveryDate,
+        phieuServiceStatus: "NOT_YET" // Match the status field from the JSON
+      };
         
-        console.log("Booking data: " + JSON.stringify(bookingData));
+        console.log("Sending booking data:", JSON.stringify(bookingData));
         const newBooking = await serviceAPI.createBooking(bookingData);
-        updateServices(newBooking);
+        
+        // Make sure the parent component updates the table
+        if (typeof updateServices === 'function') {
+          updateServices(newBooking);
+        }
       }
 
       resetForms();
@@ -353,13 +369,6 @@ const DynamicAddForm: React.FC<DynamicAddFormProps> = ({
           <MenuItem value="Male">Nam</MenuItem>
         </Select>
       </FormControl>
-      <TextBox
-        datatype="date"
-        title="Ngày đăng ký *"
-        placeholder="Chọn ngày đăng ký"
-        onChange={(value) => handleBookingInputChange("deliveryDate", value)}
-        value={formBookingData.deliveryDate.split('.')[0]} // Remove milliseconds
-      />
       <FormControl fullWidth>
         <div style={{ marginBottom: "8px", color: "#264850" }}>Chọn dịch vụ *</div>
         <Select
@@ -383,13 +392,6 @@ const DynamicAddForm: React.FC<DynamicAddFormProps> = ({
           ))}
         </Select>
       </FormControl>
-      <TextBox
-        datatype="string"
-        title="Mô tả"
-        placeholder="Nhập mô tả"
-        onChange={(value) => handleBookingInputChange("description", value)}
-        value={formBookingData.description}
-      />
       <Box sx={{ mt: 2, bgcolor: '#f5f5f5', p: 2, borderRadius: 1 }}>
         <div>Số lượng dịch vụ đã chọn: {formBookingData.quantity}</div>
         <div style={{ fontWeight: 'bold', marginTop: '8px' }}>

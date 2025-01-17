@@ -142,8 +142,10 @@ const TodayTab: React.FC<Props> = ({ completedBills, onDeliveryBills }) => {
     const staffOrders: { [key: string]: number } = {};
 
     completedBills.forEach((bill) => {
-      const staffName = bill.staffName;
-      staffOrders[staffName] = (staffOrders[staffName] || 0) + 1;
+      if (bill.staffId && bill.staffName !== "Unknown") {
+        const staffName = bill.staffName;
+        staffOrders[staffName] = (staffOrders[staffName] || 0) + 1;
+      }
     });
 
     const staffNames = Object.keys(staffOrders);

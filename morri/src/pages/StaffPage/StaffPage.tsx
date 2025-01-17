@@ -29,16 +29,16 @@ export interface Staff {
 }
 
 const columns = [
-  // { field: "ID", headerName: "ID nhân viên" },
   { field: "name", headerName: "Tên nhân viên" },
   { field: "username", headerName: "Tên đăng nhập" },
   { field: "email", headerName: "Email" },
   { field: "dateOfBirth", headerName: "Ngày sinh" },
   { field: "phoneNumber", headerName: "SDT" },
+  { field: "cccd", headerName: "CCCD" },
+  { field: "address", headerName: "Địa chỉ" },
   { field: "role", headerName: "Chức vụ" },
   { field: "gender", headerName: "Giới tính" },
   { field: "ngayVaoLam", headerName: "Ngày bắt đầu" },
-  { field: "luongCoBan", headerName: "Lương cơ bản" },
 ];
 
 type SnackbarSeverity = "success" | "error" | "warning" | "info";
@@ -139,10 +139,13 @@ const StaffPage: React.FC = () => {
     email: staff.email || "N/A",
     dateOfBirth: formatDate(staff.dateOfBirth),
     phoneNumber: staff.phoneNumber || "N/A",
+    cccd: staff.cccd || "N/A",
+    address: staff.address || "N/A",
     role: formatRole(staff.role),
     gender: staff.gender === "MALE" ? "Nam" : "Nữ",
     ngayVaoLam: formatDate(staff.ngayVaoLam),
     luongCoBan: formatSalary(staff.luongCoBan),
+    avaURL: staff.avaURL // This won't be displayed but will be passed to currentData
   }));
   
   const handleSearch = (value: string) => {
@@ -205,7 +208,7 @@ const StaffPage: React.FC = () => {
     role: string | number; }
   ): Promise<void> => {
     try {
-      const token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIyMjUyMDk1N0BjaHQuZWR1LnZuIiwiaWF0IjoxNzM2MTYwMjc2LCJyb2xlIjoiQURNSU4iLCJleHAiOjE3MzYxOTYyNzZ9.vIkMqbErDcLNjw0BlxnsI9GyVHWqnWegX5LzGIxUIkk";
+      // const token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIyMjUyMDk1N0BjaHQuZWR1LnZuIiwiaWF0IjoxNzM2MTYwMjc2LCJyb2xlIjoiQURNSU4iLCJleHAiOjE3MzYxOTYyNzZ9.vIkMqbErDcLNjw0BlxnsI9GyVHWqnWegX5LzGIxUIkk";
 
       console.log("formdata:", JSON.stringify(formData)); 
       const requestData = {
@@ -225,16 +228,16 @@ const StaffPage: React.FC = () => {
 
     console.log("Request data:", requestData);
 
-    const axiosConfig = {
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
-            'Accept': 'application/json'
-        },
-        validateStatus: function (status: number) {
-            return status >= 200 && status < 300;  
-        }
-    };
+    // const axiosConfig = {
+    //     headers: {
+    //         'Content-Type': 'application/json',
+    //         'Authorization': `Bearer ${token}`,
+    //         'Accept': 'application/json'
+    //     },
+    //     validateStatus: function (status: number) {
+    //         return status >= 200 && status < 300;  
+    //     }
+    // };
 
     const response = await fetch("http://localhost:8081/user/create", {
       method: "POST",
@@ -262,32 +265,110 @@ const StaffPage: React.FC = () => {
     }
   }; 
 
-  const handleUpdate = async (): Promise<void> => {
+  // const handleUpdate = async (updatedStaff: Staff): Promise<void> => {
+  //   try {
+  //     if (!rowClicked?.id) {
+  //       throw new Error("No staff selected");
+  //     }
+  //     console.log(`http://localhost:8081/user/${rowClicked.id}`)
+  //     console.log("updatedStaff : "+JSON.stringify(updatedStaff))
+  
+  //     const response = await fetch(`http://localhost:8081/user/${rowClicked.id}`, {
+  //       method: "PUT",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: JSON.stringify({
+  //         name: updatedStaff?.name,
+  //         username: updatedStaff.username,
+  //         email: updatedStaff.email,
+  //         dateOfBirth: updatedStaff.dateOfBirth,
+  //         gender: updatedStaff.gender,
+  //         phoneNumber: updatedStaff.phoneNumber,
+  //         cccd: updatedStaff.cccd,
+  //         address: updatedStaff.address,
+  //         ngayVaoLam: updatedStaff.ngayVaoLam,
+  //         role: updatedStaff.role,
+  //         luongCoBan: updatedStaff.luongCoBan,
+  //         avaURL: updatedStaff.avaURL
+  //       }),
+  //     });
+  
+  //     if (!response.ok) {
+  //       const errorData = await response.json();
+  //       console.log("error", errorData);
+  //       throw new Error(errorData.message || "Failed to update staff");
+  //     }
+  
+  //     setSnackbarSeverity("success");
+  //     setSnackbarMessage("Cập nhật nhân viên thành công!");
+  //     setSnackbarVisible(true);
+  //     setIsModalUpdateOpen(false);
+  //     await fetchStaffs();
+  //   } catch (error) {
+  //     setSnackbarSeverity("error");
+  //     setSnackbarMessage(
+  //       error instanceof Error ? error.message : "Error cập nhật nhân viên!"
+  //     );
+  //     setSnackbarVisible(true);
+  //     setIsModalUpdateOpen(false);
+  //   }
+  // };
+  const handleUpdate = async (formData: any): Promise<void> => {
     try {
-      const response = await fetch(`http://localhost:8081/user/`, {
-        method: "PATCH",
+      if (!rowClicked?.id) {
+        throw new Error("No staff selected");
+      }
+  
+      const formatDate = (dateString: string) => {
+        if (!dateString) return null;
+        const date = new Date(dateString);
+        return date.toISOString();
+      };
+  
+      const updatedStaff = {
+        name: formData.name || rowClicked.name,
+        username: formData.username || rowClicked.username,
+        email: formData.email || rowClicked.email,
+        dateOfBirth: formData.dateOfBirth ? formatDate(formData.dateOfBirth) : rowClicked.dateOfBirth,
+        gender: formData.gender || rowClicked.gender,
+        phoneNumber: formData.phoneNumber || rowClicked.phoneNumber,
+        cccd: formData.cccd || rowClicked.cccd,
+        address: formData.address || rowClicked.address,
+        ngayVaoLam: formData.ngayVaoLam ? formatDate(formData.ngayVaoLam) : rowClicked.ngayVaoLam,
+        role: formData.role || rowClicked.role,
+        luongCoBan: formData.luongCoBan || rowClicked.luongCoBan,
+        avaURL: formData.avaURL || rowClicked.avaURL,
+        id: rowClicked.id // Keep the original ID
+      };
+  
+      const response = await fetch(`http://localhost:8081/user/${rowClicked.id}`, {
+        method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({}),
+        body: JSON.stringify(updatedStaff),
       });
-
-      if (response.ok) {
-        setSnackbarSeverity("success");
-        setSnackbarMessage("Cập nhật nhân viên thành công!");
-        setSnackbarVisible(true);
-        setIsModalUpdateOpen(false);
-        await fetchStaffs();
+  
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to update staff");
       }
+  
+      setSnackbarSeverity("success");
+      setSnackbarMessage("Cập nhật nhân viên thành công!");
+      setSnackbarVisible(true);
+      setIsModalUpdateOpen(false);
+      await fetchStaffs();
     } catch (error) {
       setSnackbarSeverity("error");
-      setSnackbarMessage("Error cập nhật nhân viên!");
+      setSnackbarMessage(
+        error instanceof Error ? error.message : "Error cập nhật nhân viên!"
+      );
       setSnackbarVisible(true);
       setIsModalUpdateOpen(false);
     }
   };
-
-
   return (
     <div className="staff-management">
       <Header title="Quản lý nhân viên" />
@@ -322,7 +403,8 @@ const StaffPage: React.FC = () => {
         //     setSelectedStaff(staffToEdit);
         //     setIsModalUpdateOpen(true);
         //   }}
-        onRowClick={(row) =>
+        onRowClick={(row) => {
+          console.log("row: " + JSON.stringify(row));
           setRowClicked({
             id: row.ID,
             name: row.name,
@@ -334,11 +416,11 @@ const StaffPage: React.FC = () => {
             gender: row.gender === "Nam" ? "MALE" : "FEMALE",
             ngayVaoLam: row.ngayVaoLam,
             luongCoBan: row.luongCoBan,
-            cccd: row.cccd || '',
-            address: row.address || '', 
-            avaURL: row.avaURL || null,
-          })
-        }
+            cccd: row.cccd,
+            address: row.address,
+            avaURL: row.avaURL, // This will be passed to UpdateStaffForm
+          });
+        }}
         onEdit={(row) => setIsModalUpdateOpen(true)}
           onDelete={(row) => setIsDeleteModalOpen(true)}
       />
