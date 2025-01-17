@@ -28,15 +28,18 @@ interface Staff {
 }
 
 interface ServiceBooking {
+  id: string;  // Added this line
+
   nameService: string;
   customerName: string;
-  customerPhoneNumber: string;
+  customerPhone: string;
+  customerGender: string;
   services: { serviceName: string }[];
   description: string;
   staffLapHoaDon: Staff | null;
   totalPrice: number;
   createdAt: string;
-  deliverystatus: string;
+  phieuServiceStatus: string;
   quantity: number;
 }
 
@@ -71,13 +74,14 @@ const serviceAPI = {
 
 const bookingColumns = [
   { field: "customerName", headerName: "Tên khách hàng" },
-  { field: "customerPhoneNumber", headerName: "SDT khách hàng" },
+  { field: "customerPhone", headerName: "SDT khách hàng" },
+  { field: "customerGender", headerName: "Giới tính" },
   { field: "createdAt", headerName: "Ngày tạo" },
-  { field: "deliverystatus", headerName: "Trạng thái" },
+  { field: "phieuServiceStatus", headerName: "Trạng thái" },
   { field: "services", headerName: "Các dịch vụ" },
   { field: "quantity", headerName: "Số lượng" },
   { field: "totalPrice", headerName: "Tổng tiền" },
-  { field: "staffName", headerName: "Nhân viên lập" },
+  { field: "staffLapHoaDon", headerName: "Nhân viên lập" },
 ];
 
 const ServicePage: React.FC = () => {
@@ -119,7 +123,7 @@ const ServicePage: React.FC = () => {
     }
 
     try {
-      await serviceAPI.deleteService(selectedService.id);
+       await serviceAPI.deleteService(selectedService.id);
       setServices(prevServices => 
         prevServices.filter(service => service.id !== selectedService.id)
       );
@@ -151,19 +155,21 @@ const ServicePage: React.FC = () => {
       
       console.log("Deleting booking:", selectedBooking);
       setIsDeleteModalOpen(true);
-      await handleDeleteBooking();
+      // await handleDeleteBooking();
     }  
 
   }
   const handleDeleteBooking = async () => { 
 
       if (!selectedBooking?.nameService) {
-      alert('HEHHEHEH');
+      // alert('HEHHEHEH');
       return;
     }
 
     try {
-      await serviceAPI.deleteBooking(selectedBooking.nameService);
+      console.log("selectedService", selectedBooking) 
+
+      await serviceAPI.deleteBooking(selectedBooking.id);
       setBookings(prevBookings => 
         prevBookings.filter(booking => booking.nameService !== selectedBooking.nameService)
       );
@@ -206,7 +212,7 @@ const ServicePage: React.FC = () => {
       ...booking,
       createdAt: new Date(booking.createdAt).toLocaleDateString("vi-VN"),
       totalPrice: `${booking.totalPrice.toLocaleString("vi-VN")} VND`,
-      staffName: booking.staffLapHoaDon?.name || "Chưa phân công",
+      staffLapHoaDon: booking.staffLapHoaDon?.name || "Chưa phân công",
       services: booking.services.map(s => s.serviceName).join(", ")
     }));
   };
@@ -294,10 +300,10 @@ const ServicePage: React.FC = () => {
               data={formatBookingData(
                 bookings.filter(booking =>
                   booking.customerName.toLowerCase().includes(searchKeyword) ||
-                  booking.customerPhoneNumber.includes(searchKeyword)
+                  booking.customerPhone.includes(searchKeyword)
                 )
               )}
-              onRowClick={(row) => {handleDeleteClick(row);  console.log("rơ click: ", row)}}
+              onRowClick={(row) =>   console.log("rơ click: ", row)}
               onEdit={handleEdit}
               onDelete={handleDeleteClick}
             />

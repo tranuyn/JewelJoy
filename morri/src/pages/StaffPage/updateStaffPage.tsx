@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Box, Modal } from "@mui/material";
+import { Avatar, Box, Modal } from "@mui/material";
 import TextBox from "../../component/TextBox/TextBox";
 import BtnComponent from "../../component/BtnComponent/BtnComponent";
 import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
@@ -33,8 +33,14 @@ interface StaffFormData {
   ngayVaoLam: string;
   role: string;
   luongCoBan: string;
-  avaURL: string | null;
+  avaURL: string | undefined;
 }
+
+const roleOptions = [
+  { label: "Admin", value: "ADMIN" },
+  { label: "Nhân viên kho", value: "INVENTORY_STAFF" },
+  { label: "Nhân viên bán hàng", value: "SALE_STAFF" },
+];
 
 const UpdateStaffForm: React.FC<UpdateStaffFormProps> = ({
   isModalOpen,
@@ -51,7 +57,7 @@ const UpdateStaffForm: React.FC<UpdateStaffFormProps> = ({
     name: "",
     username: "",
     email: "",
-    dateOfBirth: "",
+    dateOfBirth: new Date().toISOString().split("T")[0],
     gender: "",
     phoneNumber: "",
     cccd: "",
@@ -59,26 +65,32 @@ const UpdateStaffForm: React.FC<UpdateStaffFormProps> = ({
     ngayVaoLam: new Date().toISOString().split("T")[0],
     role: "",
     luongCoBan: "",
-    avaURL: null,
+    avaURL: "",
   });
 
   useEffect(() => {
     if (currentData) {
+      const formatDate = (dateString: string | null) => {
+        if (!dateString) return '';
+        const date = new Date(dateString);
+        return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+      };
+  console.log("current", currentData)
       setFormData({
-        name: currentData.name || "",
-        username: currentData.username || "",
-        email: currentData.email || "",
-        dateOfBirth: currentData.dateOfBirth || "",
-        gender: currentData.gender || "",
-        phoneNumber: currentData.phoneNumber || "",
-        cccd: currentData.cccd || "",
-        address: currentData.address || "",
-        ngayVaoLam: currentData.ngayVaoLam || new Date().toISOString().split("T")[0],
-        role: currentData.role || "",
-        luongCoBan: currentData.luongCoBan?.toString() || "",
-        avaURL: currentData.avaURL || null,
+        name: currentData.name || '',
+        username: currentData.username || '',
+        email: currentData.email || '',
+        dateOfBirth: formatDate(currentData.dateOfBirth),
+        gender: currentData.gender || '',
+        phoneNumber: currentData.phoneNumber || '',
+        cccd: currentData.cccd || '',
+        address: currentData.address || '',
+        ngayVaoLam: formatDate(currentData.ngayVaoLam),
+        role: currentData.role || '',
+        luongCoBan: currentData.luongCoBan?.toString() || '',
+        avaURL: currentData.avaURL || undefined,
       });
-      setSelectedImage(currentData.avaURL || "https://via.placeholder.com/50");
+      setSelectedImage(currentData.avaURL || 'https://via.placeholder.com/50');
     }
   }, [currentData]);
 
@@ -98,57 +110,93 @@ const UpdateStaffForm: React.FC<UpdateStaffFormProps> = ({
     setIsSubmitting(true);
 
     try {
-      let uploadedImageUrl = selectedImage;
-      if (imageFile) {
-        uploadedImageUrl = await uploadImages(imageFile);
-        if (!uploadedImageUrl) throw new Error("Failed to upload image");
+      // Validate required fields
+      if (!formData.name || !formData.email || !formData.role) {
+        alert("Vui lòng điền đầy đủ thông tin bắt buộc (Tên, Email, Chức vụ)");
+        return;
       }
 
-      const updates: Partial<Staff> = {
-        id: currentData?.id,
+      let uploadedImageUrl = selectedImage;
+      if (imageFile) {
+        try {
+          uploadedImageUrl = await uploadImages(imageFile);
+          if (!uploadedImageUrl) throw new Error("Upload ảnh thất bại");
+        } catch (error) {
+          console.error("Error uploading image:", error);
+          alert("Upload ảnh thất bại. Vui lòng thử lại.");
+          return;
+        }
+      }
+
+      // Create the update payload with all fields
+      const updatedStaff:any = {
+        ...currentData,
         name: formData.name,
         username: formData.username,
         email: formData.email,
-        dateOfBirth: formData.dateOfBirth,
+        dateOfBirth: formData.dateOfBirth ? `${formData.dateOfBirth}T00:00:00` : null,
         gender: formData.gender,
         phoneNumber: formData.phoneNumber,
         cccd: formData.cccd,
         address: formData.address,
-        ngayVaoLam: formData.ngayVaoLam,
+        ngayVaoLam: formData.ngayVaoLam ? `${formData.ngayVaoLam}T00:00:00` : null,
         role: formData.role,
         luongCoBan: formData.luongCoBan,
-        avaURL: uploadedImageUrl,
+        avaURL: uploadedImageUrl
       };
 
-      const response = await fetch(`http://localhost:8081/user/${currentData?.id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(updates),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to update staff");
-      }
-
-      const updatedStaff = await response.json();
       await handleUpdate(updatedStaff);
       setIsModalOpen(false);
     } catch (error) {
       console.error("Error updating staff:", error);
-      alert("Failed to update staff. Please try again.");
+      alert(error instanceof Error ? error.message : "Cập nhật thất bại. Vui lòng thử lại.");
     } finally {
       setIsSubmitting(false);
     }
   };
+const handleInputChange = (field: keyof StaffFormData, value: string) => {
+  let processedValue = value;
+  
+  // Validation logic
+  switch (field) {
+    case 'email':
+      // Basic email validation
+      if (value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+        alert('Email không hợp lệ');
+        return;
+      }
+      break;
+      
+    case 'phoneNumber':
+      // Phone number validation - only allow numbers
+      if (value && !/^\d*$/.test(value)) {
+        alert('Số điện thoại chỉ được chứa số');
+        return;
+      }
+      break;
+      
+    case 'cccd':
+      // CCCD validation - only allow numbers
+      if (value && !/^\d*$/.test(value)) {
+        alert('CCCD chỉ được chứa số');
+        return;
+      }
+      break;
+      
+    case 'luongCoBan':
+      // Salary validation - only allow numbers
+      if (value && !/^\d*$/.test(value)) {
+        alert('Lương cơ bản chỉ được chứa số');
+        return;
+      }
+      break;
+  }
 
-  const handleInputChange = (field: keyof StaffFormData, value: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
-  };
+  setFormData((prev) => ({
+    ...prev,
+    [field]: processedValue,
+  }));
+};
 
   return (
     <Modal
@@ -209,12 +257,15 @@ const UpdateStaffForm: React.FC<UpdateStaffFormProps> = ({
               )}
             </Box>
             <label htmlFor="upload-photo">
+            {/* <Avatar src={formData.avaURL}/> */}
               <input
                 style={{ display: "none" }}
                 id="upload-photo"
+                
                 type="file"
                 onChange={handleImageChange}
                 accept="image/*"
+                
               />
               <button
                 style={{
@@ -245,20 +296,22 @@ const UpdateStaffForm: React.FC<UpdateStaffFormProps> = ({
                 datatype="date"
                 title="Ngày sinh"
                 placeholder="Nhập ngày sinh"
+                defaultValue={currentData?.dateOfBirth}
                 onChange={(value) => handleInputChange("dateOfBirth", String(value))}
                 value={formData.dateOfBirth}
                 icon={<CakeIcon style={{ color: "black" }} />}
               />
             </Box>
             <Box sx={{ width: "100%" }}>
-              <TextBox
+              {/* <TextBox
                 datatype="date"
                 title="Ngày vào làm"
                 placeholder="Nhập ngày vào làm"
+                defaultValue={currentData?.ngayVaoLam}
                 onChange={(value) => handleInputChange("ngayVaoLam", String(value))}
                 value={formData.ngayVaoLam}
                 icon={<WorkIcon style={{ color: "black" }} />}
-              />
+              /> */}
             </Box>
           </Box>
 
@@ -273,15 +326,17 @@ const UpdateStaffForm: React.FC<UpdateStaffFormProps> = ({
                 datatype="string"
                 title="Tên"
                 placeholder="Nhập tên nhân viên"
+                defaultValue={currentData?.name}
                 onChange={(value) => handleInputChange("name", String(value))}
-                value={formData.name}
+                // value={formData.name}
               />
               <TextBox
                 datatype="string"
                 title="CCCD"
                 placeholder="Nhập CCCD"
+                defaultValue={currentData?.cccd}
                 onChange={(value) => handleInputChange("cccd", String(value))}
-                value={formData.cccd}
+                // value={formData.cccd}
                 icon={<CardIcon style={{ color: "black" }} />}
               />
             </Box>
@@ -296,16 +351,18 @@ const UpdateStaffForm: React.FC<UpdateStaffFormProps> = ({
                 datatype="string"
                 title="Email"
                 placeholder="Nhập Email"
+                defaultValue={currentData?.email}
                 onChange={(value) => handleInputChange("email", String(value))}
-                value={formData.email}
+                // value={formData.email}
                 icon={<EmailIcon style={{ color: "black" }} />}
               />
               <TextBox
                 datatype="string"
                 title="SDT"
                 placeholder="Nhập SDT"
+                defaultValue={currentData?.phoneNumber}
                 onChange={(value) => handleInputChange("phoneNumber", String(value))}
-                value={formData.phoneNumber}
+                // value={formData.phoneNumber}
                 icon={<PhoneIcon style={{ color: "black" }} />}
               />
             </Box>
@@ -320,20 +377,18 @@ const UpdateStaffForm: React.FC<UpdateStaffFormProps> = ({
                 datatype="select"
                 title="Chức vụ"
                 placeholder="Chọn chức vụ"
+                defaultValue={currentData?.role}
                 onChange={(value) => handleInputChange("role", String(value))}
                 value={formData.role}
-                options={[
-                  { label: "Admin", value: "ADMIN" },
-                  { label: "Nhân viên kho", value: "INVENTORY_STAFF" },
-                  { label: "Nhân viên bán hàng", value: "SALE_STAFF" },
-                ]}
+                options={roleOptions}
               />
               <TextBox
                 datatype="select"
                 title="Giới tính"
                 placeholder="Chọn giới tính"
+                defaultValue={currentData?.gender}
                 onChange={(value) => handleInputChange("gender", String(value))}
-                value={formData.gender}
+                // value={formData.gender}
                 options={[
                   { label: "Nam", value: "MALE" },
                   { label: "Nữ", value: "FEMALE" },
@@ -346,18 +401,19 @@ const UpdateStaffForm: React.FC<UpdateStaffFormProps> = ({
               datatype="string"
               title="Địa chỉ"
               placeholder="Nhập địa chỉ"
+              defaultValue={currentData?.address}
               onChange={(value) => handleInputChange("address", String(value))}
-              value={formData.address}
+              // value={formData.address}
               icon={<LocationOnIcon style={{ color: "black" }} />}
             />
 
-            <TextBox
+            {/* <TextBox
               datatype="number"
               title="Lương cơ bản"
               placeholder="Nhập lương cơ bản"
               onChange={(value) => handleInputChange("luongCoBan", String(value))}
               value={formData.luongCoBan}
-            />
+            /> */}
           </Box>
         </Box>
 
