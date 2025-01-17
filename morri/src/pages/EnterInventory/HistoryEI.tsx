@@ -87,6 +87,8 @@ const HistoryEI: React.FC = () => {
   const [selectedSort, setSelectedSort] = useState<string>("default");
   const [originalRows, setOriginalRows] = useState<Data[]>([]); // Lưu trữ data gốc
   const [displayRows, setDisplayRows] = useState<Data[]>([]); // Data đã được sort
+  const [isLoading, setIsLoading] = useState(false);
+  const [inventoryLength, setInventoryLength] = useState(0);
 
   const handleConfirmDelete = async () => {
     setLoading(true);
@@ -105,7 +107,9 @@ const HistoryEI: React.FC = () => {
       if (!response.ok) {
         alert("Xóa phiếu nhập kho thất bại");
       } else
-        setRows((prevRows) => prevRows.filter((row) => row.id !== deleteId));
+        setDisplayRows((prevRows) =>
+          prevRows.filter((row) => row.id !== deleteId)
+        );
     } catch (error) {
       console.error("Error deleting:", error);
     } finally {
@@ -151,9 +155,9 @@ const HistoryEI: React.FC = () => {
       }
 
       const data = await response.json();
-      console.log(data);
 
       // Chuyển đổi dữ liệu API để phù hợp với cấu trúc bảng
+      setInventoryLength(data.length);
       const transformedRows = data.map((item: any) => {
         return createData(
           item.id,
@@ -182,7 +186,13 @@ const HistoryEI: React.FC = () => {
                   }}
                 />
                 <div style={{ textAlign: "left" }}>
-                  <div style={{ fontWeight: "500" }}>
+                  <div
+                    style={{
+                      fontWeight: "500",
+                      wordWrap: "break-word",
+                      maxWidth: "200px",
+                    }}
+                  >
                     {product?.product?.name}
                   </div>
                   <div>SL: {product.enteredQuantity}</div>
@@ -228,13 +238,25 @@ const HistoryEI: React.FC = () => {
     switch (sortType) {
       case "newest":
         sorted = sorted.sort((a, b) => {
+          let timeA = a.date.split("\n")[1];
+          let timeB = b.date.split("\n")[1];
           const dateA = new Date(
             a.date.split("\n")[0].split("/").reverse().join("/")
           );
           const dateB = new Date(
             b.date.split("\n")[0].split("/").reverse().join("/")
           );
-          return dateB.getTime() - dateA.getTime();
+          if (dateA.getTime() !== dateB.getTime()) {
+            return dateB.getTime() - dateA.getTime();
+          }
+          const [hourA, minuteA] = timeA.split(":").map(Number);
+          const [hourB, minuteB] = timeB.split(":").map(Number);
+
+          // So sánh giờ và phút
+          if (hourA !== hourB) {
+            return hourB - hourA; // Sắp xếp theo giờ
+          }
+          return minuteB - minuteA;
         });
         break;
       case "oldest":
@@ -245,7 +267,19 @@ const HistoryEI: React.FC = () => {
           const dateB = new Date(
             b.date.split("\n")[0].split("/").reverse().join("/")
           );
-          return dateA.getTime() - dateB.getTime();
+          let timeA = a.date.split("\n")[1];
+          let timeB = b.date.split("\n")[1];
+          if (dateA.getTime() !== dateB.getTime()) {
+            return dateA.getTime() - dateB.getTime();
+          }
+          const [hourA, minuteA] = timeA.split(":").map(Number);
+          const [hourB, minuteB] = timeB.split(":").map(Number);
+
+          // So sánh giờ và phút
+          if (hourA !== hourB) {
+            return hourA - hourB; // Sắp xếp theo giờ
+          }
+          return minuteA - minuteB;
         });
         break;
       default:
@@ -264,7 +298,18 @@ const HistoryEI: React.FC = () => {
   };
 
   useEffect(() => {
-    fetchData();
+    const fetchDataF = async () => {
+      setIsLoading(true); // Set loading state to true before fetching
+      try {
+        await fetchData(); // Wait for the data to be fetched
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setIsLoading(false); // Set loading state to false after fetching
+      }
+    };
+
+    fetchDataF(); // Call the fetch function
   }, []);
 
   useEffect(() => {
@@ -285,6 +330,22 @@ const HistoryEI: React.FC = () => {
   const startRow = page * rowsPerPage;
   const endRow = startRow + rowsPerPage;
   const paginatedRows = displayRows.slice(startRow, endRow);
+
+  if (isLoading) {
+    return (
+      <div
+        style={{
+          flex: 1,
+          display: "flex",
+          height: "100vh",
+          justifyContent: "center",
+          marginTop: "20px",
+        }}
+      >
+        Đang tải dữ liệu...
+      </div>
+    );
+  }
   return (
     <div className="page-content">
       <select
@@ -306,6 +367,7 @@ const HistoryEI: React.FC = () => {
                   padding: "8px",
                   textAlign: "center",
                   maxWidth: column.id === "id" ? "200px" : "auto",
+                  wordWrap: "break-word",
                 }}
               >
                 {column.label}
@@ -341,18 +403,18 @@ const HistoryEI: React.FC = () => {
         </select>
         <button
           className="ArrowButton"
-          onClick={() => handleChangePage(page - 1)}
+          onClick={() => setPage(page - 1)}
           disabled={page === 0}
         >
           <KeyboardArrowLeftRoundedIcon />
         </button>
         <span>{` Page ${page + 1} of ${Math.ceil(
-          rows.length / rowsPerPage
+          inventoryLength / rowsPerPage
         )} `}</span>
         <button
           className="ArrowButton"
-          onClick={() => handleChangePage(page + 1)}
-          disabled={endRow >= rows.length}
+          onClick={() => setPage(page + 1)}
+          disabled={endRow >= inventoryLength}
         >
           <KeyboardArrowRightRoundedIcon />
         </button>

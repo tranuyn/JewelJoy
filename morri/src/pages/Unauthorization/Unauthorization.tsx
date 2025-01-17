@@ -7,10 +7,19 @@ import { Box } from "@mui/material";
 
 const Unauthorization: React.FC = () => {
   const navigate = useNavigate();
+  const { isAuthenticated, user, validateAuthStatus } = useAuth();
   const { logout } = useAuth();
 
   const handleGoHome = () => {
-    navigate("/home");
+    if (
+      user?.role === "ADMIN" ||
+      user?.role === "INVENTORY_STAFF" ||
+      user?.role === "SALE_STAFF"
+    ) {
+      navigate("/home");
+    } else {
+      navigate("/products");
+    }
   };
   const handleGoLogin = () => {
     logout();

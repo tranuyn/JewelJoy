@@ -87,7 +87,7 @@ const Checkout = () => {
     if (updatedProducts.length > 0) {
       handleBuyNow(updatedProducts);
     }
-  }, [totalPrice, updatedProducts, note, selectedButton, customerInfo]);
+  }, [totalPrice, updatedProducts]);
 
   const handleBuyNow = async (updatedProducts: ProductType[]) => {
     if (!staffInfo && user?.role != "CUSTOMER") {
@@ -158,7 +158,7 @@ const Checkout = () => {
     const body = {
       createAt: new Date().toISOString(),
       customer: customerInfo.id,
-      orderDetails: selectedProducts.map((product) => ({
+      orderDetails: updatedProducts.map((product) => ({
         product: product.id,
         quantity: product.quantityInBill,
         unitPrice: product.sellingPrice,
@@ -187,7 +187,7 @@ const Checkout = () => {
     if (!response.ok) {
       const errorData = await response.json();
       alert("Tạo đơn hàng thất bại: " + errorData.detail);
-      throw new Error("Không thể tạo đơn hàng");
+      return;
     }
 
     const data = await response.json();
@@ -195,7 +195,7 @@ const Checkout = () => {
     alert("Tạo đơn hàng thành công");
     navigate(`/products/checkout/${data.id}`, {
       state: {
-        selectedProducts,
+        updatedProducts,
         customerInfo,
         staffInfo,
         note: note,

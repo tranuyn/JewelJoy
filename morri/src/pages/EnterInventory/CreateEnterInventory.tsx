@@ -297,6 +297,10 @@ const CreateEI: React.FC = () => {
     const productlist = await createProduct();
     console.log("product list", productlist);
 
+    const totalPrice = formProductData.reduce((acc, product) => {
+      return acc + product.sellingPrice * product.enteredQuantity;
+    }, 0);
+
     try {
       const response = await fetch("http://localhost:8081/inventory/create", {
         method: "POST",
@@ -306,7 +310,7 @@ const CreateEI: React.FC = () => {
         body: JSON.stringify({
           supplier: formData.supplierId,
           user: formData.staffId,
-          totalPrice: 10000000,
+          totalPrice: totalPrice,
           inventoryProducts: productlist,
           name: formData.name,
         }),
@@ -315,7 +319,7 @@ const CreateEI: React.FC = () => {
       if (!response.ok) {
         const errorData = await response.json();
         alert("Tạo phiếu nhập kho thất bại: " + errorData.detail);
-        throw new Error("Không thể tạo ncc");
+        // throw new Error("Không thể tạo ncc");
       } else alert("Tạo phiếu nhập kho thành công");
     } catch (error) {
       alert(error);
@@ -337,7 +341,7 @@ const CreateEI: React.FC = () => {
       });
 
       if (!response.ok) {
-        throw new Error("Không thể tạo ncc");
+        // throw new Error("Không thể tạo ncc");
       }
 
       const data = await response.json();
@@ -395,7 +399,6 @@ const CreateEI: React.FC = () => {
           });
 
           const jsonResponse = await response.json();
-          console.log("Response from API:", jsonResponse);
           // Trả về kết quả cho sản phẩm mới
           return {
             product: jsonResponse.id,
@@ -403,6 +406,7 @@ const CreateEI: React.FC = () => {
           };
         }
       } catch (error) {
+        alert("Tạo sản phẩm thất bại: " + error);
         console.error("Lỗi khi tạo sản phẩm:", error);
         return null; // Hoặc bạn có thể trả về giá trị mặc định hoặc xử lý lỗi tùy thích
       }

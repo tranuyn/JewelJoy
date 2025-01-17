@@ -1,123 +1,183 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import TabBar from '../../component/Tabbar/TabBar';
-// import { OrderItem } from './types';
 import './orderHistory.css';
 import BackgroundOrder from "../../assets/constant/background.jpg";
+import { useAuth } from '../../services/useAuth';
 
-interface OrderItem {
-    id: number;
-    name: string;
-    quantity: number;
-    price: number;
-    type: string;
-    status: string;
-    orderTime: string;
-  }
+export interface Product {
+  id: string;
+  name: string;
+  code: string;
+  description: string;
+  sellingPrice: number;
+  imageUrl: string[];
+}
+
+export interface OrderDetail {
+  id: string;
+  product: Product;
+  quantity: number;
+  unitPrice: number;
+  subtotal: number;
+}
+
+export interface Customer {
+  id: string;
+  name: string;
+  phoneNumber: string;
+}
+
+export interface Staff {
+  id: string;
+  name: string;
+  email: string;
+}
+
+export interface BillBan {
+  id: string;
+  totalPrice: number;
+  status: 'COMPLETED' | 'CANCELLED' | 'ON_DELIVERY';
+  paymentMethod: string | null;
+  customer: Customer;
+  orderDetails: OrderDetail[];
+  staff: Staff;
+  createAt: string;
+  note: string;
+}
+
 const OrderHistory: React.FC = () => {
-    
   const [activeTab, setActiveTab] = useState('Tất cả');
+  const [orders, setOrders] = useState<BillBan[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
 
-  const tabs = ['Tất cả', 'Chờ xác nhận', 'Đang giao', 'Đã giao', 'Đã hủy'];
+  const tabs = ['Tất cả', 'Đang giao', 'Đã giao', 'Đã hủy'];
 
-  // Mock data for different order statuses
-  const mockOrders: OrderItem[] = [
-    {
-      id: 1,
-      name: 'Elegant Gold Earrings with Luxurious Design for Every Occasion and Style',
-      quantity: 4,
-      price: 320.00,
-      type: 'Earring',
-      status: 'Chờ xác nhận',
-      orderTime: '20:30:31 ngày 11/12/2024'
-    },
-    {
-      id: 2,
-      name: 'Stunning Emerald Teardrop Hoop Earrings with a Dazzling Design for Effortless Elegance',
-      quantity: 1,
-      price: 220.00,
-      type: 'Earring',
-      status: 'Chờ xác nhận',
-      orderTime: '20:30:31 ngày 11/12/2024'
-    },
-    // Add more orders with different statuses
-    {
-      id: 3,
-      name: 'Diamond Stud Earrings',
-      quantity: 2,
-      price: 450.00,
-      type: 'Earring',
-      status: 'Đang giao',
-      orderTime: '19:30:31 ngày 11/12/2024'
-    },
-    {
-      id: 4,
-      name: 'Pearl Drop Earrings',
-      quantity: 1,
-      price: 280.00,
-      type: 'Earring',
-      status: 'Đã giao',
-      orderTime: '18:30:31 ngày 11/12/2024'
-    },
-    {
-      id: 5,
-      name: 'Sapphire Stud Earrings',
-      quantity: 3,
-      price: 330.00,
-      type: 'Earring',
-      status: 'Đã hủy',
-      orderTime: '17:30:31 ngày 11/12/2024'
+  const statusMapping = {
+    'Đang giao': 'ON_DELIVERY',
+    'Đã giao': 'COMPLETED',
+    'Đã hủy': 'CANCELLED'
+  };
+
+  useEffect(() => {
+    fetchOrders();
+  }, [user?.id]);
+
+  const fetchOrders = async () => {
+    if (!user?.id) return;
+    
+    try {
+      const response = await fetch(`http://localhost:8081/billBan/customer/${user.id}`);
+      const data = await response.json();
+      
+      // For debugging - log the actual data structure
+      console.log("Fetched orders data:", JSON.stringify(data, null, 2));
+      
+      // Ensure data is an array and contains valid order objects
+      if (Array.isArray(data)) {
+        const validOrders = data.filter(order => {
+          // Check if order has the required properties
+          return order && order.id && order.orderDetails;
+        });
+        setOrders(validOrders);
+      } else if (data && typeof data === 'object') {
+        // If single order object
+        setOrders([data]);
+      } else {
+        console.error('Invalid data format received:', data);
+        setOrders([]);
+      }
+    } catch (error) {
+      console.error('Error fetching orders:', error);
+      setOrders([]);
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
+
+  const handleCancelOrder = async (orderId: string) => {
+    try {
+      const response = await fetch(`http://localhost:8081/billBan/${orderId}`, {
+        method: 'DELETE'
+      });
+
+      if (response.ok) {
+        fetchOrders();
+        alert('Order cancelled successfully');
+      } else {
+        alert('Failed to cancel order');
+      }
+    } catch (error) {
+      console.error('Error cancelling order:', error);
+      alert('Error cancelling order');
+    }
+  };
 
   const getFilteredOrders = () => {
-    if (activeTab === 'Tất cả') {
-      return mockOrders;
+    if (!Array.isArray(orders)) {
+      console.warn('Orders is not an array:', orders);
+      return [];
     }
-    return mockOrders.filter(order => order.status === activeTab);
+    
+    if (activeTab === 'Tất cả') {
+      return orders;
+    }
+    return orders.filter(order => order.status === statusMapping[activeTab as keyof typeof statusMapping]);
+  };
+
+  const formatDate = (dateString: string) => {
+    if (!dateString) return 'N/A';
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleString('vi-VN');
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return 'Invalid Date';
+    }
   };
 
   const handleTabChange = (tab: string) => {
     setActiveTab(tab);
   };
 
-  const calculateTotal = (orders: OrderItem[]) => {
-    return orders.reduce((sum, order) => sum + order.price * order.quantity, 0);
-  };
-
   const filteredOrders = getFilteredOrders();
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="order-history-root">
       <div className="order-header" style={{
-      backgroundImage: `url(${BackgroundOrder})`,
-      height: '250px',
-      backgroundSize: 'cover',
-      backgroundPosition: 'center',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      position: 'relative', // Make it relative to position the overlay
-      marginBottom: '50px',
-    }}>
-      <div style={{
-        position: 'absolute', // Position it absolutely
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: 'rgba(255, 255, 255, 0.5)', // White overlay with 50% opacity
-        zIndex: 1, // Ensure it sits above the background
-      }} />
-      <div style={{
-        position: 'relative', // Keep the text above the overlay
-        color: 'white', // Change text color as needed
-        fontSize: '24px',
-        fontWeight: 'bold',
-        zIndex: 2, // Ensure text is above the overlay
+        backgroundImage: `url(${BackgroundOrder})`,
+        height: '250px',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        position: 'relative',
+        marginBottom: '50px',
       }}>
-        Đơn hàng
+        <div style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(255, 255, 255, 0.5)',
+          zIndex: 1,
+        }} />
+        <div style={{
+          position: 'relative',
+          color: 'white',
+          fontSize: '24px',
+          fontWeight: 'bold',
+          zIndex: 2,
+        }}>
+          Đơn hàng
+        </div>
       </div>
-    </div>
 
       <div className="tab-section">
         <TabBar
@@ -129,29 +189,46 @@ const OrderHistory: React.FC = () => {
       </div>
 
       <div className="orderhistory-container">
-        {filteredOrders.map((order) => (
-          <div key={order.id} className="orderhistory-card">
-            <div className="orderhistory-details">
-              <div className="orderhistory-info">
-                <h3 className="product-name">{order.name}</h3>
-                <p className="product-type">{order.type}</p>
-                <p className="quantity">x{order.quantity}</p>
-              </div>
-              <div className="price-info">
-                <p className="price">${order.price.toFixed(2)}</p>
+        {filteredOrders.length === 0 ? (
+          <div className="no-orders">Không tìm thấy đơn hàng nào</div>
+        ) : (
+          filteredOrders.map((order) => (
+            <div key={order.id} className="orderhistory-card">
+              <div className="orderhistory-details">
+                {Array.isArray(order.orderDetails) && order.orderDetails.map((detail) => (
+                  <div key={detail.id} className="product-item">
+                    <div className="orderhistory-info">
+                      <h3 className="product-name">{detail.product?.name || 'Unknown Product'}</h3>
+                      <p className="product-type">Code: {detail.product?.code || 'N/A'}</p>
+                      <p className="quantity">x{detail.quantity || 0}</p>
+                    </div>
+                    <div className="price-info">
+                      <p className="price">{(detail.subtotal || 0).toLocaleString('vi-VN')}đ</p>
+                    </div>
+                  </div>
+                ))}
+                <div className="order-footer">
+                  <p>Ngày đặt: {formatDate(order.createAt)}</p>
+                  <p>Trạng thái: {order.status}</p>
+                  {order.status === 'ON_DELIVERY' && (
+                    <button 
+                      className="cancel-button"
+                      onClick={() => handleCancelOrder(order.id)}
+                    >
+                      Hủy đơn
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))
+        )}
       </div>
 
       <div className="orderhistory-summary">
         <div className="total">
-          Thành tiền: <span>${calculateTotal(filteredOrders).toFixed(2)}</span>
+          Tổng giá trị: {filteredOrders.reduce((sum, order) => sum + (order.totalPrice || 0), 0).toLocaleString('vi-VN')}đ
         </div>
-        <button className="cancel-button">
-          Hủy đơn
-        </button>
       </div>
     </div>
   );

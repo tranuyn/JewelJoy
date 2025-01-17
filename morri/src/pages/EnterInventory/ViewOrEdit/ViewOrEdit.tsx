@@ -272,8 +272,8 @@ const ViewOrEdit: React.FC = () => {
 
       if (!response.ok) {
         const errorData = await response.json();
-        alert("Tạo phiếu nhập kho thất bại: " + errorData.detail);
-        throw new Error("Không thể tạo ncc");
+        alert("Cập nhật phiếu nhập kho thất bại: " + errorData.detail);
+        // throw new Error("Không thể tạo ncc");
       } else alert("Cập nhật phiếu nhập kho thành công");
     } catch (error) {
       alert(error);
@@ -296,7 +296,7 @@ const ViewOrEdit: React.FC = () => {
       });
 
       if (!response.ok) {
-        throw new Error("Không thể tạo ncc");
+        // throw new Error("Không thể tạo ncc");
       }
 
       const data = await response.json();
