@@ -122,7 +122,7 @@ const Login: React.FC = () => {
     }
 
     try {
-      console.log("form state: ",formState)
+      console.log("form state: ", formState);
       await login({
         email: formState.email,
         password: formState.password,
@@ -244,9 +244,9 @@ const Login: React.FC = () => {
                   }
                   label="Ghi nhớ tài khoản"
                 />
-                <Button variant="text" className="forgot-password" onClick={() => navigate("/forgotpassword")}> 
+                {/* <Button variant="text" className="forgot-password" onClick={() => navigate("/forgotpassword")}> 
                   Quên mật khẩu?
-                </Button>
+                </Button> */}
               </Box>
 
               <Button
@@ -271,7 +271,7 @@ const Login: React.FC = () => {
                 </Divider>
               </Box>
 
-              <Button
+              {/* <Button
                 fullWidth
                 variant="outlined"
                 startIcon={
@@ -285,7 +285,7 @@ const Login: React.FC = () => {
                 className="google-button"
               >
                 Đăng nhập bằng Google
-              </Button>
+              </Button> */}
               <Typography
                 variant="body2"
                 align="center"

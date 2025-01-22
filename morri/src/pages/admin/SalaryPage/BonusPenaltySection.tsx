@@ -5,17 +5,32 @@ import TableComponent from "../../../component/TableComponent/TableComponent";
 import AddBonusPenaltyModal from "./AddBonusPenaltyModal";
 import { BonusPenaltyRecord, Salary } from "./types";
 import DeleteComponent from "../../../component/DeleteComponent/DeleteComponent";
+const formatDate = (dateString: string | number): string => {
+  const date = new Date(dateString);
+  const day = date.getDate().toString().padStart(2, "0");
+  const month = (date.getMonth() + 1).toString().padStart(2, "0");
+  const year = date.getFullYear().toString().slice(-2);
+  return `${day}/${month}/${year}`;
+};
 
 const bonusColumns = [
   { field: "amount", headerName: "Số tiền thưởng" },
   { field: "reason", headerName: "Lý do thưởng" },
-  { field: "date", headerName: "Ngày thưởng" },
+  {
+    field: "date",
+    headerName: "Ngày thưởng",
+    renderCell: (record: any) => formatDate(record.date), // Use the formatted date
+  },
 ];
 
 const penaltyColumns = [
   { field: "amount", headerName: "Số tiền phạt" },
   { field: "reason", headerName: "Lý do phạt" },
-  { field: "date", headerName: "Ngày phạt" },
+  {
+    field: "date",
+    headerName: "Ngày phạt",
+    renderCell: (record: any) => formatDate(record.date), // Use the formatted date
+  },
 ];
 
 interface BonusPenaltySectionProps {
@@ -45,7 +60,8 @@ const BonusPenaltySection: React.FC<BonusPenaltySectionProps> = ({
   const [editRecord, setEditRecord] = useState<BonusPenaltyRecord | null>(null);
   //   const [isBonusPenaltyModalOpen, setBonusPenaltyModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-
+  const [recordToDelete, setRecordToDelete] =
+    useState<BonusPenaltyRecord | null>(null);
   const handleTabChange = (
     event: React.SyntheticEvent,
     newValue: "BONUS" | "PENALTY"
@@ -68,7 +84,10 @@ const BonusPenaltySection: React.FC<BonusPenaltySectionProps> = ({
     setEditRecord(null);
     setIsModalOpen(true);
   };
-
+  const handleShowDeleteModal = (record: any) => {
+    setRecordToDelete(record);
+    setIsDeleteModalOpen(true);
+  };
   const handleAddOrEdit = async (record: BonusPenaltyRecord) => {
     if (!currentSalary) return;
 
@@ -79,9 +98,11 @@ const BonusPenaltySection: React.FC<BonusPenaltySectionProps> = ({
     }
   };
   const handleDelete = async () => {
-    if (!currentSalary) return;
+    if (!currentSalary || !recordToDelete?.id) return;
 
-    await onDeleteRecord(currentSalary.id, currentSalary.id);
+    await onDeleteRecord(currentSalary.id, recordToDelete.id);
+    setIsDeleteModalOpen(false);
+    setRecordToDelete(null);
   };
 
   return (
@@ -101,12 +122,19 @@ const BonusPenaltySection: React.FC<BonusPenaltySectionProps> = ({
         />
       </Box>
 
-      <TableComponent
+      {/* <TableComponent
         columns={selectedTab === "BONUS" ? bonusColumns : penaltyColumns}
         data={filteredRecords}
         onRowClick={() => {}}
         onEdit={handleEdit}
         onDelete={(record) => setIsDeleteModalOpen(true)}
+      /> */}
+      <TableComponent
+        columns={selectedTab === "BONUS" ? bonusColumns : penaltyColumns}
+        data={filteredRecords}
+        onRowClick={() => {}}
+        onEdit={handleEdit}
+        onDelete={handleShowDeleteModal}
       />
 
       {currentSalary && (
@@ -119,16 +147,12 @@ const BonusPenaltySection: React.FC<BonusPenaltySectionProps> = ({
           salaryId={currentSalary.id}
         />
       )}
-      {/* <UpdateBonusPenaltyModal
-        isOpen={isBonusPenaltyModalOpen}
-        onClose={() => setBonusPenaltyModalOpen(false)}
-        salaryId={currentSalary?.id}
-        type="BONUS"
-      /> */}
       <DeleteComponent
         isModalOpen={isDeleteModalOpen}
         setIsModalOpen={setIsDeleteModalOpen}
-        deleteName={`Thuong/Phat cua ${selectedUser?.name}`}
+        deleteName={`${selectedTab === "BONUS" ? "Thưởng" : "Phạt"} của ${
+          selectedUser?.name
+        }`}
         handleDelete={handleDelete}
       />
     </div>

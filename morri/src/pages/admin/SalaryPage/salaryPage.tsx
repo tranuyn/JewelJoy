@@ -284,7 +284,7 @@ const SalaryPage: React.FC = () => {
           body: JSON.stringify({
             baseSalary,
             commissionRate,
-            salaryReceiveDate: `${salaryReceiveDate}T23:59:59`,
+            salaryReceiveDate,
           }),
         }
       );
@@ -361,6 +361,7 @@ const SalaryPage: React.FC = () => {
     record: BonusPenaltyRecord
   ) => {
     try {
+      console.log("record me ne con: " + JSON.stringify(record));
       const response = await fetch(
         `http://localhost:8081/salary/${salaryId}/bonus-penalty/${recordId}`,
         {

@@ -26,13 +26,11 @@ const AddBonusPenaltyModal: React.FC<AddBonusPenaltyProps> = ({
   editRecord,
   salaryId,
 }) => {
-  const [amount, setAmount] = useState<string | number>(
+  const [amount, setAmount] = useState<any>(
     editRecord?.amount?.toString() || ""
   );
-  const [reason, setReason] = useState<string | number>(
-    editRecord?.reason || ""
-  );
-  const [date, setDate] = useState<string | number>(
+  const [reason, setReason] = useState<any>(editRecord?.reason || "");
+  const [date, setDate] = useState<any>(
     editRecord?.date || new Date().toISOString().split("T")[0]
   );
   type SnackbarSeverity = "success" | "error" | "warning" | "info";

@@ -300,6 +300,7 @@ const TongHop: React.FC = () => {
       const endpoint = isAbsence
         ? `http://localhost:8081/attendance/absence/${selectedRow.id}`
         : `http://localhost:8081/attendance/record/${selectedRow.id}`;
+      console.log("delete endpoint : " + JSON.stringify(endpoint));
 
       const response = await fetch(endpoint, {
         method: "DELETE",
@@ -307,6 +308,7 @@ const TongHop: React.FC = () => {
           "Content-Type": "application/json",
         },
       });
+      console.log("delete response: " + JSON.stringify(response));
 
       if (!response.ok) {
         throw new Error(

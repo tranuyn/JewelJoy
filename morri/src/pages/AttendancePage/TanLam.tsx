@@ -180,12 +180,13 @@ const TanLam: React.FC<XinVangProps> = ({
           }),
         }
       );
+      console.log("check in response: " + JSON.stringify(response));
 
       if (!response.ok) {
         throw new Error("Failed to mark attendance");
       }
 
-      setAttendanceStatus("Attendance recorded successfully");
+      setAttendanceStatus("Chấm công thành công");
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Failed to process attendance"
@@ -229,7 +230,7 @@ const TanLam: React.FC<XinVangProps> = ({
             }
             sx={{ mt: 2 }}
           >
-            Face match confidence: {faceMatchScore.toFixed(1)}%
+            Tỷ lệ thành công: {faceMatchScore.toFixed(1)}%
           </Alert>
         )}
 

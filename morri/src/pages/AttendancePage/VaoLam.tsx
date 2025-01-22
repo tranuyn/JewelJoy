@@ -166,7 +166,7 @@ const VaoLam: React.FC<XinVangProps> = ({
       );
 
       if (similarity < CONFIDENCE_THRESHOLD) {
-        throw new Error("Face verification failed. Please try again.");
+        throw new Error("Không nhận diện được mặt. Làm ơn hãy thử lại");
       }
       console.log("user id: " + user?.id);
 
@@ -187,7 +187,7 @@ const VaoLam: React.FC<XinVangProps> = ({
         throw new Error("Failed to mark attendance");
       }
 
-      setAttendanceStatus("Attendance recorded successfully");
+      setAttendanceStatus("Chấm công thành công");
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Failed to process attendance"
@@ -231,7 +231,7 @@ const VaoLam: React.FC<XinVangProps> = ({
             }
             sx={{ mt: 2 }}
           >
-            Face match confidence: {faceMatchScore.toFixed(1)}%
+            Tỷ lệ chính xác: {faceMatchScore.toFixed(1)}%
           </Alert>
         )}
 
