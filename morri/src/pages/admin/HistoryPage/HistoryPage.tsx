@@ -222,13 +222,14 @@ const HistoryPage: React.FC = () => {
     }
 
     try {
+      console.log(`http://localhost:8081/billBan/${selectedTransaction.id}`);
       const response = await fetch(
         `http://localhost:8081/billBan/${selectedTransaction.id}`,
         {
           method: "DELETE",
         }
       );
-
+      console.log("response history: " + JSON.stringify(response));
       if (!response.ok) throw new Error();
 
       setSnackbar({

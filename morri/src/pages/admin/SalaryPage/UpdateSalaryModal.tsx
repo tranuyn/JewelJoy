@@ -45,6 +45,8 @@ const UpdateSalaryModal: React.FC<UpdateSalaryModalProps> = ({
   const handleSubmit = async () => {
     setLoading(true);
     try {
+      // const formattedDate = new Date(formData.date).toISOString();
+
       const formattedReceiveDate = new Date(receiveDate).toISOString();
       console.log("Formatted receiveDate for backend:", formattedReceiveDate);
       await handleUpdateSalary(
